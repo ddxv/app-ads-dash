@@ -3,9 +3,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import json
 from layout.layout import APP_LAYOUT
-from layout.tab_template import (
-    make_columns, TAB_LAYOUT_DICT
-)
+from layout.tab_template import make_columns, TAB_LAYOUT_DICT
 from plotter.plotter import overview_plot
 from dbcon.queries import (
     query_latest_updates,
@@ -37,7 +35,6 @@ def get_cached_dataframe(query_json):
     else:
         logger.error(f"query_dict id: {query_dict['id']} not recognized")
     return df
-
 
 
 def limit_rows_for_plotting(df: pd.DataFrame, row_ids: list[str]) -> pd.DataFrame:
@@ -88,12 +85,12 @@ def latest_updates_table(
 ):
     logger.info("Start creative rotation table")
     metrics = []
-    query_dict = {'start_date':start_date, 'end_date':end_date}
+    query_dict = {"start_date": start_date, "end_date": end_date}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
 
+    overview_df = df.copy()
     dimensions = [x for x in overview_df.columns if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
-    overview_df = df.copy()
     table_obj = overview_df.to_dict("records")
 
     keys = []
@@ -105,8 +102,9 @@ def latest_updates_table(
         xaxis_col="updated_at",
         title="Updates",
     )
-    
+
     return table_obj, column_dicts, fig
+
 
 def add_id_column(df: pd.DataFrame, dimensions: list[str]) -> pd.DataFrame:
     df["id"] = df[dimensions].apply(
@@ -120,7 +118,6 @@ MAX_ROWS = 10
 
 logger.info("Set Layout")
 app.layout = APP_LAYOUT
-
 
 if __name__ == "__main__":
     app.run_server(debug=True)

@@ -48,5 +48,3 @@ with CONFIG_FILE_PATH.open() as f:
 
 
 DATE_FORMAT = "%Y-%m-%d"
-
-

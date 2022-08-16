@@ -6,6 +6,7 @@ import plotly.express as px
 
 COLORS = px.colors.qualitative.Alphabet
 
+
 def overview_plot(
     df: pd.DataFrame, y_vals: list[str], stack_bars=False, xaxis_col=None, title=None
 ):

@@ -6,7 +6,6 @@ import dash_bootstrap_components as dbc
 
 DATE_FORMAT = "%Y-%m-%d"
 
-
 top_padding = 15
 main_content_list = html.Div(
     [

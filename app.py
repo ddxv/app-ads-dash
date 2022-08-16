@@ -7,7 +7,6 @@ dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
 )
 
-
 # This loads the theme template from dash-bootstrap-templates library,
 # adds it to plotly.io and makes it the default figure template.
 load_figure_template("vapor")
