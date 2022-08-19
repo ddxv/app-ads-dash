@@ -6,7 +6,7 @@ from layout.layout import APP_LAYOUT
 from layout.tab_template import make_columns, TAB_LAYOUT_DICT
 from plotter.plotter import overview_plot
 from dbcon.queries import (
-    query_latest_updates,
+    query_overview,
 )
 from flask_caching import Cache
 
@@ -31,7 +31,7 @@ CACHE.clear()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
     if query_dict["id"] == "latest-updates":
-        df = query_latest_updates()
+        df = query_overview()
     else:
         logger.error(f"query_dict id: {query_dict['id']} not recognized")
     return df
@@ -71,7 +71,6 @@ def render_content(tab):
     Output("latest-updates-df-table-overview", "data"),
     Output("latest-updates-df-table-overview", "columns"),
     Output("latest-updates-overview-plot", "figure"),
-    Output("latest-updates-overview-plot2", "figure"),
     Input("date-picker-range", "start_date"),
     Input("date-picker-range", "end_date"),
     Input("latest-updates-switches", "value"),
@@ -83,9 +82,9 @@ def latest_updates_table(
     switches,
     derived_viewport_row_ids: list[str],
 ):
-    logger.info("Start creative rotation table")
+    logger.info("Latest Updates Table")
     metrics = []
-    query_dict = {"start_date": start_date, "end_date": end_date}
+    query_dict = {"id": "latest-updates"}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
 
     overview_df = df.copy()
