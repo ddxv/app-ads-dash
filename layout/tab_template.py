@@ -4,6 +4,10 @@ from dash import dcc
 from dash import html
 from dash import dash_table
 from plotly import graph_objects as go
+from dbcon.queries import query_overview
+from config import get_logger
+
+logger = get_logger(__name__)
 
 
 def make_tab_options(tab_id: str) -> html.Div:
@@ -16,12 +20,12 @@ def make_tab_options(tab_id: str) -> html.Div:
                 "value": "",
             },
         ]
-        groupby_options = [
-            {"label": "", "value": ""},
-        ]
+        groupby_options = [{"label": x, "value": x} for x in OVERVIEW_COLUMNS]
+        groupby_defaults = ["publisher_id", "developer_domain", "txt_updated_at"]
         options_div = make_options_div(
             tab_id,
             groupby_options=groupby_options,
+            groupby_defaults=groupby_defaults,
             switch_options=switch_options,
             switch_defaults=default_values,
             groupby_time=True,
@@ -229,20 +233,9 @@ def make_columns(dimensions, metrics):
     columns = dimensions + metric_columns
     return columns
 
-TABS = dbc.Tabs(
-    id="tabs-selector",
-    persistence=True,
-    persistence_type="memory",
-    children=[
-        dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
-    ],
-)
 
-TAB_LAYOUT_DICT = {}
-tab_tags = [x.tab_id for x in TABS.children]
-for tab_tag in tab_tags:
-    default_layout = create_tab_layout(tab_tag)
-    TAB_LAYOUT_DICT[tab_tag] = default_layout
+logger.info("Set layout column defaults")
+OVERVIEW_COLUMNS = query_overview(limit=1).columns.tolist()
 
 
 DOLLAR_NAMES = [
@@ -258,3 +251,17 @@ DOLLAR_NAMES = [
 ]
 
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
+
+TABS = dbc.Tabs(
+    id="tabs-selector",
+    persistence=True,
+    persistence_type="memory",
+    children=[
+        dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
+    ],
+)
+TAB_LAYOUT_DICT = {}
+tab_tags = [x.tab_id for x in TABS.children]
+for tab_tag in tab_tags:
+    default_layout = create_tab_layout(tab_tag)
+    TAB_LAYOUT_DICT[tab_tag] = default_layout

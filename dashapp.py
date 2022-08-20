@@ -73,32 +73,37 @@ def render_content(tab):
     Output("latest-updates-overview-plot", "figure"),
     Input("date-picker-range", "start_date"),
     Input("date-picker-range", "end_date"),
+    Input("latest-updates-groupby", "value"),
     Input("latest-updates-switches", "value"),
     Input("latest-updates-df-table-overview", "derived_viewport_row_ids"),
 )
 def latest_updates_table(
     start_date,
     end_date,
+    groupby,
     switches,
     derived_viewport_row_ids: list[str],
 ):
     logger.info("Latest Updates Table")
-    metrics = []
+    metrics = ["size"]
     query_dict = {"id": "latest-updates"}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
 
     overview_df = df.copy()
-    dimensions = [x for x in overview_df.columns if x not in metrics and x != "id"]
+    dimensions = [x for x in groupby if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
     table_obj = overview_df.to_dict("records")
-
-    keys = []
-    plot_df = df.groupby(keys)["no_upload"].sum().reset_index()
-    plot_df = add_id_column(plot_df, dimensions=[x for x in keys if x != "data_date"])
+    plot_df = (
+        df.groupby(dimensions, dropna=False)
+        .size()
+        .reset_index()
+        .rename(columns={0: "size"})
+    )
+    plot_df = add_id_column(plot_df, dimensions=dimensions)
     fig = overview_plot(
         plot_df,
-        y_vals=["count"],
-        xaxis_col="updated_at",
+        y_vals=["size"],
+        xaxis_col="txt_updated_at",
         title="Updates",
     )
 

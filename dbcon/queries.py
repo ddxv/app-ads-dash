@@ -10,10 +10,10 @@ def get_dash_users():
     return df
 
 
-def query_overview():
-    sel_query = """SELECT * FROM
+def query_overview(limit: int = 1000):
+    sel_query = f"""SELECT * FROM
                     overview_table
-                    LIMIT 1000
+                    LIMIT {limit}
                     ;
                     """
     df = pd.read_sql(sel_query, DBCON.engine)
@@ -22,3 +22,5 @@ def query_overview():
 
 DBCON = get_db_connection("madrone")
 DBCON.set_engine()
+
+df = query_overview(limit=1)
