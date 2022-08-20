@@ -1,5 +1,5 @@
 import pandas as pd
-from .connections import get_db_connection
+from dbcon.connections import get_db_connection
 
 
 def get_dash_users():
