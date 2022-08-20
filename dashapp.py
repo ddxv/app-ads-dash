@@ -89,10 +89,15 @@ def latest_updates_table(
     query_dict = {"id": "latest-updates"}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
 
-    overview_df = df.copy()
     dimensions = [x for x in groupby if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
-    table_obj = overview_df.to_dict("records")
+    dff = (
+        df.groupby(dimensions, dropna=False)
+        .size()
+        .reset_index()
+        .rename(columns={0: "size"})
+    )
+    table_obj = dff.to_dict("records")
     plot_df = (
         df.groupby(dimensions, dropna=False)
         .size()
