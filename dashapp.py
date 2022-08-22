@@ -1,5 +1,6 @@
 from app import app
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+from dash import html
 import pandas as pd
 import json
 from layout.layout import APP_LAYOUT
@@ -71,11 +72,13 @@ def render_content(tab):
     Output("latest-updates-df-table-overview", "data"),
     Output("latest-updates-df-table-overview", "columns"),
     Output("latest-updates-overview-plot", "figure"),
+    Output("txt-updated-at", "children"),
     Input("date-picker-range", "start_date"),
     Input("date-picker-range", "end_date"),
     Input("latest-updates-groupby", "value"),
     Input("latest-updates-switches", "value"),
     Input("latest-updates-df-table-overview", "derived_viewport_row_ids"),
+    State("txt-updated-at", "children"),
 )
 def latest_updates_table(
     start_date,
@@ -83,6 +86,7 @@ def latest_updates_table(
     groupby,
     switches,
     derived_viewport_row_ids: list[str],
+    txt_updated_at: list,
 ):
     logger.info("Latest Updates Table")
     metrics = ["size"]
@@ -111,8 +115,9 @@ def latest_updates_table(
         xaxis_col=groupby[0],
         title="Updates",
     )
+    txt_updated_at[1] = html.H5(df["txt_updated_at"].max())
 
-    return table_obj, column_dicts, fig
+    return table_obj, column_dicts, fig, txt_updated_at
 
 
 def add_id_column(df: pd.DataFrame, dimensions: list[str]) -> pd.DataFrame:

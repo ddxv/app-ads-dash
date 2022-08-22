@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 
 def make_tab_options(tab_id: str) -> html.Div:
-    options_div = html.Div()
+    options_div = html.Div([])
     if "latest-updates" == tab_id:
         default_values = [""]
         switch_options = [
@@ -30,6 +30,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             switch_defaults=default_values,
             groupby_time=True,
         )
+        options_div.children.insert(0, cards)
     return options_div
 
 
@@ -232,6 +233,93 @@ def make_columns(dimensions, metrics):
 
     columns = dimensions + metric_columns
     return columns
+
+
+cards = html.Div(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("App-Ads.txt File Last Pulled"),
+                            dbc.CardBody(
+                                [
+                                    html.H5("Card title", className="card-title"),
+                                    html.P(
+                                        "Last time an App-Ads.txt file was updated",
+                                        className="card-text",
+                                    ),
+                                ]
+                            ),
+                        ],
+                        color="primary",
+                        inverse=True,
+                        id="txt-updated-at",
+                    )
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Store Info Last Pulled"),
+                            dbc.CardBody(
+                                [
+                                    html.H5("Card title", className="card-title"),
+                                    html.P(
+                                        "Last time the store info for apps was pulled",
+                                        className="card-text",
+                                    ),
+                                ]
+                            ),
+                        ],
+                        color="secondary",
+                        inverse=True,
+                        id="store-app-updated-at",
+                    )
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Store Info Last Pulled"),
+                            dbc.CardBody(
+                                [
+                                    html.H5("Card title", className="card-title"),
+                                    html.P(
+                                        "Last time the ads.txt host was pulled",
+                                        className="card-text",
+                                    ),
+                                ]
+                            ),
+                        ],
+                        color="primary",
+                        inverse=True,
+                        id="pub-domain-updated-at",
+                    )
+                ),
+                dbc.Col(
+                    dbc.Card(
+                        [
+                            dbc.CardHeader("Ad Domain Updated"),
+                            dbc.CardBody(
+                                [
+                                    html.H5("Card title", className="card-title"),
+                                    html.P(
+                                        "Last time the ad_domain data was updated",
+                                        className="card-text",
+                                    ),
+                                ]
+                            ),
+                        ],
+                        color="secondary",
+                        inverse=True,
+                        id="ad-domain-updated-at",
+                    )
+                ),
+            ],
+            className="mb-4",
+        ),
+    ]
+)
 
 
 logger.info("Set layout column defaults")
