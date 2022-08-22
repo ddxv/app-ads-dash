@@ -108,7 +108,7 @@ def latest_updates_table(
     fig = overview_plot(
         plot_df,
         y_vals=["size"],
-        xaxis_col="txt_updated_at",
+        xaxis_col=groupby[0],
         title="Updates",
     )
 

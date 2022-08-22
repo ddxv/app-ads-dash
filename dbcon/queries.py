@@ -22,5 +22,3 @@ def query_overview(limit: int = 1000):
 
 DBCON = get_db_connection("madrone")
 DBCON.set_engine()
-
-df = query_overview(limit=1)
