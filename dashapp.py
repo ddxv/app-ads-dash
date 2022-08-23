@@ -123,8 +123,12 @@ def latest_updates_table(
     ]
     for card_name in card_ids:
         column_name = card_name.replace("-", "_")
-        cards_group[f"{card_name}-body"] = html.H5(
-            df[column_name].max().strftime("%Y-%m-%d %H:%M:%S")
+        cards_group[f"{card_name}-body"] = html.P(
+            [
+                f'Latest:  {df[column_name].max().strftime("%Y-%m-%d %H:%M:%S")}',
+                html.Br(),
+                f'Earliest: {df[column_name].min().strftime("%Y-%m-%d %H:%M:%S")}',
+            ]
         )
 
     return table_obj, column_dicts, fig, cards_group.children
