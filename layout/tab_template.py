@@ -4,7 +4,7 @@ from dash import dcc
 from dash import html
 from dash import dash_table
 from plotly import graph_objects as go
-from dbcon.queries import query_overview
+from dbcon.queries import query_overview, query_all
 from config import get_logger
 
 logger = get_logger(__name__)
@@ -12,6 +12,17 @@ logger = get_logger(__name__)
 
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
+
+    if "developers" == tab_id:
+        default_values = [""]
+        groupby_options = [{"label": x, "value": x} for x in DEVELOPERS_COLUMNS]
+        groupby_defaults = ["name"]
+        options_div = make_options_div(
+            tab_id,
+            groupby_options=groupby_options,
+            groupby_defaults=groupby_defaults,
+        )
+
     if "latest-updates" == tab_id:
         default_values = [""]
         switch_options = [
@@ -328,6 +339,7 @@ def get_cards_group():
 
 logger.info("Set layout column defaults")
 OVERVIEW_COLUMNS = query_overview(limit=1).columns.tolist()
+DEVELOPERS_COLUMNS = query_all(table_name="developers", limit=1).columns.tolist()
 
 
 DOLLAR_NAMES = [
@@ -350,6 +362,7 @@ TABS = dbc.Tabs(
     persistence_type="memory",
     children=[
         dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
+        dbc.Tab(label="Developers", tab_id="developers"),
     ],
 )
 TAB_LAYOUT_DICT = {}

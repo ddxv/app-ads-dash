@@ -6,9 +6,7 @@ import json
 from layout.layout import APP_LAYOUT
 from layout.tab_template import make_columns, TAB_LAYOUT_DICT, get_cards_group
 from plotter.plotter import overview_plot
-from dbcon.queries import (
-    query_overview,
-)
+from dbcon.queries import query_overview, query_all
 from flask_caching import Cache
 
 from config import get_logger
@@ -32,7 +30,9 @@ CACHE.clear()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
     if query_dict["id"] == "latest-updates":
-        df = query_overview()
+        df = query_overview(limit=10000)
+    if query_dict["id"] == "developers":
+        df = query_all(table_name=query_dict["table_name"], limit=10000)
     else:
         logger.error(f"query_dict id: {query_dict['id']} not recognized")
     return df
@@ -69,21 +69,57 @@ def render_content(tab):
 
 
 @app.callback(
+    Output("developers-df-table-overview", "data"),
+    Output("developers-df-table-overview", "columns"),
+    Output("developers-overview-plot", "figure"),
+    Input("developers-groupby", "value"),
+    Input("developers-df-table-overview", "derived_viewport_row_ids"),
+)
+def developers(
+    groupby,
+    derived_viewport_row_ids: list[str],
+):
+    logger.info("Developers")
+    metrics = ["size"]
+    query_dict = {"id": "developers", "table_name": "developers", "groupby": groupby}
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+
+    dimensions = [x for x in groupby if x not in metrics and x != "id"]
+    column_dicts = make_columns(dimensions, metrics)
+    dff = (
+        df.groupby(dimensions, dropna=False)
+        .size()
+        .reset_index()
+        .rename(columns={0: "size"})
+    )
+    table_obj = dff.to_dict("records")
+    plot_df = (
+        df.groupby(dimensions, dropna=False)
+        .size()
+        .reset_index()
+        .rename(columns={0: "size"})
+    )
+    plot_df = add_id_column(plot_df, dimensions=dimensions)
+    fig = overview_plot(
+        plot_df,
+        y_vals=["size"],
+        xaxis_col=groupby[0],
+        title="Developers",
+    )
+
+    return table_obj, column_dicts, fig
+
+
+@app.callback(
     Output("latest-updates-df-table-overview", "data"),
     Output("latest-updates-df-table-overview", "columns"),
     Output("latest-updates-overview-plot", "figure"),
     Output("cards-group", "children"),
-    Input("date-picker-range", "start_date"),
-    Input("date-picker-range", "end_date"),
     Input("latest-updates-groupby", "value"),
-    Input("latest-updates-switches", "value"),
     Input("latest-updates-df-table-overview", "derived_viewport_row_ids"),
 )
 def latest_updates_table(
-    start_date,
-    end_date,
     groupby,
-    switches,
     derived_viewport_row_ids: list[str],
 ):
     logger.info("Latest Updates Table")
