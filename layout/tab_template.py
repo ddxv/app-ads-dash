@@ -30,7 +30,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             switch_defaults=default_values,
             groupby_time=True,
         )
-        options_div.children.insert(0, cards)
+        options_div.children.insert(0, get_cards_group())
     return options_div
 
 
@@ -235,91 +235,95 @@ def make_columns(dimensions, metrics):
     return columns
 
 
-cards = html.Div(
-    [
-        dbc.Row(
-            [
-                dbc.Col(
-                    dbc.Card(
+def get_cards_group():
+    card_group = dbc.CardGroup(
+        [
+            dbc.Card(
+                [
+                    dbc.CardHeader("App-Ads.txt File Last Pulled"),
+                    dbc.CardBody(
                         [
-                            dbc.CardHeader("App-Ads.txt File Last Pulled"),
-                            dbc.CardBody(
-                                [
-                                    html.H5("Card title", className="card-title"),
-                                    html.P(
-                                        "Last time an App-Ads.txt file was updated",
-                                        className="card-text",
-                                    ),
-                                ]
+                            html.H5("Card title", className="card-title"),
+                            html.P(
+                                "Last time an App-Ads.txt file was updated",
+                                className="card-text",
                             ),
                         ],
-                        color="primary",
-                        inverse=True,
-                        id="txt-updated-at",
-                    )
-                ),
-                dbc.Col(
-                    dbc.Card(
+                        id="txt-updated-at-body",
+                    ),
+                ],
+                color="primary",
+                inverse=True,
+                id="txt-updated-at",
+            ),
+            dbc.Card(
+                [
+                    dbc.CardHeader("Store Info Last Pulled"),
+                    dbc.CardBody(
                         [
-                            dbc.CardHeader("Store Info Last Pulled"),
-                            dbc.CardBody(
-                                [
-                                    html.H5("Card title", className="card-title"),
-                                    html.P(
-                                        "Last time the store info for apps was pulled",
-                                        className="card-text",
-                                    ),
-                                ]
+                            html.H5("Card title", className="card-title"),
+                            html.P(
+                                "Last time the store info for apps was pulled",
+                                className="card-text",
                             ),
                         ],
-                        color="secondary",
-                        inverse=True,
-                        id="store-app-updated-at",
-                    )
-                ),
-                dbc.Col(
-                    dbc.Card(
+                        id="store-app-updated-at-body",
+                    ),
+                ],
+                color="secondary",
+                inverse=True,
+                id="store-app-updated-at",
+            ),
+            dbc.Card(
+                [
+                    dbc.CardHeader("Store Info Last Pulled"),
+                    dbc.CardBody(
                         [
-                            dbc.CardHeader("Store Info Last Pulled"),
-                            dbc.CardBody(
-                                [
-                                    html.H5("Card title", className="card-title"),
-                                    html.P(
-                                        "Last time the ads.txt host was pulled",
-                                        className="card-text",
-                                    ),
-                                ]
+                            html.H5("Card title", className="card-title"),
+                            html.P(
+                                "Last time the ads.txt host was pulled",
+                                className="card-text",
                             ),
                         ],
-                        color="primary",
-                        inverse=True,
-                        id="pub-domain-updated-at",
-                    )
-                ),
-                dbc.Col(
-                    dbc.Card(
+                        id="pub-domain-updated-at-body",
+                    ),
+                ],
+                color="primary",
+                inverse=True,
+                id="pub-domain-updated-at",
+            ),
+            dbc.Card(
+                [
+                    dbc.CardHeader("Ad Domain Updated"),
+                    dbc.CardBody(
                         [
-                            dbc.CardHeader("Ad Domain Updated"),
-                            dbc.CardBody(
-                                [
-                                    html.H5("Card title", className="card-title"),
-                                    html.P(
-                                        "Last time the ad_domain data was updated",
-                                        className="card-text",
-                                    ),
-                                ]
+                            html.H5("Card title", className="card-title"),
+                            html.P(
+                                "Last time the ad_domain data was updated",
+                                className="card-text",
                             ),
                         ],
-                        color="secondary",
-                        inverse=True,
-                        id="ad-domain-updated-at",
-                    )
-                ),
-            ],
-            className="mb-4",
-        ),
-    ]
-)
+                        id="ad-domain-updated-at-body",
+                    ),
+                ],
+                color="secondary",
+                inverse=True,
+                id="ad-domain-updated-at",
+            ),
+        ],
+        id="cards-group",
+    )
+    cards = html.Div(
+        [
+            dbc.Row(
+                [
+                    card_group,
+                ],
+                className="mb-4",
+            ),
+        ]
+    )
+    return cards
 
 
 logger.info("Set layout column defaults")

@@ -1,10 +1,10 @@
 from app import app
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from dash import html
 import pandas as pd
 import json
 from layout.layout import APP_LAYOUT
-from layout.tab_template import make_columns, TAB_LAYOUT_DICT
+from layout.tab_template import make_columns, TAB_LAYOUT_DICT, get_cards_group
 from plotter.plotter import overview_plot
 from dbcon.queries import (
     query_overview,
@@ -72,13 +72,12 @@ def render_content(tab):
     Output("latest-updates-df-table-overview", "data"),
     Output("latest-updates-df-table-overview", "columns"),
     Output("latest-updates-overview-plot", "figure"),
-    Output("txt-updated-at", "children"),
+    Output("cards-group", "children"),
     Input("date-picker-range", "start_date"),
     Input("date-picker-range", "end_date"),
     Input("latest-updates-groupby", "value"),
     Input("latest-updates-switches", "value"),
     Input("latest-updates-df-table-overview", "derived_viewport_row_ids"),
-    State("txt-updated-at", "children"),
 )
 def latest_updates_table(
     start_date,
@@ -86,7 +85,6 @@ def latest_updates_table(
     groupby,
     switches,
     derived_viewport_row_ids: list[str],
-    txt_updated_at: list,
 ):
     logger.info("Latest Updates Table")
     metrics = ["size"]
@@ -115,9 +113,21 @@ def latest_updates_table(
         xaxis_col=groupby[0],
         title="Updates",
     )
-    txt_updated_at[1] = html.H5(df["txt_updated_at"].max())
 
-    return table_obj, column_dicts, fig, txt_updated_at
+    cards_group = get_cards_group()
+    card_ids = [
+        "txt-updated-at",
+        "ad-domain-updated-at",
+        "store-app-updated-at",
+        "pub-domain-updated-at",
+    ]
+    for card_name in card_ids:
+        column_name = card_name.replace("-", "_")
+        cards_group[f"{card_name}-body"] = html.H5(
+            df[column_name].max().strftime("%Y-%m-%d %H:%M:%S")
+        )
+
+    return table_obj, column_dicts, fig, cards_group.children
 
 
 def add_id_column(df: pd.DataFrame, dimensions: list[str]) -> pd.DataFrame:
