@@ -25,6 +25,7 @@ def query_all(table_name: str, groupby: str | list[str] = None, limit: int = 100
     sel_query = f"""SELECT {select_str}
                     FROM {table_name}
                     {groupby_str}
+                    LIMIT {limit}
                     ;
                     """
     df = pd.read_sql(sel_query, DBCON.engine)

@@ -30,9 +30,9 @@ CACHE.clear()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
     if query_dict["id"] == "latest-updates":
-        df = query_overview(limit=10000)
-    if query_dict["id"] == "developers":
-        df = query_all(table_name=query_dict["table_name"], limit=10000)
+        df = query_overview(limit=1000)
+    elif query_dict["id"] == "developers":
+        df = query_all(table_name=query_dict["table_name"], limit=1000)
     else:
         logger.error(f"query_dict id: {query_dict['id']} not recognized")
     return df
@@ -83,6 +83,7 @@ def developers(
     metrics = ["size"]
     query_dict = {"id": "developers", "table_name": "developers", "groupby": groupby}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    logger.info(f"Developers {df.shape=}")
 
     dimensions = [x for x in groupby if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
@@ -92,6 +93,7 @@ def developers(
         .reset_index()
         .rename(columns={0: "size"})
     )
+    logger.info(f"Developers {dff.shape=}")
     table_obj = dff.to_dict("records")
     plot_df = (
         df.groupby(dimensions, dropna=False)
