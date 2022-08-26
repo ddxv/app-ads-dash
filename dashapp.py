@@ -8,7 +8,6 @@ from layout.tab_template import make_columns, TAB_LAYOUT_DICT, get_cards_group
 from plotter.plotter import overview_plot
 from dbcon.queries import query_overview, query_all
 from flask_caching import Cache
-
 from config import get_logger
 
 logger = get_logger(__name__)
