@@ -1,4 +1,4 @@
 # app-ads-dash
 
-Dashboard for viewing app-ads from database
+Example dashboard for viewing app-ads from database. 
 
