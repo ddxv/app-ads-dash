@@ -9,7 +9,7 @@ dbc_css = (
 
 # This loads the theme template from dash-bootstrap-templates library,
 # adds it to plotly.io and makes it the default figure template.
-load_figure_template("vapor")
+load_figure_template("bootstrap")
 
 app = dash.Dash(
     name=__name__,
