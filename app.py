@@ -15,6 +15,6 @@ app = dash.Dash(
     name=__name__,
     server=server,
     url_base_pathname="/dash/",
-    external_stylesheets=[dbc.themes.VAPOR, dbc_css],
+    external_stylesheets=[dbc.themes.BOOTSTRAP, dbc_css],
     suppress_callback_exceptions=True,
 )
