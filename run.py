@@ -1,7 +1,7 @@
 from config import get_logger
 from server import server
 from flask import (
-    # request,
+    request,
     Response,
     render_template,
     url_for,
@@ -9,26 +9,26 @@ from flask import (
 )
 from functools import wraps
 
-# from dbcon.queries import get_dash_users
+from dbcon.queries import get_dash_users
 from dashapp import app as dashapp
 
 logger = get_logger(__name__)
 
 logger.info(f"start, {dashapp=}")
 
-# DASH_USERS_DICT = get_dash_users()
+DASH_USERS_DICT = get_dash_users()
 
 
-# def check_auth(username, password):
-#     try:
-#         if password == DASH_USERS_DICT[username]:
-#             login = True
-#         else:
-#             login = False
-#         logger.info(f"Check Login {username=} {login=}")
-#     except Exception:
-#         login = False
-#     return login
+def check_auth(username, password):
+    try:
+        if password == DASH_USERS_DICT[username]:
+            login = True
+        else:
+            login = False
+        logger.info(f"Check Login {username=} {login=}")
+    except Exception:
+        login = False
+    return login
 
 
 def authenticate():
@@ -44,9 +44,9 @@ def authenticate():
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        # auth = request.authorization
-        # if not auth or not check_auth(auth.username, auth.password):
-        #    return authenticate()
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
         return f(*args, **kwargs)
 
     return decorated
