@@ -17,14 +17,16 @@ jobs:
       - name: Deploy to my EC2
         uses: appleboy/ssh-action@master
         env:
-          TARGET: ${{ secrets.TARGET_DIR }}
+          TARGETDIR: ${{ secrets.TARGET_DIR }}
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          envs: TARGET
+          envs: TARGETDIR
+          script_stop: true
           script: |
-            cd $TARGET
+            cd $TARGETDIR
+            pwd
             git pull origin main
             sudo systemctl restart app-ads-dash
