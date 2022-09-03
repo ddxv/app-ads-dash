@@ -21,7 +21,7 @@ DASH_USERS_DICT = get_dash_users()
 
 def check_auth(username, password):
     try:
-        if password == DASH_USERS_DICT[username]:
+        if password == DASH_USERS_DICT[username]["password"]:
             login = True
         else:
             login = False

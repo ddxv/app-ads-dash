@@ -7,10 +7,11 @@ logger = get_logger(__name__)
 
 def get_dash_users():
     sel_query = """SELECT *
-                    FROM dash_users
+                    FROM dash.users
                     ;"""
     df = pd.read_sql(sel_query, DBCON.engine)
-    return df
+    users_dict = df.set_index("username").to_dict(orient="index")
+    return users_dict
 
 
 def query_all(table_name: str, groupby: str | list[str] = None, limit: int = 1000):
