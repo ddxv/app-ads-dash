@@ -1,5 +1,4 @@
 from config import CONFIG, get_logger
-import os
 from sqlalchemy import create_engine
 from sshtunnel import SSHTunnelForwarder
 
@@ -33,7 +32,8 @@ def get_db_connection(server_name: str):
 
 def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
     # PROD, set in the OS environment, is true if python running in EC2 security group
-    if "PROD" in os.environ and os.environ["PROD"] == "True":
+    server_ip = CONFIG[server_name]["host"]
+    if server_ip == "localhost":
         logger.info("Prod environment mode no SSH")
         server_ip = CONFIG[server_name]["host"]
         server_local_port = 5432
