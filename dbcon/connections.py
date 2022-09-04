@@ -9,8 +9,6 @@ def OpenSSHTunnel(server_name):
     with SSHTunnelForwarder(
         (CONFIG[server_name]["host"], 22),  # Remote server IP and SSH port
         ssh_username=CONFIG[server_name]["os_user"],
-        # ssh_pkey=CONFIG["ssh"]["pkey"],
-        # ssh_private_key_password=CONFIG["ssh"]["pkey_password"],
         remote_bind_address=("127.0.0.1", 5432),
     ) as server:  # PostgreSQL server IP and sever port on remote machine
         server.start()  # start ssh sever
