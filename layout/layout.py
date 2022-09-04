@@ -1,46 +1,73 @@
-from layout.tab_template import TABS
+from layout.tab_template import create_tab_layout
 import datetime
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 
+
+def main_content_div():
+    top_padding = 15
+    main_content = html.Div(
+        [
+            html.Div(
+                [
+                    dcc.DatePickerRange(
+                        id="date-picker-range",
+                        persistence_type="session",
+                        start_date=datetime.datetime.strftime(
+                            datetime.datetime.now() - datetime.timedelta(days=30),
+                            DATE_FORMAT,
+                        ),
+                        end_date=datetime.datetime.strftime(
+                            datetime.datetime.now(), DATE_FORMAT
+                        ),
+                    ),
+                ],
+                style={
+                    "display": "inline-block",
+                    "padding-top": f"{top_padding}px",
+                    "float": "right",
+                },
+            ),
+            html.Div(
+                [
+                    TABS,
+                    html.Div(id="tabs-content"),
+                ],
+                style={"display": "block", "padding-top": "20px"},
+            ),
+        ]
+    )
+    return main_content
+
+
+def get_tab_layout_dict():
+    tab_layout = {}
+    tab_tags = [x.tab_id for x in TABS.children]
+    for tab_tag in tab_tags:
+        default_layout = create_tab_layout(tab_tag)
+        tab_layout[tab_tag] = default_layout
+    return tab_layout
+
+
 DATE_FORMAT = "%Y-%m-%d"
 
-top_padding = 15
-main_content_list = html.Div(
-    [
-        html.Div(
-            [
-                dcc.DatePickerRange(
-                    id="date-picker-range",
-                    persistence_type="session",
-                    start_date=datetime.datetime.strftime(
-                        datetime.datetime.now() - datetime.timedelta(days=30),
-                        DATE_FORMAT,
-                    ),
-                    end_date=datetime.datetime.strftime(
-                        datetime.datetime.now(), DATE_FORMAT
-                    ),
-                ),
-            ],
-            style={
-                "display": "inline-block",
-                "padding-top": f"{top_padding}px",
-                "float": "right",
-            },
-        ),
-        html.Div(
-            [
-                TABS,
-                html.Div(id="tabs-content"),
-            ],
-            style={"display": "block", "padding-top": "20px"},
-        ),
-    ]
+TABS = dbc.Tabs(
+    id="tabs-selector",
+    persistence=True,
+    persistence_type="memory",
+    children=[
+        dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
+        dbc.Tab(label="Developers", tab_id="developers"),
+        dbc.Tab(label="Updated Ats", tab_id="updated-at"),
+        dbc.Tab(label="Developers Search", tab_id="developers-search"),
+    ],
 )
 
+TAB_LAYOUT_DICT = get_tab_layout_dict()
+
 APP_LAYOUT = dbc.Container(
-    [main_content_list],
+    [main_content_div()],
     fluid=True,
     className="dbc",
 )

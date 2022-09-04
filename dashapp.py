@@ -1,12 +1,18 @@
 from app import app
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash import html
+from dash.exceptions import PreventUpdate
 import pandas as pd
 import json
-from layout.layout import APP_LAYOUT
-from layout.tab_template import make_columns, TAB_LAYOUT_DICT, get_cards_group
+from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
+from layout.tab_template import make_columns, get_cards_group
 from plotter.plotter import overview_plot
-from dbcon.queries import query_overview, query_all, get_updated_ats
+from dbcon.queries import (
+    query_overview,
+    query_all,
+    get_updated_ats,
+    query_search_developers,
+)
 from flask_caching import Cache
 from config import get_logger
 
@@ -34,6 +40,10 @@ def get_cached_dataframe(query_json):
         df = query_all(table_name=query_dict["table_name"], limit=1000)
     elif query_dict["id"] == "updated-at":
         df = get_updated_ats("public")
+    elif query_dict["id"] == "developers-search":
+        df = query_search_developers(
+            search_input=query_dict["search_input"], limit=1000
+        )
     else:
         logger.error(f"query_dict id: {query_dict['id']} not recognized")
     return df
@@ -67,6 +77,36 @@ def limit_rows_for_plotting(df: pd.DataFrame, row_ids: list[str]) -> pd.DataFram
 def render_content(tab):
     logger.info(f"Loading tab: {tab}")
     return TAB_LAYOUT_DICT[tab]
+
+
+@app.callback(
+    Output("developers-search-df-table-overview", "data"),
+    Output("developers-search-df-table-overview", "columns"),
+    Input("developers-search-button", "n_clicks"),
+    State("developers-search-input", "value"),
+    Input("developers-search-df-table-overview", "derived_viewport_row_ids"),
+)
+def developers_search(
+    button,
+    input_value,
+    derived_viewport_row_ids: list[str],
+):
+    logger.info("Developers Search {input_value=}")
+    metrics = ["size"]
+    if not input_value:
+        logger.info("Developers Search {input_value=} prevent update")
+        PreventUpdate
+    query_dict = {
+        "id": "developers-search",
+        "search_input": input_value,
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    logger.info(f"Developers Search {df.shape=}")
+    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    column_dicts = make_columns(dimensions, metrics)
+    logger.info(f"Developers Search {df.shape=}")
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts
 
 
 @app.callback(

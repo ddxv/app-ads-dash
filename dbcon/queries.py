@@ -33,6 +33,32 @@ def query_all(table_name: str, groupby: str | list[str] = None, limit: int = 100
     return df
 
 
+def query_search_developers(search_input: str, limit: int = 1000):
+    logger.info(f"Developer search: {search_input=}")
+    search_input = f"%%{search_input}%%"
+    sel_query = f"""SELECT
+                        d.*,
+                        pd.*,
+                        sa.*
+                    FROM
+                        app_urls_map aum
+                    LEFT JOIN pub_domains pd ON
+                        pd.id = aum.pub_domain
+                    LEFT JOIN store_apps sa ON
+                        sa.id = aum.store_app
+                    LEFT JOIN developers d ON
+                        d.id = sa.developer
+                    WHERE
+                        d.name ILIKE '{search_input}'
+                        OR d.developer_id ILIKE '{search_input}'
+                        OR pd.url ILIKE '{search_input}'
+                    LIMIT {limit}
+                    ;
+                    """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
 def query_overview(limit: int = 1000):
     logger.info("Query overview_table")
     sel_query = f"""SELECT * FROM

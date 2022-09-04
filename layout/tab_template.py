@@ -13,6 +13,16 @@ logger = get_logger(__name__)
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
 
+    if "developers-search" == tab_id:
+        input_group = dbc.InputGroup(
+            [
+                dbc.Input(
+                    id=f"{tab_id}-input", placeholder="Names, ids or URL parts..."
+                ),
+                dbc.Button("Search", id=f"{tab_id}-button", n_clicks=0),
+            ]
+        )
+        options_div.children.append(input_group)
     if "developers" == tab_id:
         default_values = [""]
         groupby_options = [{"label": x, "value": x} for x in DEVELOPERS_COLUMNS]
@@ -355,19 +365,3 @@ DOLLAR_NAMES = [
 ]
 
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
-
-TABS = dbc.Tabs(
-    id="tabs-selector",
-    persistence=True,
-    persistence_type="memory",
-    children=[
-        dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
-        dbc.Tab(label="Developers", tab_id="developers"),
-        dbc.Tab(label="Updated Ats", tab_id="updated-at"),
-    ],
-)
-TAB_LAYOUT_DICT = {}
-tab_tags = [x.tab_id for x in TABS.children]
-for tab_tag in tab_tags:
-    default_layout = create_tab_layout(tab_tag)
-    TAB_LAYOUT_DICT[tab_tag] = default_layout
