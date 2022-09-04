@@ -363,6 +363,7 @@ TABS = dbc.Tabs(
     children=[
         dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
         dbc.Tab(label="Developers", tab_id="developers"),
+        dbc.Tab(label="Updated Ats", tab_id="updated-at"),
     ],
 )
 TAB_LAYOUT_DICT = {}

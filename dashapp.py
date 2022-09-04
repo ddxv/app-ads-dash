@@ -6,7 +6,7 @@ import json
 from layout.layout import APP_LAYOUT
 from layout.tab_template import make_columns, TAB_LAYOUT_DICT, get_cards_group
 from plotter.plotter import overview_plot
-from dbcon.queries import query_overview, query_all
+from dbcon.queries import query_overview, query_all, get_updated_ats
 from flask_caching import Cache
 from config import get_logger
 
@@ -32,6 +32,8 @@ def get_cached_dataframe(query_json):
         df = query_overview(limit=1000)
     elif query_dict["id"] == "developers":
         df = query_all(table_name=query_dict["table_name"], limit=1000)
+    elif query_dict["id"] == "updated-at":
+        df = get_updated_ats("public")
     else:
         logger.error(f"query_dict id: {query_dict['id']} not recognized")
     return df
@@ -109,6 +111,24 @@ def developers(
     )
 
     return table_obj, column_dicts, fig
+
+
+@app.callback(
+    Output("updated-at-df-table-overview", "data"),
+    Output("updated-at-df-table-overview", "columns"),
+    Input("updated-at-df-table-overview", "derived_viewport_row_ids"),
+)
+def updated_at_table(
+    derived_viewport_row_ids: list[str],
+):
+    logger.info("Updates At Table")
+    metrics = ["size"]
+    query_dict = {"id": "updated-at"}
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    column_dicts = make_columns(dimensions, metrics)
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts
 
 
 @app.callback(

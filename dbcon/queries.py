@@ -44,5 +44,49 @@ def query_overview(limit: int = 1000):
     return df
 
 
+def get_all_tables_in_schema(schema_name: str):
+    logger.info("Get checks tables")
+    sel_schema = f"""SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = '{schema_name}'
+    ;"""
+    tables = pd.read_sql(sel_schema, DBCON.engine)
+    tables = tables["table_name"].values.tolist()
+    return tables
+
+
+def get_updated_ats(schema_name: str):
+    sel_query = """SELECT
+                        table_schema,
+                        table_name,
+                        column_name
+                    FROM
+                        information_schema.columns
+                    WHERE
+                        table_schema ='public'
+                    ORDER BY
+                        table_schema,
+                        table_name
+                ;
+                """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    df = df[df.column_name.str.endswith("_at")]
+    tables = df.table_name.unique().tolist()
+    dfs = []
+    for table in tables:
+        time_columns = df[df["table_name"] == table].column_name.unique().tolist()
+        cols = [
+            f"min({col}) as min_{col}, max({col}) as max_{col}" for col in time_columns
+        ]
+        cols_str = ", ".join(cols)
+        sel_query = f"""SELECT '{table}' as table_name, {cols_str}
+            FROM {schema_name}.{table}
+            ;"""
+        temp = pd.read_sql(sel_query, DBCON.engine)
+        dfs.append(temp)
+    df = pd.concat(dfs)
+    return df
+
+
 DBCON = get_db_connection("madrone")
 DBCON.set_engine()
