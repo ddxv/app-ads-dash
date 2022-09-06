@@ -122,6 +122,7 @@ def create_tab_layout(tab_id):
     buttons_div = get_left_buttons_layout(tab_id)
     tab_layout = html.Div(
         [
+            dcc.Store(id=f"{tab_id}-memory-output"),
             dbc.Row(  # Entire Page Row
                 [
                     None

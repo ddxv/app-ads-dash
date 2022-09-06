@@ -12,7 +12,7 @@ def overview_plot(
 ):
     # logger.info(f"Start Plot: {df.shape}, {y_vals=}")
     fig = go.Figure()
-    safe_y_vals = [x for x in y_vals if x in df.columns]
+    y_vals = [x for x in y_vals if x in df.columns]
     if df.empty:
         return {}
     yaxis1_col = []
@@ -29,10 +29,12 @@ def overview_plot(
         else:
             pass
 
-    if bar_column and bar_column in safe_y_vals:
+    if bar_column and bar_column in y_vals:
         ordered = df.groupby("id")[bar_column].sum().sort_values(ascending=False)
+    else:
+        ordered = df.groupby("id")[y_vals[0]].size().sort_values(ascending=False)
     plot_dims = ordered.index.unique().tolist()
-    color_dims = True if len(plot_dims) >= len(safe_y_vals) else False
+    color_dims = True if len(plot_dims) >= len(y_vals) else False
     plot_title = ""
     if len(plot_dims) == 1:
         plot_title = plot_dims[0]
@@ -41,13 +43,13 @@ def overview_plot(
     y1_tickformat = ""
     y2_tickformat = ""
     # logger.info(f"PLOT TYPE: {bar_column=}")
-    if all([True if x in bar_columns else False for x in safe_y_vals]):
+    if all([True if x in bar_columns else False for x in y_vals]):
         show_bar_legend = True
     else:
         show_bar_legend = False
     # logger.warning(f"PLOT TYPE: {bar_column=}, {safe_y_vals=}")
     if xaxis_col in df.columns:
-        for y_val in safe_y_vals:
+        for y_val in y_vals:
             # symbol_int expected order: 0, 101, 302, 3, 104
             if y_val not in bar_columns:
                 symbol_int += 1
@@ -100,7 +102,7 @@ def overview_plot(
                     else:
                         name_id = my_id
                     if color_dims:
-                        if len([x for x in safe_y_vals if x not in bar_columns]) > 1:
+                        if len([x for x in y_vals if x not in bar_columns]) > 1:
                             name = name_id + " " + y_val
                         else:
                             name = name_id

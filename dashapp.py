@@ -1,11 +1,11 @@
 from app import app
 from dash.dependencies import Input, Output, State
-from dash import html
+import dash
 from dash.exceptions import PreventUpdate
 import pandas as pd
 import json
 from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
-from layout.tab_template import make_columns, get_cards_group
+from layout.tab_template import make_columns, get_cards_group, get_left_buttons_layout
 from plotter.plotter import overview_plot
 from dbcon.queries import (
     query_overview,
@@ -40,7 +40,8 @@ def get_cached_dataframe(query_json):
     elif query_dict["id"] == "developers":
         df = query_all(table_name=query_dict["table_name"], limit=1000)
     elif query_dict["id"] == "updated-histogram":
-        df = query_update_histogram("store_apps")
+        df = query_update_histogram(table_name=query_dict["table_name"])
+        df["table_name"] = query_dict["table_name"]
     elif query_dict["id"] == "updated-at":
         df = get_updated_ats("public")
     elif query_dict["id"] == "developers-search":
@@ -83,25 +84,56 @@ def render_content(tab):
 
 
 @app.callback(
+    Output("updated-histogram-plot", "figure"),
+    Input("updated-histogram-memory-output", "children"),
+    Input("developers-search-df-table-overview", "derived_viewport_row_ids"),
+)
+def histograms_plot(
+    table_name,
+    derived_viewport_row_ids,
+):
+    logger.info(f"Updated histogram plot {dash.ctx.triggered_id=}")
+    metrics = ["updated_count", "created_count"]
+    query_dict = {"id": "updated-histogram", "table_name": table_name}
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    df = add_id_column(df, dimensions=dimensions)
+    logger.info(f"Updated histogram: {df.shape=}")
+    df = limit_rows_for_plotting(df, derived_viewport_row_ids)
+    fig = overview_plot(
+        df=df, xaxis_col="date", y_vals=metrics, title="Updated Histogram"
+    )
+    return fig
+
+
+@app.callback(
     Output("updated-histogram-df-table-overview", "data"),
     Output("updated-histogram-df-table-overview", "columns"),
-    Input("updated-histogram-df-table-overview", "derived_viewport_row_ids"),
+    Output("updated-histogram-buttongroup", "children"),
+    Output("updated-histogram-memory-output", "children"),
+    Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
+    prevent_initial_call=True,
 )
 def histograms(
-    derived_viewport_row_ids: list[str],
+    n_clicks,
 ):
-    logger.info("Developers Search {input_value=}")
-    metrics = ["size"]
-    query_dict = {
-        "id": "updated-histogram",
-    }
+    logger.info(f"Updated histogram {dash.ctx.triggered_id=}")
+    table_name = "store_apps"
+    if (
+        dash.ctx.triggered_id
+        and dash.ctx.triggered_id != "updated-histogram-df-table-overview"
+    ):
+        table_name = dash.ctx.triggered_id["index"]
+    metrics = ["updated_count", "created_count"]
+    query_dict = {"id": "updated-histogram", "table_name": table_name}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    logger.info(f"Developers Search {df.shape=}")
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
-    logger.info(f"Developers Search {df.shape=}")
+    buttons = get_left_buttons_layout("updated-histogram", active_x=table_name)
+    logger.info(f"Updated histogram: {df.shape=}")
     table_obj = df.to_dict("records")
-    return table_obj, column_dicts
+    return table_obj, column_dicts, buttons, table_name
 
 
 @app.callback(
@@ -245,10 +277,10 @@ def latest_updates_table(
     ]
     for card_name in card_ids:
         column_name = card_name.replace("-", "_")
-        cards_group[f"{card_name}-body"] = html.P(
+        cards_group[f"{card_name}-body"] = dash.html.P(
             [
                 f'Latest:  {df[column_name].max().strftime("%Y-%m-%d %H:%M:%S")}',
-                html.Br(),
+                dash.html.Br(),
                 f'Earliest: {df[column_name].min().strftime("%Y-%m-%d %H:%M:%S")}',
             ]
         )
