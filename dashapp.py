@@ -12,6 +12,7 @@ from dbcon.queries import (
     query_all,
     get_updated_ats,
     query_search_developers,
+    query_update_histogram,
 )
 from flask_caching import Cache
 from config import get_logger
@@ -38,6 +39,8 @@ def get_cached_dataframe(query_json):
         df = query_overview(limit=1000)
     elif query_dict["id"] == "developers":
         df = query_all(table_name=query_dict["table_name"], limit=1000)
+    elif query_dict["id"] == "updated-histogram":
+        df = query_update_histogram("store_apps")
     elif query_dict["id"] == "updated-at":
         df = get_updated_ats("public")
     elif query_dict["id"] == "developers-search":
@@ -77,6 +80,28 @@ def limit_rows_for_plotting(df: pd.DataFrame, row_ids: list[str]) -> pd.DataFram
 def render_content(tab):
     logger.info(f"Loading tab: {tab}")
     return TAB_LAYOUT_DICT[tab]
+
+
+@app.callback(
+    Output("updated-histogram-df-table-overview", "data"),
+    Output("updated-histogram-df-table-overview", "columns"),
+    Input("updated-histogram-df-table-overview", "derived_viewport_row_ids"),
+)
+def histograms(
+    derived_viewport_row_ids: list[str],
+):
+    logger.info("Developers Search {input_value=}")
+    metrics = ["size"]
+    query_dict = {
+        "id": "updated-histogram",
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    logger.info(f"Developers Search {df.shape=}")
+    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    column_dicts = make_columns(dimensions, metrics)
+    logger.info(f"Developers Search {df.shape=}")
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts
 
 
 @app.callback(

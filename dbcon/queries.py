@@ -33,6 +33,50 @@ def query_all(table_name: str, groupby: str | list[str] = None, limit: int = 100
     return df
 
 
+def query_update_histogram(table_name: str, start_date="2021-01-01") -> pd.DataFrame:
+    logger.info(f"Table time histogram: {table_name=}")
+    sel_query = f"""WITH md AS (
+                    SELECT
+                        generate_series('{start_date}', 
+                            CURRENT_DATE, '1 day'::INTERVAL)::date AS date),
+                    ud AS (
+                    SELECT
+                        updated_at::date AS updated_date,
+                        count(1) AS updated_count
+                    FROM
+                        {table_name}
+                    WHERE
+                        updated_at >= '{start_date}'
+                    GROUP BY
+                        updated_at::date),
+                    cd AS (
+                    SELECT
+                        created_at::date AS created_date,
+                        count(1) AS created_count
+                    FROM
+                        {table_name}
+                    WHERE
+                        created_at >= '{start_date}'
+                    GROUP BY
+                        created_at::date)
+                    SELECT
+                        md.date AS date,
+                        ud.updated_count,
+                        cd.created_count
+                    FROM
+                        md
+                    LEFT JOIN ud ON
+                        md.date = ud.updated_date
+                    LEFT JOIN cd ON
+                        md.date = cd.created_date
+                    ORDER BY
+                        md.date DESC
+                    ;
+                """
+    df = pd.read_sql(sel_query, con=DBCON.engine)
+    return df
+
+
 def query_search_developers(search_input: str, limit: int = 1000):
     logger.info(f"Developer search: {search_input=}")
     search_input = f"%%{search_input}%%"
@@ -82,21 +126,7 @@ def get_all_tables_in_schema(schema_name: str):
 
 
 def get_updated_ats(schema_name: str):
-    sel_query = """SELECT
-                        table_schema,
-                        table_name,
-                        column_name
-                    FROM
-                        information_schema.columns
-                    WHERE
-                        table_schema ='public'
-                    ORDER BY
-                        table_schema,
-                        table_name
-                ;
-                """
-    df = pd.read_sql(sel_query, DBCON.engine)
-    df = df[df.column_name.str.endswith("_at")]
+    df = SCHEMA_OVERVIEW[SCHEMA_OVERVIEW.column_name.str.endswith("_at")]
     tables = df.table_name.unique().tolist()
     dfs = []
     for table in tables:
@@ -114,5 +144,24 @@ def get_updated_ats(schema_name: str):
     return df
 
 
+def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:
+    sel_query = f"""SELECT
+                        table_schema,
+                        table_name,
+                        column_name
+                    FROM
+                        information_schema.columns
+                    WHERE
+                        table_schema ='{schema_name}'
+                    ORDER BY
+                        table_schema,
+                        table_name
+                ;
+                """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
 DBCON = get_db_connection("madrone")
 DBCON.set_engine()
+SCHEMA_OVERVIEW = get_schema_overview("public")

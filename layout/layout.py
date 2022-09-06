@@ -60,6 +60,7 @@ TABS = dbc.Tabs(
         dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
         dbc.Tab(label="Developers", tab_id="developers"),
         dbc.Tab(label="Updated Ats", tab_id="updated-at"),
+        dbc.Tab(label="Updated Histograms", tab_id="updated-histogram"),
         dbc.Tab(label="Developers Search", tab_id="developers-search"),
     ],
 )

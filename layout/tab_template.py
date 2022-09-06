@@ -4,7 +4,7 @@ from dash import dcc
 from dash import html
 from dash import dash_table
 from plotly import graph_objects as go
-from dbcon.queries import query_overview, query_all
+from dbcon.queries import query_overview, SCHEMA_OVERVIEW
 from config import get_logger
 
 logger = get_logger(__name__)
@@ -119,21 +119,27 @@ def create_tab_layout(tab_id):
     options_div = make_tab_options(tab_id)
     table_div = make_table_div(tab_id)
     plot_div = make_plot_div(tab_id)
+    buttons_div = get_left_buttons_layout(tab_id)
     tab_layout = html.Div(
         [
-            html.Div(
+            dbc.Row(  # Entire Page Row
                 [
-                    options_div,
-                    table_div,
-                ]
-            ),
-            dbc.Row(
-                [
+                    None
+                    if tab_id != "updated-histogram"
+                    else dbc.Col(
+                        [buttons_div],
+                        width={"size": 2, "order": "first"},
+                    ),
                     dbc.Col(
-                        plot_div,
-                    )
+                        [
+                            options_div,
+                            table_div,
+                            plot_div,
+                        ]
+                    ),
                 ]
             ),
+            dbc.Row([dbc.Col()]),
         ],
     )
     return tab_layout
@@ -347,9 +353,37 @@ def get_cards_group():
     return cards
 
 
+def get_left_buttons_layout(tab_id, info=None, active_x=None):
+    mydiv = html.Div([])
+    tables = ["overview"] + SCHEMA_OVERVIEW["table_name"].unique().tolist()
+    mydiv = dbc.ButtonGroup(
+        [
+            dbc.Button(
+                [
+                    html.Strong(x),
+                    ""
+                    if not info
+                    else f" {info[x]['updated_at'].strftime('%Y-%m-%d %H:%M')}",
+                ],
+                color="secondary" if x != active_x else "primary",
+                id={"type": "left-menu", "index": x},
+                style={"text-align": "left"},
+            )
+            for x in tables
+        ],
+        vertical=True,
+        id=f"{tab_id}-buttongroup",
+    )
+    return mydiv
+
+
 logger.info("Set layout column defaults")
+# Is a materialized view
 OVERVIEW_COLUMNS = query_overview(limit=1).columns.tolist()
-DEVELOPERS_COLUMNS = query_all(table_name="developers", limit=1).columns.tolist()
+
+DEVELOPERS_COLUMNS = SCHEMA_OVERVIEW[
+    SCHEMA_OVERVIEW["table_name"] == "developers"
+].column_name.tolist()
 
 
 DOLLAR_NAMES = [
