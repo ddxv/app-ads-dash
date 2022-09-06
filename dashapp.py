@@ -85,7 +85,7 @@ def render_content(tab):
 
 @app.callback(
     Output("updated-histogram-plot", "figure"),
-    Input("updated-histogram-memory-output", "children"),
+    Input("updated-histogram-memory-output", "data"),
     Input("developers-search-df-table-overview", "derived_viewport_row_ids"),
 )
 def histograms_plot(
@@ -98,7 +98,7 @@ def histograms_plot(
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     df = add_id_column(df, dimensions=dimensions)
-    logger.info(f"Updated histogram: {df.shape=}")
+    logger.info(f"Updated histogram plot_df: {df.shape=}")
     df = limit_rows_for_plotting(df, derived_viewport_row_ids)
     fig = overview_plot(
         df=df, xaxis_col="date", y_vals=metrics, title="Updated Histogram"
@@ -110,9 +110,9 @@ def histograms_plot(
     Output("updated-histogram-df-table-overview", "data"),
     Output("updated-histogram-df-table-overview", "columns"),
     Output("updated-histogram-buttongroup", "children"),
-    Output("updated-histogram-memory-output", "children"),
+    Output("updated-histogram-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
-    prevent_initial_call=True,
+    # prevent_initial_call=True,
 )
 def histograms(
     n_clicks,
