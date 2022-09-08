@@ -34,7 +34,7 @@ def query_all(table_name: str, groupby: str | list[str] = None, limit: int = 100
 
 
 def query_update_histogram(table_name: str, start_date="2021-01-01") -> pd.DataFrame:
-    logger.info(f"Table time histogram: {table_name=}")
+    logger.info(f"Query times for histogram: {table_name=}")
     sel_query = f"""WITH md AS (
                     SELECT
                         generate_series('{start_date}', 

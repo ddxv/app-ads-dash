@@ -84,35 +84,11 @@ def render_content(tab):
 
 
 @app.callback(
-    Output("updated-histogram-plot", "figure"),
-    Input("updated-histogram-memory-output", "data"),
-    Input("developers-search-df-table-overview", "derived_viewport_row_ids"),
-)
-def histograms_plot(
-    table_name,
-    derived_viewport_row_ids,
-):
-    logger.info(f"Updated histogram plot {dash.ctx.triggered_id=}")
-    metrics = ["updated_count", "created_count"]
-    query_dict = {"id": "updated-histogram", "table_name": table_name}
-    df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
-    df = add_id_column(df, dimensions=dimensions)
-    logger.info(f"Updated histogram plot_df: {df.shape=}")
-    df = limit_rows_for_plotting(df, derived_viewport_row_ids)
-    fig = overview_plot(
-        df=df, xaxis_col="date", y_vals=metrics, title="Updated Histogram"
-    )
-    return fig
-
-
-@app.callback(
     Output("updated-histogram-df-table-overview", "data"),
     Output("updated-histogram-df-table-overview", "columns"),
     Output("updated-histogram-buttongroup", "children"),
     Output("updated-histogram-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
-    # prevent_initial_call=True,
 )
 def histograms(
     n_clicks,
@@ -131,9 +107,34 @@ def histograms(
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
     buttons = get_left_buttons_layout("updated-histogram", active_x=table_name)
-    logger.info(f"Updated histogram: {df.shape=}")
+    logger.info(f"Updated histogram: {table_name=} {df.shape=}")
     table_obj = df.to_dict("records")
     return table_obj, column_dicts, buttons, table_name
+
+
+@app.callback(
+    Output("updated-histogram-plot", "figure"),
+    Input("date-picker-range", "start_date"),
+    Input("updated-histogram-memory-output", "data"),
+    Input("updated-histogram-df-table-overview", "derived_viewport_row_ids"),
+)
+def histograms_plot(
+    start_date,
+    table_name,
+    derived_viewport_row_ids,
+):
+    logger.info(f"Updated histogram plot {table_name=}")
+    metrics = ["updated_count", "created_count"]
+    query_dict = {"id": "updated-histogram", "table_name": table_name}
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    df = add_id_column(df, dimensions=dimensions)
+    logger.info(f"Updated histogram plot_df: {df.shape=}")
+    df = limit_rows_for_plotting(df, derived_viewport_row_ids)
+    fig = overview_plot(
+        df=df, xaxis_col="date", y_vals=metrics, title="Updated Histogram"
+    )
+    return fig
 
 
 @app.callback(
