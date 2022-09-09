@@ -124,7 +124,7 @@ def histograms(n_clicks, start_date):
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    dimensions = [x for x in df.columns if x not in metrics and x != "date"]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
     buttons = get_left_buttons_layout("updated-histogram", active_x=table_name)
