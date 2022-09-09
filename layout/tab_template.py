@@ -6,6 +6,13 @@ from dash import dash_table
 from plotly import graph_objects as go
 from dbcon.queries import query_overview, SCHEMA_OVERVIEW
 from config import get_logger
+from ids import (
+    AFFIX_GROUPBY_TIME,
+    AFFIX_PLOT,
+    AFFIX_GROUPBY,
+    AFFIX_SWITCHES,
+    AFFIX_TABLE,
+)
 
 logger = get_logger(__name__)
 
@@ -59,7 +66,7 @@ def make_table_div(tab_id):
     table_div = html.Div(
         [
             dash_table.DataTable(
-                id=f"{tab_id}-df-table-overview",
+                id=tab_id + AFFIX_TABLE,
                 style_header={
                     "overflowX": "scroll",
                     "fontWeight": "bold",
@@ -85,26 +92,15 @@ def make_table_div(tab_id):
 
 
 def make_plot_div(tab_id):
-    second_plot = html.Div()
-    if tab_id in ["data-import"]:
-        second_plot = html.Div(
-            dcc.Graph(
-                id=f"{tab_id}-overview-plot2",
-                config={"displaylogo": False},
-                figure=go.Figure(),
-            )
-        )
-
     plot_div = html.Div(
         [
             dcc.Loading(
                 children=[
                     dcc.Graph(
-                        id=f"{tab_id}-overview-plot",
+                        id=tab_id + AFFIX_PLOT,
                         config={"displaylogo": False},
                         figure=go.Figure(),
                     ),
-                    second_plot,
                 ]
             ),
         ],
@@ -151,7 +147,7 @@ def make_groupby_time_column(tab_id: str, groupby_time: bool):
     if groupby_time:
         time_col.children.append(
             dbc.Select(
-                id=f"{tab_id}-groupby-time",
+                id=tab_id + AFFIX_GROUPBY_TIME,
                 options=[
                     {"label": "Plot Hourly", "value": "1H"},
                     {"label": "Plot Daily", "value": "1D"},
@@ -172,7 +168,7 @@ def make_groupby_column(
     if groupby_columns:
         groupby_col.children.append(
             dcc.Dropdown(
-                id=f"{tab_id}-groupby",
+                id=tab_id + AFFIX_GROUPBY,
                 options=groupby_columns,
                 multi=True,
                 placeholder="Select Groupby...",
@@ -193,7 +189,7 @@ def make_switch_options(tab_id, switch_options, switch_defaults):
             dbc.Checklist(
                 options=switch_options,
                 value=switch_defaults,
-                id=f"{tab_id}-switches",
+                id=tab_id + AFFIX_SWITCHES,
                 inline=True,
                 switch=True,
             ),

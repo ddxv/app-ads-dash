@@ -1,3 +1,10 @@
+from ids import (
+    DEVELOPERS,
+    DEVELOPERS_SEARCH,
+    LATEST_UPDATES,
+    UPDATED_AT,
+    UPDATED_HISTOGRAM,
+)
 from layout.tab_template import create_tab_layout
 import datetime
 from dash import dcc
@@ -57,13 +64,14 @@ TABS = dbc.Tabs(
     persistence=True,
     persistence_type="memory",
     children=[
-        dbc.Tab(label="Latest Updates", tab_id="latest-updates"),
-        dbc.Tab(label="Developers", tab_id="developers"),
-        dbc.Tab(label="Updated Ats", tab_id="updated-at"),
-        dbc.Tab(label="Updated Histograms", tab_id="updated-histogram"),
-        dbc.Tab(label="Developers Search", tab_id="developers-search"),
+        dbc.Tab(label="Latest Updates", tab_id=LATEST_UPDATES),
+        dbc.Tab(label="Developers", tab_id=DEVELOPERS),
+        dbc.Tab(label="Updated Ats", tab_id=UPDATED_AT),
+        dbc.Tab(label="Updated Histograms", tab_id=UPDATED_HISTOGRAM),
+        dbc.Tab(label="Developers Search", tab_id=DEVELOPERS_SEARCH),
     ],
 )
+
 
 TAB_LAYOUT_DICT = get_tab_layout_dict()
 

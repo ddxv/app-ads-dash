@@ -8,7 +8,12 @@ COLORS = px.colors.qualitative.Alphabet
 
 
 def overview_plot(
-    df: pd.DataFrame, y_vals: list[str], stack_bars=False, xaxis_col=None, title=None
+    df: pd.DataFrame,
+    y_vals: list[str],
+    bar_column: str = None,
+    stack_bars: bool = False,
+    xaxis_col: str = None,
+    title: str = None,
 ):
     # logger.info(f"Start Plot: {df.shape}, {y_vals=}")
     fig = go.Figure()
@@ -19,16 +24,8 @@ def overview_plot(
     yaxis2_col = []
     symbol_int = -1
     y_color_int = 0
-    bar_columns = [
-        "size",
-    ]
-    bar_column = None
-    for bc in bar_columns:
-        if bc in df.columns:
-            bar_column = bc
-        else:
-            pass
-
+    if not bar_column:
+        bar_column = guess_bar_column(df)
     if bar_column and bar_column in y_vals:
         ordered = df.groupby("id")[bar_column].sum().sort_values(ascending=False)
     else:
@@ -43,7 +40,7 @@ def overview_plot(
     y1_tickformat = ""
     y2_tickformat = ""
     # logger.info(f"PLOT TYPE: {bar_column=}")
-    if all([True if x in bar_columns else False for x in y_vals]):
+    if all([True if x == bar_column else False for x in y_vals]):
         show_bar_legend = True
     else:
         show_bar_legend = False
@@ -51,7 +48,7 @@ def overview_plot(
     if xaxis_col in df.columns:
         for y_val in y_vals:
             # symbol_int expected order: 0, 101, 302, 3, 104
-            if y_val not in bar_columns:
+            if y_val != bar_column:
                 symbol_int += 1
                 if symbol_int > 100:
                     symbol_int += 200
@@ -77,7 +74,7 @@ def overview_plot(
                 pdf[mcol] = np.nan
             for my_id in ordered.index:
                 # BAR / Y-AXIS 1
-                if y_val in bar_columns:
+                if y_val == bar_column:
                     yaxis1_col.append(y_val)
                     if is_dollar(y_val):
                         y1_tickformat = "$f"
@@ -102,7 +99,7 @@ def overview_plot(
                     else:
                         name_id = my_id
                     if color_dims:
-                        if len([x for x in y_vals if x not in bar_columns]) > 1:
+                        if len([x for x in y_vals if x != bar_column]) > 1:
                             name = name_id + " " + y_val
                         else:
                             name = name_id
@@ -172,3 +169,16 @@ def overview_plot(
     }
     fig.layout = layout
     return fig
+
+
+def guess_bar_column(df: pd.DataFrame):
+    bar_columns = [
+        "size",
+    ]
+    bar_column = None
+    for bc in bar_columns:
+        if bc in df.columns:
+            bar_column = bc
+        else:
+            pass
+    return bar_column

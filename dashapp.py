@@ -4,6 +4,17 @@ import dash
 from dash.exceptions import PreventUpdate
 import pandas as pd
 import json
+from ids import (
+    AFFIX_GROUPBY,
+    AFFIX_TABLE,
+    DEVELOPERS,
+    DEVELOPERS_SEARCH,
+    LATEST_UPDATES,
+    AFFIX_PLOT,
+    UPDATED_AT,
+    UPDATED_HISTOGRAM,
+    DATE_PICKER_RANGE,
+)
 from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
 from layout.tab_template import make_columns, get_cards_group, get_left_buttons_layout
 from plotter.plotter import overview_plot
@@ -35,16 +46,18 @@ CACHE.clear()
 @CACHE.memoize()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
-    if query_dict["id"] == "latest-updates":
+    if query_dict["id"] == LATEST_UPDATES:
         df = query_overview(limit=1000)
-    elif query_dict["id"] == "developers":
+    elif query_dict["id"] == DEVELOPERS:
         df = query_all(table_name=query_dict["table_name"], limit=1000)
-    elif query_dict["id"] == "updated-histogram":
-        df = query_update_histogram(table_name=query_dict["table_name"])
+    elif query_dict["id"] == UPDATED_HISTOGRAM:
+        df = query_update_histogram(
+            table_name=query_dict["table_name"], start_date=query_dict["start_date"]
+        )
         df["table_name"] = query_dict["table_name"]
-    elif query_dict["id"] == "updated-at":
+    elif query_dict["id"] == UPDATED_AT:
         df = get_updated_ats("public")
-    elif query_dict["id"] == "developers-search":
+    elif query_dict["id"] == DEVELOPERS_SEARCH:
         df = query_search_developers(
             search_input=query_dict["search_input"], limit=1000
         )
@@ -53,7 +66,9 @@ def get_cached_dataframe(query_json):
     return df
 
 
-def limit_rows_for_plotting(df: pd.DataFrame, row_ids: list[str]) -> pd.DataFrame:
+def limit_rows_for_plotting(
+    df: pd.DataFrame, row_ids: list[str], metrics: list[str] = None
+) -> pd.DataFrame:
     logger.info("Limit Rows for Plotting")
     original_shape = df.shape
     if row_ids:
@@ -61,7 +76,10 @@ def limit_rows_for_plotting(df: pd.DataFrame, row_ids: list[str]) -> pd.DataFram
         df = df[df["id"].isin(row_ids)]
     if not row_ids:
         logger.warning("NO row_ids or derived_row_ids! attempting to manually select")
-        sort_column = "count"
+        if metrics and len(metrics) > 0:
+            sort_column = metrics[0]
+        else:
+            sort_column = "count"
         idf = df.groupby("id")[sort_column].sum().reset_index()
         idf = (
             idf.sort_values(sort_column, ascending=False)
@@ -84,10 +102,10 @@ def render_content(tab):
 
 
 @app.callback(
-    Output("updated-histogram-df-table-overview", "data"),
-    Output("updated-histogram-df-table-overview", "columns"),
-    Output("updated-histogram-buttongroup", "children"),
-    Output("updated-histogram-memory-output", "data"),
+    Output(UPDATED_HISTOGRAM + AFFIX_TABLE, "data"),
+    Output(UPDATED_HISTOGRAM + AFFIX_TABLE, "columns"),
+    Output(UPDATED_HISTOGRAM + "-buttongroup", "children"),
+    Output(UPDATED_HISTOGRAM + "-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
 )
 def histograms(
@@ -97,11 +115,11 @@ def histograms(
     table_name = "store_apps"
     if (
         dash.ctx.triggered_id
-        and dash.ctx.triggered_id != "updated-histogram-df-table-overview"
+        and dash.ctx.triggered_id != UPDATED_HISTOGRAM + AFFIX_TABLE
     ):
         table_name = dash.ctx.triggered_id["index"]
     metrics = ["updated_count", "created_count"]
-    query_dict = {"id": "updated-histogram", "table_name": table_name}
+    query_dict = {"id": UPDATED_HISTOGRAM, "table_name": table_name}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     df = add_id_column(df, dimensions=dimensions)
@@ -113,10 +131,10 @@ def histograms(
 
 
 @app.callback(
-    Output("updated-histogram-plot", "figure"),
-    Input("date-picker-range", "start_date"),
-    Input("updated-histogram-memory-output", "data"),
-    Input("updated-histogram-df-table-overview", "derived_viewport_row_ids"),
+    Output(UPDATED_HISTOGRAM + AFFIX_PLOT, "figure"),
+    Input(DATE_PICKER_RANGE, "start_date"),
+    Input(UPDATED_HISTOGRAM + "-memory-output", "data"),
+    Input(UPDATED_HISTOGRAM + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
 def histograms_plot(
     start_date,
@@ -125,24 +143,36 @@ def histograms_plot(
 ):
     logger.info(f"Updated histogram plot {table_name=}")
     metrics = ["updated_count", "created_count"]
-    query_dict = {"id": "updated-histogram", "table_name": table_name}
+    if not table_name:
+        PreventUpdate
+    query_dict = {
+        "id": UPDATED_HISTOGRAM,
+        "table_name": table_name,
+        "start_date": start_date,
+    }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    dimensions = [x for x in df.columns if x not in metrics and x != "date"]
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Updated histogram plot_df: {df.shape=}")
-    df = limit_rows_for_plotting(df, derived_viewport_row_ids)
+    df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
     fig = overview_plot(
-        df=df, xaxis_col="date", y_vals=metrics, title="Updated Histogram"
+        df=df,
+        xaxis_col="date",
+        y_vals=metrics,
+        title="Updated Histogram",
+        stack_bars=True,
+        bar_column=metrics[0],
     )
+    fig.show()
     return fig
 
 
 @app.callback(
-    Output("developers-search-df-table-overview", "data"),
-    Output("developers-search-df-table-overview", "columns"),
-    Input("developers-search-button", "n_clicks"),
-    State("developers-search-input", "value"),
-    Input("developers-search-df-table-overview", "derived_viewport_row_ids"),
+    Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "data"),
+    Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "columns"),
+    Input(DEVELOPERS_SEARCH + "-button", "n_clicks"),
+    State(DEVELOPERS_SEARCH + "-input", "value"),
+    Input(DEVELOPERS_SEARCH + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
 def developers_search(
     button,
@@ -155,7 +185,7 @@ def developers_search(
         logger.info("Developers Search {input_value=} prevent update")
         PreventUpdate
     query_dict = {
-        "id": "developers-search",
+        "id": DEVELOPERS_SEARCH,
         "search_input": input_value,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
@@ -168,11 +198,11 @@ def developers_search(
 
 
 @app.callback(
-    Output("developers-df-table-overview", "data"),
-    Output("developers-df-table-overview", "columns"),
-    Output("developers-overview-plot", "figure"),
-    Input("developers-groupby", "value"),
-    Input("developers-df-table-overview", "derived_viewport_row_ids"),
+    Output(DEVELOPERS + AFFIX_TABLE, "data"),
+    Output(DEVELOPERS + AFFIX_TABLE, "columns"),
+    Output(DEVELOPERS + AFFIX_PLOT, "figure"),
+    Input(DEVELOPERS + AFFIX_GROUPBY, "value"),
+    Input(DEVELOPERS + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
 def developers(
     groupby,
@@ -180,7 +210,7 @@ def developers(
 ):
     logger.info("Developers")
     metrics = ["size"]
-    query_dict = {"id": "developers", "table_name": "developers", "groupby": groupby}
+    query_dict = {"id": DEVELOPERS, "table_name": "developers", "groupby": groupby}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     logger.info(f"Developers {df.shape=}")
 
@@ -212,16 +242,16 @@ def developers(
 
 
 @app.callback(
-    Output("updated-at-df-table-overview", "data"),
-    Output("updated-at-df-table-overview", "columns"),
-    Input("updated-at-df-table-overview", "derived_viewport_row_ids"),
+    Output(UPDATED_AT + AFFIX_TABLE, "data"),
+    Output(UPDATED_AT + AFFIX_TABLE, "columns"),
+    Input(UPDATED_AT + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
 def updated_at_table(
     derived_viewport_row_ids: list[str],
 ):
     logger.info("Updates At Table")
     metrics = ["size"]
-    query_dict = {"id": "updated-at"}
+    query_dict = {"id": UPDATED_AT}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
@@ -230,12 +260,12 @@ def updated_at_table(
 
 
 @app.callback(
-    Output("latest-updates-df-table-overview", "data"),
-    Output("latest-updates-df-table-overview", "columns"),
-    Output("latest-updates-overview-plot", "figure"),
+    Output(LATEST_UPDATES + AFFIX_TABLE, "data"),
+    Output(LATEST_UPDATES + AFFIX_TABLE, "columns"),
+    Output(LATEST_UPDATES + AFFIX_PLOT, "figure"),
     Output("cards-group", "children"),
-    Input("latest-updates-groupby", "value"),
-    Input("latest-updates-df-table-overview", "derived_viewport_row_ids"),
+    Input(LATEST_UPDATES + AFFIX_GROUPBY, "value"),
+    Input(LATEST_UPDATES + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
 def latest_updates_table(
     groupby,
@@ -243,7 +273,7 @@ def latest_updates_table(
 ):
     logger.info("Latest Updates Table")
     metrics = ["size"]
-    query_dict = {"id": "latest-updates"}
+    query_dict = {"id": LATEST_UPDATES}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
 
     dimensions = [x for x in groupby if x not in metrics and x != "id"]
