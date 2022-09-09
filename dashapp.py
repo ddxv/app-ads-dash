@@ -107,10 +107,9 @@ def render_content(tab):
     Output(UPDATED_HISTOGRAM + "-buttongroup", "children"),
     Output(UPDATED_HISTOGRAM + "-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
+    Input(DATE_PICKER_RANGE, "start_date"),
 )
-def histograms(
-    n_clicks,
-):
+def histograms(n_clicks, start_date):
     logger.info(f"Updated histogram {dash.ctx.triggered_id=}")
     table_name = "store_apps"
     if (
@@ -119,7 +118,11 @@ def histograms(
     ):
         table_name = dash.ctx.triggered_id["index"]
     metrics = ["updated_count", "created_count"]
-    query_dict = {"id": UPDATED_HISTOGRAM, "table_name": table_name}
+    query_dict = {
+        "id": UPDATED_HISTOGRAM,
+        "table_name": table_name,
+        "start_date": start_date,
+    }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     df = add_id_column(df, dimensions=dimensions)
@@ -143,8 +146,6 @@ def histograms_plot(
 ):
     logger.info(f"Updated histogram plot {table_name=}")
     metrics = ["updated_count", "created_count"]
-    if not table_name:
-        PreventUpdate
     query_dict = {
         "id": UPDATED_HISTOGRAM,
         "table_name": table_name,
@@ -163,7 +164,6 @@ def histograms_plot(
         stack_bars=True,
         bar_column=metrics[0],
     )
-    fig.show()
     return fig
 
 
