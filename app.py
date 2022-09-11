@@ -9,12 +9,12 @@ dbc_css = (
 
 # This loads the theme template from dash-bootstrap-templates library,
 # adds it to plotly.io and makes it the default figure template.
-load_figure_template("lux")
+load_figure_template("pulse")
 
 app = dash.Dash(
     name=__name__,
     server=server,
     url_base_pathname="/dash/",
-    external_stylesheets=[dbc.themes.LUX, dbc_css],
+    external_stylesheets=[dbc.themes.PULSE, dbc_css],
     suppress_callback_exceptions=True,
 )
