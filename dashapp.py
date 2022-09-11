@@ -117,7 +117,7 @@ def histograms(n_clicks, start_date):
         and dash.ctx.triggered_id != UPDATED_HISTOGRAM + AFFIX_TABLE
     ):
         table_name = dash.ctx.triggered_id["index"]
-    metrics = ["updated_count", "created_count"]
+    metrics = ["updated_count", "created_count", "last_updated_count"]
     query_dict = {
         "id": UPDATED_HISTOGRAM,
         "table_name": table_name,
