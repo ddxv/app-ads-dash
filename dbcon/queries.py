@@ -33,23 +33,42 @@ def query_all(table_name: str, groupby: str | list[str] = None, limit: int = 100
     return df
 
 
-def query_update_histogram(table_name: str, start_date="2021-01-01") -> pd.DataFrame:
-    logger.info(f"Query times for histogram: {table_name=}")
-    sel_query = f"""WITH md AS (
+def query_updated_timestamps(table_name: str, start_date="2021-01-01") -> pd.DataFrame:
+    logger.info(f"Query updated times: {table_name=}")
+    if table_name == "store_apps":
+        audit_with = f""",
+                    audit_dates AS (
+                    SELECT
+                        stamp::date AS updated_date,
+                        count(1) AS updated_count
+                    FROM
+                        logging.{table_name}_audit
+                    WHERE
+                        stamp >= '{start_date}'
+                    GROUP BY
+                        stamp::date)
+                    """
+        audit_select = " audit_dates.updated_count, "
+        audit_join = """LEFT JOIN audit_dates ON
+                        my_dates.date = audit_dates.updated_date
+                        """
+    else:
+        audit_with, audit_join, audit_select = "", "", ""
+    sel_query = f"""WITH my_dates AS (
                     SELECT
                         generate_series('{start_date}', 
                             CURRENT_DATE, '1 day'::INTERVAL)::date AS date),
-                    ud AS (
+                    updated_dates AS (
                     SELECT
-                        updated_at::date AS updated_date,
-                        count(1) AS updated_count
+                        updated_at::date AS last_updated_date,
+                        count(1) AS last_updated_count
                     FROM
                         {table_name}
                     WHERE
                         updated_at >= '{start_date}'
                     GROUP BY
                         updated_at::date),
-                    cd AS (
+                    created_dates AS (
                     SELECT
                         created_at::date AS created_date,
                         count(1) AS created_count
@@ -59,21 +78,25 @@ def query_update_histogram(table_name: str, start_date="2021-01-01") -> pd.DataF
                         created_at >= '{start_date}'
                     GROUP BY
                         created_at::date)
+                    {audit_with}
                     SELECT
-                        md.date AS date,
-                        ud.updated_count,
-                        cd.created_count
+                        my_dates.date AS date,
+                        updated_dates.last_updated_count,
+                        {audit_select}
+                        created_dates.created_count
                     FROM
-                        md
-                    LEFT JOIN ud ON
-                        md.date = ud.updated_date
-                    LEFT JOIN cd ON
-                        md.date = cd.created_date
+                        my_dates
+                    LEFT JOIN updated_dates ON
+                        my_dates.date = updated_dates.last_updated_date
+                    {audit_join}
+                    LEFT JOIN created_dates ON
+                        my_dates.date = created_dates.created_date
                     ORDER BY
-                        md.date DESC
+                        my_dates.date DESC
                     ;
                 """
     df = pd.read_sql(sel_query, con=DBCON.engine)
+    df = df.fillna(0)
     return df
 
 

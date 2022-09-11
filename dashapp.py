@@ -23,7 +23,7 @@ from dbcon.queries import (
     query_all,
     get_updated_ats,
     query_search_developers,
-    query_update_histogram,
+    query_updated_timestamps,
 )
 from flask_caching import Cache
 from config import get_logger
@@ -51,7 +51,7 @@ def get_cached_dataframe(query_json):
     elif query_dict["id"] == DEVELOPERS:
         df = query_all(table_name=query_dict["table_name"], limit=1000)
     elif query_dict["id"] == UPDATED_HISTOGRAM:
-        df = query_update_histogram(
+        df = query_updated_timestamps(
             table_name=query_dict["table_name"], start_date=query_dict["start_date"]
         )
         df["table_name"] = query_dict["table_name"]
@@ -145,7 +145,7 @@ def histograms_plot(
     derived_viewport_row_ids,
 ):
     logger.info(f"Updated histogram plot {table_name=}")
-    metrics = ["updated_count", "created_count"]
+    metrics = ["updated_count", "created_count", "last_updated_count"]
     query_dict = {
         "id": UPDATED_HISTOGRAM,
         "table_name": table_name,
@@ -160,7 +160,7 @@ def histograms_plot(
         df=df,
         xaxis_col="date",
         y_vals=metrics,
-        title="Updated Histogram",
+        title="Updated Counts by Date",
         stack_bars=True,
         bar_column=metrics[0],
     )
