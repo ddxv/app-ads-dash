@@ -188,3 +188,11 @@ def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:
 DBCON = get_db_connection("madrone")
 DBCON.set_engine()
 SCHEMA_OVERVIEW = get_schema_overview("public")
+TABLES = SCHEMA_OVERVIEW["table_name"].unique().tolist()
+TABLES_WITH_TIMES = (
+    SCHEMA_OVERVIEW[SCHEMA_OVERVIEW["column_name"].isin(["updated_at", "created_at"])][
+        "table_name"
+    ]
+    .unique()
+    .tolist()
+)

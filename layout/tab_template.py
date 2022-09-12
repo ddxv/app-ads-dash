@@ -4,7 +4,7 @@ from dash import dcc
 from dash import html
 from dash import dash_table
 from plotly import graph_objects as go
-from dbcon.queries import query_overview, SCHEMA_OVERVIEW
+from dbcon.queries import TABLES_WITH_TIMES, query_overview, SCHEMA_OVERVIEW
 from config import get_logger
 from ids import (
     AFFIX_GROUPBY_TIME,
@@ -352,7 +352,7 @@ def get_cards_group():
 
 def get_left_buttons_layout(tab_id, info=None, active_x=None):
     mydiv = html.Div([])
-    tables = ["overview"] + SCHEMA_OVERVIEW["table_name"].unique().tolist()
+    tables = ["overview"] + TABLES_WITH_TIMES
     mydiv = dbc.ButtonGroup(
         [
             dbc.Button(
