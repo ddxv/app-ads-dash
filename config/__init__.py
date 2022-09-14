@@ -1,12 +1,21 @@
 import pathlib
 import yaml
 import logging
+from logging.handlers import RotatingFileHandler
+import sys
 
 HOME = pathlib.Path.home()
 TOP_CONFIGDIR = pathlib.Path(HOME, pathlib.Path(".config"))
 CONFIG_DIR = pathlib.Path(TOP_CONFIGDIR, pathlib.Path("app-ads"))
 LOG_DIR = pathlib.Path(CONFIG_DIR, pathlib.Path("logs"))
 MODULE_DIR = pathlib.Path(__file__).resolve().parent.parent
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 
 def check_config_dirs():
@@ -28,8 +37,13 @@ def get_logger(mod_name):
     ch.setLevel(logging.INFO)
     ch.setFormatter(logging.Formatter(format))
     logger.addHandler(ch)
+    handler = RotatingFileHandler(filename=filename, maxBytes=10000000, backupCount=10)
+    logger.addHandler(handler)
     return logger
 
+
+# Set global handling of uncaught exceptions
+sys.excepthook = handle_exception
 
 logger = get_logger(__name__)
 
