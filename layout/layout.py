@@ -4,6 +4,7 @@ from ids import (
     LATEST_UPDATES,
     UPDATED_AT,
     UPDATED_HISTOGRAM,
+    TXT_VIEW,
 )
 from layout.tab_template import create_tab_layout
 import datetime
@@ -69,6 +70,7 @@ TABS = dbc.Tabs(
         dbc.Tab(label="Updated Ats", tab_id=UPDATED_AT),
         dbc.Tab(label="Updated Histograms", tab_id=UPDATED_HISTOGRAM),
         dbc.Tab(label="Developers Search", tab_id=DEVELOPERS_SEARCH),
+        dbc.Tab(label="New App-Ads.txt View", tab_id=TXT_VIEW),
     ],
 )
 

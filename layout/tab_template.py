@@ -49,7 +49,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             },
         ]
         groupby_options = [{"label": x, "value": x} for x in OVERVIEW_COLUMNS]
-        groupby_defaults = ["publisher_id", "developer_domain", "txt_updated_at"]
+        groupby_defaults = ["publisher_id", "developer_domain_url"]
         options_div = make_options_div(
             tab_id,
             groupby_options=groupby_options,

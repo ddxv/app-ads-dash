@@ -11,6 +11,7 @@ from ids import (
     DEVELOPERS_SEARCH,
     LATEST_UPDATES,
     AFFIX_PLOT,
+    TXT_VIEW,
     UPDATED_AT,
     UPDATED_HISTOGRAM,
     DATE_PICKER_RANGE,
@@ -19,6 +20,7 @@ from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
 from layout.tab_template import make_columns, get_cards_group, get_left_buttons_layout
 from plotter.plotter import overview_plot
 from dbcon.queries import (
+    get_app_txt_view,
     query_overview,
     query_all,
     get_updated_ats,
@@ -57,6 +59,8 @@ def get_cached_dataframe(query_json):
         df["table_name"] = query_dict["table_name"]
     elif query_dict["id"] == UPDATED_AT:
         df = get_updated_ats("public")
+    elif query_dict["id"] == TXT_VIEW:
+        df = get_app_txt_view(query_dict["developer_url"])
     elif query_dict["id"] == DEVELOPERS_SEARCH:
         df = query_search_developers(
             search_input=query_dict["search_input"], limit=1000
@@ -239,6 +243,24 @@ def developers(
     )
 
     return table_obj, column_dicts, fig
+
+
+@app.callback(
+    Output(TXT_VIEW + AFFIX_TABLE, "data"),
+    Output(TXT_VIEW + AFFIX_TABLE, "columns"),
+    Input(TXT_VIEW + AFFIX_TABLE, "derived_viewport_row_ids"),
+)
+def txt_view_table(
+    derived_viewport_row_ids: list[str],
+):
+    logger.info(f"{TXT_VIEW} Table")
+    metrics = ["size"]
+    query_dict = {"id": TXT_VIEW, "developer_url": "bighugegames.com"}
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    column_dicts = make_columns(dimensions, metrics)
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts
 
 
 @app.callback(

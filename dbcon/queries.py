@@ -5,7 +5,7 @@ from config import get_logger
 logger = get_logger(__name__)
 
 
-def get_dash_users():
+def get_dash_users() -> dict:
     sel_query = """SELECT *
                     FROM dash.users
                     ;"""
@@ -14,7 +14,46 @@ def get_dash_users():
     return users_dict
 
 
-def query_all(table_name: str, groupby: str | list[str] = None, limit: int = 1000):
+def get_app_txt_view(developer_url: str) -> pd.DataFrame:
+    sel_query = """WITH cte1 AS (
+            SELECT
+                av.developer_domain_url,
+                av.ad_domain AS ad_domain_id,
+                av.ad_domain_url,
+                av.publisher_id
+            FROM
+                app_ads_view av
+            WHERE
+                av.developer_domain_url = 'bighugegames.com'
+                --AND av.relationship = 'DIRECT'
+                )
+            SELECT
+                c1.developer_domain_url AS my_domain_url,
+                    av2.developer_domain_url AS their_domain_url,
+                    CASE
+                        WHEN av2.developer_domain_url != c1.developer_domain_url
+                        THEN 'FAIL'
+                    ELSE 'PASS'
+                END AS is_my_id,
+                av2.publisher_id,
+                av2.ad_domain_url,
+                    av2.ad_domain AS ad_domain_id,
+                    av2.relationship AS relationship,
+                    av2.txt_crawled_at
+            FROM
+                cte1 c1
+            LEFT JOIN app_ads_view av2 ON
+                av2.ad_domain_url = c1.ad_domain_url
+                AND av2.publisher_id = c1.publisher_id
+                    ;
+                """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
+def query_all(
+    table_name: str, groupby: str | list[str] = None, limit: int = 1000
+) -> pd.DataFrame:
     logger.info(f"Query: {table_name} {groupby=}")
     groupby_str = ""
     select_str = "*"
@@ -127,9 +166,9 @@ def query_search_developers(search_input: str, limit: int = 1000):
 
 
 def query_overview(limit: int = 1000):
-    logger.info("Query overview_table")
+    logger.info("Query app_ads_view")
     sel_query = f"""SELECT * FROM
-                    overview_table
+                    app_ads_view
                     LIMIT {limit}
                     ;
                     """

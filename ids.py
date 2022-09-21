@@ -7,6 +7,7 @@ DEVELOPERS = "developers"
 UPDATED_AT = "updated-at"
 UPDATED_HISTOGRAM = "updated-histogram"
 DEVELOPERS_SEARCH = "developers-search"
+TXT_VIEW = "txt-view"
 
 # Tab Options
 AFFIX_PLOT = "-plot"
