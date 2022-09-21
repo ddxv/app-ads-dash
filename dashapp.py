@@ -255,7 +255,8 @@ def txt_view_table(
 ):
     logger.info(f"{TXT_VIEW} Table")
     metrics = ["size"]
-    query_dict = {"id": TXT_VIEW, "developer_url": "bighugegames.com"}
+    developer_url = "bighugegames.com"
+    query_dict = {"id": TXT_VIEW, "developer_url": developer_url}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
@@ -323,10 +324,8 @@ def latest_updates_table(
 
     cards_group = get_cards_group()
     card_ids = [
-        "txt-updated-at",
+        "txt-crawled-at",
         "ad-domain-updated-at",
-        "store-app-updated-at",
-        "pub-domain-updated-at",
     ]
     for card_name in card_ids:
         column_name = card_name.replace("-", "_")

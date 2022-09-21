@@ -273,12 +273,12 @@ def get_cards_group():
                                 className="card-text",
                             ),
                         ],
-                        id="txt-updated-at-body",
+                        id="txt-crawled-at-body",
                     ),
                 ],
                 color="primary",
                 inverse=True,
-                id="txt-updated-at",
+                id="txt-crawled-at",
             ),
             dbc.Card(
                 [
@@ -288,42 +288,6 @@ def get_cards_group():
                             html.H5("Card title", className="card-title"),
                             html.P(
                                 "Last time the store info for apps was pulled",
-                                className="card-text",
-                            ),
-                        ],
-                        id="store-app-updated-at-body",
-                    ),
-                ],
-                color="secondary",
-                inverse=True,
-                id="store-app-updated-at",
-            ),
-            dbc.Card(
-                [
-                    dbc.CardHeader("Store Info Last Pulled"),
-                    dbc.CardBody(
-                        [
-                            html.H5("Card title", className="card-title"),
-                            html.P(
-                                "Last time the ads.txt host was pulled",
-                                className="card-text",
-                            ),
-                        ],
-                        id="pub-domain-updated-at-body",
-                    ),
-                ],
-                color="primary",
-                inverse=True,
-                id="pub-domain-updated-at",
-            ),
-            dbc.Card(
-                [
-                    dbc.CardHeader("Ad Domain Updated"),
-                    dbc.CardBody(
-                        [
-                            html.H5("Card title", className="card-title"),
-                            html.P(
-                                "Last time the ad_domain data was updated",
                                 className="card-text",
                             ),
                         ],
