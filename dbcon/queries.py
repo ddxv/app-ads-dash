@@ -75,24 +75,12 @@ def query_all(
 def query_updated_timestamps(table_name: str, start_date="2021-01-01") -> pd.DataFrame:
     logger.info(f"Query updated times: {table_name=}")
     if table_name == "store_apps":
-        audit_with = f""",
-                    audit_dates AS (
-                    SELECT
-                        stamp::date AS updated_date,
-                        count(1) AS updated_count
-                    FROM
-                        logging.{table_name}_audit
-                    WHERE
-                        stamp >= '{start_date}'
-                    GROUP BY
-                        stamp::date)
-                    """
         audit_select = " audit_dates.updated_count, "
         audit_join = """LEFT JOIN audit_dates ON
                         my_dates.date = audit_dates.updated_date
                         """
     else:
-        audit_with, audit_join, audit_select = "", "", ""
+        audit_join, audit_select = "", ""
     sel_query = f"""WITH my_dates AS (
                     SELECT
                         generate_series('{start_date}', 
@@ -117,7 +105,6 @@ def query_updated_timestamps(table_name: str, start_date="2021-01-01") -> pd.Dat
                         created_at >= '{start_date}'
                     GROUP BY
                         created_at::date)
-                    {audit_with}
                     SELECT
                         my_dates.date AS date,
                         updated_dates.last_updated_count,
