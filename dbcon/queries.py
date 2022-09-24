@@ -15,7 +15,7 @@ def get_dash_users() -> dict:
 
 
 def get_app_txt_view(developer_url: str) -> pd.DataFrame:
-    sel_query = """WITH cte1 AS (
+    sel_query = f"""WITH cte1 AS (
             SELECT
                 av.developer_domain_url,
                 av.ad_domain AS ad_domain_id,
@@ -24,8 +24,7 @@ def get_app_txt_view(developer_url: str) -> pd.DataFrame:
             FROM
                 app_ads_view av
             WHERE
-                av.developer_domain_url = 'bighugegames.com'
-                --AND av.relationship = 'DIRECT'
+                av.developer_domain_url = '{developer_url}'
                 )
             SELECT
                 c1.developer_domain_url AS my_domain_url,
