@@ -21,7 +21,7 @@ def get_db_connection(server_name: str):
     to use class run server.set_engine()
     ====
     Parameters
-       server_name: str String of either hydra or netx
+       server_name: str String of server name for parsing config file
     """
     server_ip, server_local_port = get_postgres_server_ips(server_name)
     postgres_con = PostgresCon(server_name, server_ip, server_local_port)
@@ -31,7 +31,7 @@ def get_db_connection(server_name: str):
 def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
     # PROD, set in the OS environment, is true if python running in EC2 security group
     server_ip = CONFIG[server_name]["host"]
-    if server_ip == "localhost":
+    if server_ip == "localhost" or server_ip.startswith("172"):
         logger.info("Prod environment mode no SSH")
         server_ip = CONFIG[server_name]["host"]
         server_local_port = 5432
