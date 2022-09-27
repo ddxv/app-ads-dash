@@ -12,6 +12,10 @@ from ids import (
     AFFIX_GROUPBY,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
+    DEVELOPERS,
+    LATEST_UPDATES,
+    TXT_VIEW,
+    DEVELOPERS_SEARCH,
 )
 
 logger = get_logger(__name__)
@@ -20,7 +24,7 @@ logger = get_logger(__name__)
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
 
-    if "developers-search" == tab_id:
+    if DEVELOPERS_SEARCH == tab_id:
         input_group = dbc.InputGroup(
             [
                 dbc.Input(
@@ -30,8 +34,24 @@ def make_tab_options(tab_id: str) -> html.Div:
             ]
         )
         options_div.children.append(input_group)
-    if "developers" == tab_id:
-        default_values = [""]
+    if TXT_VIEW == tab_id:
+        switch_defaults = [""]
+        groupby_options = [{"label": x, "value": x} for x in TXT_VIEW_COLUMNS]
+        groupby_defaults = ["my_domain_url", "ad_domain_url"]
+        options_div = make_options_div(
+            tab_id,
+            groupby_options=groupby_options,
+            groupby_defaults=groupby_defaults,
+        )
+        input_group = dbc.InputGroup(
+            [
+                dbc.Input(id=f"{tab_id}-input", placeholder="Developer URL ..."),
+                dbc.Button("Search", id=f"{tab_id}-button", n_clicks=0),
+            ]
+        )
+        options_div.children.append(input_group)
+    if DEVELOPERS == tab_id:
+        switch_defaults = [""]
         groupby_options = [{"label": x, "value": x} for x in DEVELOPERS_COLUMNS]
         groupby_defaults = ["name"]
         options_div = make_options_div(
@@ -40,8 +60,8 @@ def make_tab_options(tab_id: str) -> html.Div:
             groupby_defaults=groupby_defaults,
         )
 
-    if "latest-updates" == tab_id:
-        default_values = [""]
+    if LATEST_UPDATES == tab_id:
+        switch_defaults = [""]
         switch_options = [
             {
                 "label": "",
@@ -55,7 +75,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             groupby_options=groupby_options,
             groupby_defaults=groupby_defaults,
             switch_options=switch_options,
-            switch_defaults=default_values,
+            switch_defaults=switch_defaults,
             groupby_time=True,
         )
         options_div.children.insert(0, get_cards_group())
@@ -63,6 +83,14 @@ def make_tab_options(tab_id: str) -> html.Div:
 
 
 def make_table_div(tab_id):
+    if tab_id in [TXT_VIEW]:
+        page_action = "custom"
+        sort_action = "custom"
+        filter_action = "custom"
+    else:
+        page_action = "native"
+        sort_action = "native"
+        filter_action = "native"
     table_div = html.Div(
         [
             dash_table.DataTable(
@@ -71,11 +99,11 @@ def make_table_div(tab_id):
                     "overflowX": "scroll",
                     "fontWeight": "bold",
                 },
-                filter_action="native",
+                filter_action=filter_action,
                 filter_options={"case": "insensitive"},
-                sort_action="native",
+                sort_action=sort_action,
                 sort_mode="multi",
-                page_action="native",
+                page_action=page_action,
                 page_current=0,
                 page_size=15,
                 style_table={"overflowX": "auto"},
@@ -345,6 +373,16 @@ OVERVIEW_COLUMNS = query_overview(limit=1).columns.tolist()
 DEVELOPERS_COLUMNS = SCHEMA_OVERVIEW[
     SCHEMA_OVERVIEW["table_name"] == "developers"
 ].column_name.tolist()
+
+TXT_VIEW_COLUMNS = [
+    "my_domain_url",
+    "their_domain_url",
+    "publisher_id",
+    "ad_domain_url",
+    "ad_domain_id",
+    "relationship",
+    "is_my_id",
+]
 
 
 DOLLAR_NAMES = [

@@ -24,21 +24,21 @@ def get_app_txt_view(developer_url: str) -> pd.DataFrame:
             FROM
                 app_ads_view av
             WHERE
-                av.developer_domain_url = '{developer_url}'
+                av.developer_domain_url ILIKE '{developer_url}'
                 )
             SELECT
                 c1.developer_domain_url AS my_domain_url,
-                    av2.developer_domain_url AS their_domain_url,
-                    CASE
-                        WHEN av2.developer_domain_url != c1.developer_domain_url
-                        THEN 'FAIL'
+                av2.developer_domain_url AS their_domain_url,
+                CASE
+                  WHEN av2.developer_domain_url != c1.developer_domain_url
+                    THEN 'FAIL'
                     ELSE 'PASS'
-                END AS is_my_id,
+                  END AS is_my_id,
                 av2.publisher_id,
                 av2.ad_domain_url,
-                    av2.ad_domain AS ad_domain_id,
-                    av2.relationship AS relationship,
-                    av2.txt_crawled_at
+                av2.ad_domain AS ad_domain_id,
+                av2.relationship AS relationship,
+                av2.txt_crawled_at
             FROM
                 cte1 c1
             LEFT JOIN app_ads_view av2 ON

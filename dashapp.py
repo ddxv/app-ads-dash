@@ -15,6 +15,7 @@ from ids import (
     UPDATED_AT,
     UPDATED_HISTOGRAM,
     DATE_PICKER_RANGE,
+    TXT_VIEW_TABLE,
 )
 from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
 from layout.tab_template import make_columns, get_cards_group, get_left_buttons_layout
@@ -183,10 +184,10 @@ def developers_search(
     input_value,
     derived_viewport_row_ids: list[str],
 ):
-    logger.info("Developers Search {input_value=}")
+    logger.info(f"Developers Search {input_value=}")
     metrics = ["size"]
     if not input_value:
-        logger.info("Developers Search {input_value=} prevent update")
+        logger.info(f"Developers Search {input_value=} prevent update")
         PreventUpdate
     query_dict = {
         "id": DEVELOPERS_SEARCH,
@@ -245,19 +246,112 @@ def developers(
     return table_obj, column_dicts, fig
 
 
+operators = [
+    ["ge ", ">="],
+    ["le ", "<="],
+    ["lt ", "<"],
+    ["gt ", ">"],
+    ["ne ", "!="],
+    ["eq ", "="],
+    ["contains "],
+    ["datestartswith "],
+]
+
+
+def split_filter_part(filter_part):
+    for operator_type in operators:
+        for operator in operator_type:
+            if operator in filter_part:
+                name_part, value_part = filter_part.split(operator, 1)
+                first = name_part.find("{") + 1
+                last = name_part.rfind("}")
+                name = name_part[first:last]
+
+                value_part = value_part.strip()
+                v0 = value_part[0]
+                if v0 == value_part[-1] and v0 in ("'", '"', "`"):
+                    value = value_part[1:-1].replace("\\" + v0, v0)
+                else:
+                    try:
+                        value = float(value_part)
+                    except ValueError:
+                        value = value_part
+
+                # word operators need spaces after them in the filter string,
+                # but we don't want these later
+                return name, operator_type[0].strip(), value
+    return [None] * 3
+
+
+def filter_table(dff, page_current, page_size, sort_by, filter):
+    original_shape = dff.shape
+    if filter:
+        filtering_expressions = filter.split(" && ")
+        for filter_part in filtering_expressions:
+            col_name, operator, filter_value = split_filter_part(filter_part)
+
+            if operator in ("eq", "ne", "lt", "le", "gt", "ge"):
+                # these operators match pandas series operator method names
+                dff = dff.loc[getattr(dff[col_name], operator)(filter_value)]
+            elif operator == "contains":
+                dff = dff.loc[dff[col_name].str.contains(filter_value)]
+            elif operator == "datestartswith":
+                # this is a simplification of the front-end filtering logic,
+                # only works with complete fields in standard format
+                dff = dff.loc[dff[col_name].str.startswith(filter_value)]
+
+    if sort_by and len(sort_by):
+        dff = dff.sort_values(
+            [col["column_id"] for col in sort_by],
+            ascending=[col["direction"] == "asc" for col in sort_by],
+            inplace=False,
+        )
+    first = page_current * page_size
+    last = (page_current + 1) * page_size
+    dff = dff.iloc[first:last]
+    new_shape = dff.shape
+    logger.info(f"Filter table {original_shape=} -> {new_shape=}")
+    return dff
+
+
 @app.callback(
-    Output(TXT_VIEW + AFFIX_TABLE, "data"),
-    Output(TXT_VIEW + AFFIX_TABLE, "columns"),
-    Input(TXT_VIEW + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Output(TXT_VIEW_TABLE, "data"),
+    Output(TXT_VIEW_TABLE, "columns"),
+    Input(TXT_VIEW_TABLE, "page_current"),
+    Input(TXT_VIEW_TABLE, "page_size"),
+    Input(TXT_VIEW_TABLE, "sort_by"),
+    Input(TXT_VIEW_TABLE, "filter_query"),
+    Input(TXT_VIEW + "-button", "n_clicks"),
+    State(TXT_VIEW + "-input", "value"),
+    Input(TXT_VIEW + AFFIX_GROUPBY, "value"),
+    Input(TXT_VIEW_TABLE, "derived_viewport_row_ids"),
 )
 def txt_view_table(
+    page_current,
+    page_size,
+    sort_by,
+    filter,
+    button,
+    developer_url,
+    groupby,
     derived_viewport_row_ids: list[str],
 ):
-    logger.info(f"{TXT_VIEW} Table")
+    logger.info(f"{TXT_VIEW} Table {developer_url=}")
     metrics = ["size"]
-    developer_url = "bighugegames.com"
+    if not developer_url:
+        PreventUpdate
     query_dict = {"id": TXT_VIEW, "developer_url": developer_url}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    logger.info(f"{TXT_VIEW} Table {developer_url=} {df.shape=}")
+    metrics = ["size"]
+    df = (
+        df.groupby(groupby, dropna=False)
+        .size()
+        .reset_index()
+        .rename(columns={0: "size"})
+    )
+    df = filter_table(df, page_current, page_size, sort_by, filter)
+    # df[df["publisher_id"] == "1137"]
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
