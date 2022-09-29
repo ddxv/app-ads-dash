@@ -38,7 +38,7 @@ def get_app_txt_view(developer_url: str) -> pd.DataFrame:
                 av2.ad_domain_url,
                 av2.ad_domain AS ad_domain_id,
                 av2.relationship AS relationship,
-                av2.txt_crawled_at
+                av2.txt_entry_crawled_at
             FROM
                 cte1 c1
             LEFT JOIN app_ads_view av2 ON

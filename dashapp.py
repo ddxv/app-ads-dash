@@ -5,7 +5,9 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 import json
 from ids import (
+    AFFIX_BUTTON,
     AFFIX_GROUPBY,
+    AFFIX_LOADING,
     AFFIX_TABLE,
     DEVELOPERS,
     DEVELOPERS_SEARCH,
@@ -175,7 +177,7 @@ def histograms_plot(
 @app.callback(
     Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "data"),
     Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "columns"),
-    Input(DEVELOPERS_SEARCH + "-button", "n_clicks"),
+    Input(DEVELOPERS_SEARCH + AFFIX_BUTTON, "n_clicks"),
     State(DEVELOPERS_SEARCH + "-input", "value"),
     Input(DEVELOPERS_SEARCH + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
@@ -317,11 +319,12 @@ def filter_table(dff, page_current, page_size, sort_by, filter):
 @app.callback(
     Output(TXT_VIEW_TABLE, "data"),
     Output(TXT_VIEW_TABLE, "columns"),
+    Output(TXT_VIEW + f"-search{AFFIX_LOADING}", "children"),
     Input(TXT_VIEW_TABLE, "page_current"),
     Input(TXT_VIEW_TABLE, "page_size"),
     Input(TXT_VIEW_TABLE, "sort_by"),
     Input(TXT_VIEW_TABLE, "filter_query"),
-    Input(TXT_VIEW + "-button", "n_clicks"),
+    Input(TXT_VIEW + AFFIX_BUTTON, "n_clicks"),
     State(TXT_VIEW + "-input", "value"),
     Input(TXT_VIEW + AFFIX_GROUPBY, "value"),
     Input(TXT_VIEW_TABLE, "derived_viewport_row_ids"),
@@ -355,7 +358,7 @@ def txt_view_table(
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
-    return table_obj, column_dicts
+    return table_obj, column_dicts, ""
 
 
 @app.callback(
@@ -418,7 +421,7 @@ def latest_updates_table(
 
     cards_group = get_cards_group()
     card_ids = [
-        "txt-crawled-at",
+        "txt-entry-crawled-at",
         "ad-domain-updated-at",
     ]
     for card_name in card_ids:

@@ -8,6 +8,7 @@ from dbcon.queries import TABLES_WITH_TIMES, query_overview, SCHEMA_OVERVIEW
 from config import get_logger
 from ids import (
     AFFIX_GROUPBY_TIME,
+    AFFIX_LOADING,
     AFFIX_PLOT,
     AFFIX_GROUPBY,
     AFFIX_SWITCHES,
@@ -16,6 +17,7 @@ from ids import (
     LATEST_UPDATES,
     TXT_VIEW,
     DEVELOPERS_SEARCH,
+    AFFIX_BUTTON,
 )
 
 logger = get_logger(__name__)
@@ -220,10 +222,17 @@ def make_search_column(tab_id: str, search_hint: str | None) -> dbc.Col:
         search_col.children.append(
             dbc.InputGroup(
                 [
-                    dbc.Input(id=f"{tab_id}-input", placeholder=f"{search_hint} ..."),
+                    dbc.Input(id=f"{tab_id}-input", placeholder=search_hint),
                     dbc.Button(
-                        ["Search", dbc.Spinner(size="sm"), " Loading..."],
-                        id=f"{tab_id}-button",
+                        [
+                            "Search ",
+                            dbc.Spinner(
+                                [html.Div(id=f"{tab_id}-search{AFFIX_LOADING}")],
+                                size="sm",
+                                show_initially=False,
+                            ),
+                        ],
+                        id=tab_id + AFFIX_BUTTON,
                         n_clicks=0,
                     ),
                 ]
@@ -311,12 +320,12 @@ def get_cards_group() -> dbc.CardGroup:
                                 className="card-text",
                             ),
                         ],
-                        id="txt-crawled-at-body",
+                        id="txt-entry-crawled-at-body",
                     ),
                 ],
                 color="primary",
                 inverse=True,
-                id="txt-crawled-at",
+                id="txt-entry   -crawled-at",
             ),
             dbc.Card(
                 [
@@ -392,6 +401,7 @@ TXT_VIEW_COLUMNS = [
     "ad_domain_id",
     "relationship",
     "is_my_id",
+    "txt_entry_crawled_at",
 ]
 
 
