@@ -25,15 +25,7 @@ def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
 
     if DEVELOPERS_SEARCH == tab_id:
-        input_group = dbc.InputGroup(
-            [
-                dbc.Input(
-                    id=f"{tab_id}-input", placeholder="Names, ids or URL parts..."
-                ),
-                dbc.Button("Search", id=f"{tab_id}-button", n_clicks=0),
-            ]
-        )
-        options_div.children.append(input_group)
+        options_div = make_options_div(tab_id, search_hint="Name, ids or URL parts...")
     if TXT_VIEW == tab_id:
         switch_defaults = [""]
         groupby_options = [{"label": x, "value": x} for x in TXT_VIEW_COLUMNS]
@@ -42,14 +34,9 @@ def make_tab_options(tab_id: str) -> html.Div:
             tab_id,
             groupby_options=groupby_options,
             groupby_defaults=groupby_defaults,
+            search_hint="Developer URL ...",
         )
-        input_group = dbc.InputGroup(
-            [
-                dbc.Input(id=f"{tab_id}-input", placeholder="Developer URL ..."),
-                dbc.Button("Search", id=f"{tab_id}-button", n_clicks=0),
-            ]
-        )
-        options_div.children.append(input_group)
+
     if DEVELOPERS == tab_id:
         switch_defaults = [""]
         groupby_options = [{"label": x, "value": x} for x in DEVELOPERS_COLUMNS]
@@ -82,7 +69,7 @@ def make_tab_options(tab_id: str) -> html.Div:
     return options_div
 
 
-def make_table_div(tab_id):
+def make_table_div(tab_id: str) -> html.Div:
     if tab_id in [TXT_VIEW]:
         page_action = "custom"
         sort_action = "custom"
@@ -119,7 +106,7 @@ def make_table_div(tab_id):
     return table_div
 
 
-def make_plot_div(tab_id):
+def make_plot_div(tab_id: str) -> html.Div:
     plot_div = html.Div(
         [
             dcc.Loading(
@@ -139,7 +126,7 @@ def make_plot_div(tab_id):
     return plot_div
 
 
-def create_tab_layout(tab_id):
+def create_tab_layout(tab_id: str) -> html.Div:
     options_div = make_tab_options(tab_id)
     table_div = make_table_div(tab_id)
     plot_div = make_plot_div(tab_id)
@@ -170,7 +157,7 @@ def create_tab_layout(tab_id):
     return tab_layout
 
 
-def make_groupby_time_column(tab_id: str, groupby_time: bool):
+def make_groupby_time_column(tab_id: str, groupby_time: bool) -> dbc.Col:
     time_col = dbc.Col([])
     if groupby_time:
         time_col.children.append(
@@ -208,7 +195,9 @@ def make_groupby_column(
     return groupby_col
 
 
-def make_switch_options(tab_id, switch_options, switch_defaults):
+def make_switch_options(
+    tab_id: str, switch_options: list[str] | None, switch_defaults: list[str] | None
+) -> dbc.Col:
     checklist_col = dbc.Col([])
     if not switch_defaults:
         switch_defaults = []
@@ -225,6 +214,24 @@ def make_switch_options(tab_id, switch_options, switch_defaults):
     return checklist_col
 
 
+def make_search_column(tab_id: str, search_hint: str | None) -> dbc.Col:
+    search_col = dbc.Col([])
+    if search_hint:
+        search_col.children.append(
+            dbc.InputGroup(
+                [
+                    dbc.Input(id=f"{tab_id}-input", placeholder=f"{search_hint} ..."),
+                    dbc.Button(
+                        ["Search", dbc.Spinner(size="sm"), " Loading..."],
+                        id=f"{tab_id}-button",
+                        n_clicks=0,
+                    ),
+                ]
+            )
+        )
+    return search_col
+
+
 def make_options_div(
     tab_id=str,
     groupby_options: list[dict] = None,
@@ -232,8 +239,11 @@ def make_options_div(
     switch_options: list[dict] = None,
     switch_defaults: list[str] = None,
     groupby_time: bool = None,
+    search_hint: str = None,
 ) -> html.Div:
     options_row = dbc.Row([])
+    search_col = make_search_column(tab_id, search_hint)
+    options_row.children.append(search_col)
     groupby_col = make_groupby_column(tab_id, groupby_options, groupby_defaults)
     options_row.children.append(groupby_col)
     checklist = make_switch_options(tab_id, switch_options, switch_defaults)
@@ -244,15 +254,15 @@ def make_options_div(
     return options_row
 
 
-def is_percent(name):
+def is_percent(name: str) -> bool:
     return any(True for x in PERCENT_NAMES if x in name)
 
 
-def is_dollar(name):
+def is_dollar(name: str) -> bool:
     return any(True for x in DOLLAR_NAMES if x in name)
 
 
-def make_columns(dimensions, metrics):
+def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     dimensions = [
         {"name": i, "id": i, "selectable": False, "type": "text"} for i in dimensions
     ]
@@ -287,7 +297,7 @@ def make_columns(dimensions, metrics):
     return columns
 
 
-def get_cards_group():
+def get_cards_group() -> dbc.CardGroup:
     card_group = dbc.CardGroup(
         [
             dbc.Card(
@@ -342,7 +352,7 @@ def get_cards_group():
     return cards
 
 
-def get_left_buttons_layout(tab_id, info=None, active_x=None):
+def get_left_buttons_layout(tab_id, info=None, active_x=None) -> html.Div:
     mydiv = html.Div([])
     tables = ["overview"] + TABLES_WITH_TIMES
     mydiv = dbc.ButtonGroup(

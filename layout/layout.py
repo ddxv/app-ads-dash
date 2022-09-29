@@ -68,9 +68,10 @@ TABS = dbc.Tabs(
         dbc.Tab(label="Latest Updates", tab_id=LATEST_UPDATES),
         dbc.Tab(label="Developers", tab_id=DEVELOPERS),
         dbc.Tab(label="Updated Ats", tab_id=UPDATED_AT),
-        dbc.Tab(label="Updated Histograms", tab_id=UPDATED_HISTOGRAM),
-        dbc.Tab(label="Developers Search", tab_id=DEVELOPERS_SEARCH),
-        dbc.Tab(label="New App-Ads.txt View", tab_id=TXT_VIEW),
+        dbc.Tab(label="Crawler: Updated Counts", tab_id=UPDATED_HISTOGRAM),
+        dbc.Tab(label="Search: Developers", tab_id=DEVELOPERS_SEARCH),
+        dbc.Tab(label="Search: Ads.txt Shared Publishers", tab_id=TXT_VIEW),
+        dbc.Tab(label="Search: App-Ads.txt File ", tab_id=TXT_VIEW),
     ],
 )
 
