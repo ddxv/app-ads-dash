@@ -402,6 +402,7 @@ TXT_VIEW_COLUMNS = [
     "relationship",
     "is_my_id",
     "txt_entry_crawled_at",
+    "developer_domain_crawled_at",
 ]
 
 
