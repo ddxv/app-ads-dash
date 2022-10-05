@@ -5,6 +5,7 @@ from ids import (
     UPDATED_AT,
     UPDATED_HISTOGRAM,
     TXT_VIEW,
+    NETWORKS,
 )
 from layout.tab_template import create_tab_layout
 import datetime
@@ -67,6 +68,7 @@ TABS = dbc.Tabs(
     children=[
         dbc.Tab(label="Latest Updates", tab_id=LATEST_UPDATES),
         dbc.Tab(label="Developers", tab_id=DEVELOPERS),
+        dbc.Tab(label="Ad Networks", tab_id=NETWORKS),
         dbc.Tab(label="Updated Ats", tab_id=UPDATED_AT),
         dbc.Tab(label="Crawler: Updated Counts", tab_id=UPDATED_HISTOGRAM),
         dbc.Tab(label="Search: Developers", tab_id=DEVELOPERS_SEARCH),

@@ -18,6 +18,7 @@ from ids import (
     UPDATED_HISTOGRAM,
     DATE_PICKER_RANGE,
     TXT_VIEW_TABLE,
+    NETWORKS,
 )
 from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
 from layout.tab_template import make_columns, get_cards_group, get_left_buttons_layout
@@ -29,6 +30,7 @@ from dbcon.queries import (
     get_updated_ats,
     query_search_developers,
     query_updated_timestamps,
+    get_developer_and_networks_count,
 )
 from flask_caching import Cache
 from config import get_logger
@@ -64,6 +66,8 @@ def get_cached_dataframe(query_json):
         df = get_updated_ats("public")
     elif query_dict["id"] == TXT_VIEW:
         df = get_app_txt_view(query_dict["developer_url"])
+    elif query_dict["id"] == NETWORKS:
+        df = get_developer_and_networks_count()
     elif query_dict["id"] == DEVELOPERS_SEARCH:
         df = query_search_developers(
             search_input=query_dict["search_input"], limit=1000
@@ -377,6 +381,36 @@ def updated_at_table(
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
     return table_obj, column_dicts
+
+
+@app.callback(
+    Output(NETWORKS + AFFIX_TABLE, "data"),
+    Output(NETWORKS + AFFIX_TABLE, "columns"),
+    Output(NETWORKS + AFFIX_PLOT, "figure"),
+    Input(NETWORKS + AFFIX_TABLE, "derived_viewport_row_ids"),
+)
+def networks_table(
+    derived_viewport_row_ids: list[str],
+):
+    logger.info("Networks start")
+    metrics = ["size"]
+    query_dict = {"id": NETWORKS}
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    num_sites = len(df["developer_domain_url"].unique())
+    df = (
+        df.groupby(["ad_domain_url", "relationship"])["developer_domain_url"]
+        .size()
+        .reset_index()
+        .rename(columns={"developer_domain_url": "count"})
+    )
+    df["percent"] = df["count"] / num_sites
+    df = df.sort_values("percent", ascending=False)
+    df = limit_rows_for_plotting(df=df, row_ids=derived_viewport_row_ids)
+    fig = overview_plot(df=df, y_vals=["percent"])
+    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    column_dicts = make_columns(dimensions, metrics)
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts, fig
 
 
 @app.callback(
