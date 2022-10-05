@@ -405,9 +405,13 @@ def networks_table(
     )
     df["percent"] = df["count"] / num_sites
     df = df.sort_values("percent", ascending=False)
+    metrics = ["percent"]
+    dimensions = [x for x in df.columns if x not in metrics]
+    df = add_id_column(df, dimensions=dimensions)
     df = limit_rows_for_plotting(df=df, row_ids=derived_viewport_row_ids)
-    fig = overview_plot(df=df, y_vals=["percent"])
-    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
+    fig = overview_plot(
+        df=df, y_vals=metrics, xaxis_col="ad_domain_url", bar_column="percent"
+    )
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
     return table_obj, column_dicts, fig
