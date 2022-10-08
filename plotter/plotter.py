@@ -184,6 +184,7 @@ def overview_plot(
             "overlaying": "y",
             "side": "left",
             "tickformat": y2_tickformat,
+            "rangemode": "tozero",
         },
         "barmode": bar_type,
         "hoverlabel": {"namelength": -1},
