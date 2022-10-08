@@ -261,8 +261,9 @@ def make_options_div(
     checklist = make_switch_options(tab_id, switch_options, switch_defaults)
     options_row.children.append(checklist)
     time_col = make_groupby_time_column(tab_id, groupby_time)
-    date_picker = make_date_picker_column(tab_id, date_picker)
     options_row.children.append(time_col)
+    date_picker_col = make_date_picker_column(tab_id, date_picker)
+    options_row.children.append(date_picker_col)
     options_row = html.Div([options_row], style={"padding": "15px"})
     return options_row
 
