@@ -163,7 +163,7 @@ def histograms_plot(
         y_vals=metrics,
         title="Updated Counts by Date",
         stack_bars=True,
-        bar_column=metrics[0],
+        bar_column="created_count",
     )
     return fig
 
