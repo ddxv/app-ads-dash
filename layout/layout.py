@@ -46,8 +46,8 @@ TABS = dbc.Tabs(
     persistence=True,
     persistence_type="memory",
     children=[
-        dbc.Tab(label="Ad Networks", tab_id=NETWORKS),
         dbc.Tab(label="Crawler: Updated Counts", tab_id=UPDATED_HISTOGRAM),
+        dbc.Tab(label="Ad Networks", tab_id=NETWORKS),
         dbc.Tab(label="Search: Developers", tab_id=DEVELOPERS_SEARCH),
         dbc.Tab(label="Search: App-Ads.txt File ", tab_id=TXT_VIEW),
     ],
