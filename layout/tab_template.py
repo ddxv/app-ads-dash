@@ -5,7 +5,7 @@ from dash import html
 from dash import dash_table
 from plotly import graph_objects as go
 import datetime
-from dbcon.queries import TABLES_WITH_TIMES, query_overview, SCHEMA_OVERVIEW
+from dbcon.queries import TABLES_WITH_TIMES
 from config import get_logger
 from ids import (
     AFFIX_GROUPBY_TIME,
@@ -15,8 +15,6 @@ from ids import (
     AFFIX_SWITCHES,
     AFFIX_DATE_PICKER,
     AFFIX_TABLE,
-    DEVELOPERS,
-    LATEST_UPDATES,
     TXT_VIEW,
     DEVELOPERS_SEARCH,
     UPDATED_HISTOGRAM,
@@ -42,7 +40,6 @@ def make_tab_options(tab_id: str) -> html.Div:
     if DEVELOPERS_SEARCH == tab_id:
         options_div = make_options_div(tab_id, search_hint="Name, ids or URL parts...")
     if TXT_VIEW == tab_id:
-        switch_defaults = [""]
         groupby_options = [{"label": x, "value": x} for x in TXT_VIEW_COLUMNS]
         groupby_defaults = ["my_domain_url", "ad_domain_url"]
         options_div = make_options_div(
@@ -51,36 +48,6 @@ def make_tab_options(tab_id: str) -> html.Div:
             groupby_defaults=groupby_defaults,
             search_hint="Developer URL ...",
         )
-
-    if DEVELOPERS == tab_id:
-        switch_defaults = [""]
-        groupby_options = [{"label": x, "value": x} for x in DEVELOPERS_COLUMNS]
-        groupby_defaults = ["name"]
-        options_div = make_options_div(
-            tab_id,
-            groupby_options=groupby_options,
-            groupby_defaults=groupby_defaults,
-        )
-
-    if LATEST_UPDATES == tab_id:
-        switch_defaults = [""]
-        switch_options = [
-            {
-                "label": "",
-                "value": "",
-            },
-        ]
-        groupby_options = [{"label": x, "value": x} for x in OVERVIEW_COLUMNS]
-        groupby_defaults = ["publisher_id", "developer_domain_url"]
-        options_div = make_options_div(
-            tab_id,
-            groupby_options=groupby_options,
-            groupby_defaults=groupby_defaults,
-            switch_options=switch_options,
-            switch_defaults=switch_defaults,
-            groupby_time=True,
-        )
-        options_div.children.insert(0, get_cards_group())
     return options_div
 
 
@@ -343,61 +310,6 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     return columns
 
 
-def get_cards_group() -> dbc.CardGroup:
-    card_group = dbc.CardGroup(
-        [
-            dbc.Card(
-                [
-                    dbc.CardHeader("App-Ads.txt File Last Pulled"),
-                    dbc.CardBody(
-                        [
-                            html.H5("Card title", className="card-title"),
-                            html.P(
-                                "Last time an App-Ads.txt file was updated",
-                                className="card-text",
-                            ),
-                        ],
-                        id="txt-entry-crawled-at-body",
-                    ),
-                ],
-                color="primary",
-                inverse=True,
-                id="txt-entry   -crawled-at",
-            ),
-            dbc.Card(
-                [
-                    dbc.CardHeader("Store Info Last Pulled"),
-                    dbc.CardBody(
-                        [
-                            html.H5("Card title", className="card-title"),
-                            html.P(
-                                "Last time the store info for apps was pulled",
-                                className="card-text",
-                            ),
-                        ],
-                        id="ad-domain-updated-at-body",
-                    ),
-                ],
-                color="secondary",
-                inverse=True,
-                id="ad-domain-updated-at",
-            ),
-        ],
-        id="cards-group",
-    )
-    cards = html.Div(
-        [
-            dbc.Row(
-                [
-                    card_group,
-                ],
-                className="mb-4",
-            ),
-        ]
-    )
-    return cards
-
-
 def get_left_buttons_layout(tab_id, info=None, active_x=None) -> html.Div:
     mydiv = html.Div([])
     tables = ["overview"] + TABLES_WITH_TIMES
@@ -423,12 +335,6 @@ def get_left_buttons_layout(tab_id, info=None, active_x=None) -> html.Div:
 
 
 logger.info("Set layout column defaults")
-# Is a materialized view
-OVERVIEW_COLUMNS = query_overview(limit=1).columns.tolist()
-
-DEVELOPERS_COLUMNS = SCHEMA_OVERVIEW[
-    SCHEMA_OVERVIEW["table_name"] == "developers"
-].column_name.tolist()
 
 TXT_VIEW_COLUMNS = [
     "my_domain_url",

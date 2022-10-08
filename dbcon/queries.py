@@ -66,27 +66,6 @@ def get_app_txt_view(developer_url: str) -> pd.DataFrame:
     return df
 
 
-def query_all(
-    table_name: str, groupby: str | list[str] = None, limit: int = 1000
-) -> pd.DataFrame:
-    logger.info(f"Query: {table_name} {groupby=}")
-    groupby_str = ""
-    select_str = "*"
-    if groupby:
-        if isinstance(groupby, list):
-            groupby = ",".join(groupby)
-        groupby_str = f"GROUP BY {groupby}"
-        select_str = groupby + ", count(*)"
-    sel_query = f"""SELECT {select_str}
-                    FROM {table_name}
-                    {groupby_str}
-                    LIMIT {limit}
-                    ;
-                    """
-    df = pd.read_sql(sel_query, DBCON.engine)
-    return df
-
-
 def query_updated_timestamps(table_name: str, start_date="2021-01-01") -> pd.DataFrame:
     logger.info(f"Query updated times: {table_name=}")
     if table_name == "store_apps":
@@ -167,17 +146,6 @@ def query_search_developers(search_input: str, limit: int = 1000):
     return df
 
 
-def query_overview(limit: int = 1000):
-    logger.info("Query app_ads_view")
-    sel_query = f"""SELECT * FROM
-                    app_ads_view
-                    LIMIT {limit}
-                    ;
-                    """
-    df = pd.read_sql(sel_query, DBCON.engine)
-    return df
-
-
 def get_all_tables_in_schema(schema_name: str):
     logger.info("Get checks tables")
     sel_schema = f"""SELECT table_name
@@ -187,25 +155,6 @@ def get_all_tables_in_schema(schema_name: str):
     tables = pd.read_sql(sel_schema, DBCON.engine)
     tables = tables["table_name"].values.tolist()
     return tables
-
-
-def get_updated_ats(schema_name: str):
-    df = SCHEMA_OVERVIEW[SCHEMA_OVERVIEW.column_name.str.endswith("_at")]
-    tables = df.table_name.unique().tolist()
-    dfs = []
-    for table in tables:
-        time_columns = df[df["table_name"] == table].column_name.unique().tolist()
-        cols = [
-            f"min({col}) as min_{col}, max({col}) as max_{col}" for col in time_columns
-        ]
-        cols_str = ", ".join(cols)
-        sel_query = f"""SELECT '{table}' as table_name, {cols_str}
-            FROM {schema_name}.{table}
-            ;"""
-        temp = pd.read_sql(sel_query, DBCON.engine)
-        dfs.append(temp)
-    df = pd.concat(dfs)
-    return df
 
 
 def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:

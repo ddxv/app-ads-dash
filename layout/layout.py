@@ -1,8 +1,5 @@
 from ids import (
-    DEVELOPERS,
     DEVELOPERS_SEARCH,
-    LATEST_UPDATES,
-    UPDATED_AT,
     UPDATED_HISTOGRAM,
     TXT_VIEW,
     NETWORKS,
@@ -49,13 +46,9 @@ TABS = dbc.Tabs(
     persistence=True,
     persistence_type="memory",
     children=[
-        dbc.Tab(label="Latest Updates", tab_id=LATEST_UPDATES),
-        dbc.Tab(label="Developers", tab_id=DEVELOPERS),
         dbc.Tab(label="Ad Networks", tab_id=NETWORKS),
-        dbc.Tab(label="Updated Ats", tab_id=UPDATED_AT),
         dbc.Tab(label="Crawler: Updated Counts", tab_id=UPDATED_HISTOGRAM),
         dbc.Tab(label="Search: Developers", tab_id=DEVELOPERS_SEARCH),
-        dbc.Tab(label="Search: Ads.txt Shared Publishers", tab_id=TXT_VIEW),
         dbc.Tab(label="Search: App-Ads.txt File ", tab_id=TXT_VIEW),
     ],
 )

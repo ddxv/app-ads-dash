@@ -10,25 +10,19 @@ from ids import (
     AFFIX_LOADING,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
-    DEVELOPERS,
     DEVELOPERS_SEARCH,
-    LATEST_UPDATES,
     AFFIX_PLOT,
     TXT_VIEW,
-    UPDATED_AT,
     UPDATED_HISTOGRAM,
     AFFIX_DATE_PICKER,
     TXT_VIEW_TABLE,
     NETWORKS,
 )
 from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
-from layout.tab_template import make_columns, get_cards_group, get_left_buttons_layout
+from layout.tab_template import make_columns, get_left_buttons_layout
 from plotter.plotter import overview_plot
 from dbcon.queries import (
     get_app_txt_view,
-    query_overview,
-    query_all,
-    get_updated_ats,
     query_search_developers,
     query_updated_timestamps,
     get_developer_and_networks_count,
@@ -55,17 +49,11 @@ CACHE.clear()
 @CACHE.memoize()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
-    if query_dict["id"] == LATEST_UPDATES:
-        df = query_overview(limit=1000)
-    elif query_dict["id"] == DEVELOPERS:
-        df = query_all(table_name=query_dict["table_name"], limit=1000)
-    elif query_dict["id"] == UPDATED_HISTOGRAM:
+    if query_dict["id"] == UPDATED_HISTOGRAM:
         df = query_updated_timestamps(
             table_name=query_dict["table_name"], start_date=query_dict["start_date"]
         )
         df["table_name"] = query_dict["table_name"]
-    elif query_dict["id"] == UPDATED_AT:
-        df = get_updated_ats("public")
     elif query_dict["id"] == TXT_VIEW:
         df = get_app_txt_view(query_dict["developer_url"])
     elif query_dict["id"] == NETWORKS:
@@ -210,50 +198,6 @@ def developers_search(
     return table_obj, column_dicts
 
 
-@app.callback(
-    Output(DEVELOPERS + AFFIX_TABLE, "data"),
-    Output(DEVELOPERS + AFFIX_TABLE, "columns"),
-    Output(DEVELOPERS + AFFIX_PLOT, "figure"),
-    Input(DEVELOPERS + AFFIX_GROUPBY, "value"),
-    Input(DEVELOPERS + AFFIX_TABLE, "derived_viewport_row_ids"),
-)
-def developers(
-    groupby,
-    derived_viewport_row_ids: list[str],
-):
-    logger.info("Developers")
-    metrics = ["size"]
-    query_dict = {"id": DEVELOPERS, "table_name": "developers", "groupby": groupby}
-    df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    logger.info(f"Developers {df.shape=}")
-
-    dimensions = [x for x in groupby if x not in metrics and x != "id"]
-    column_dicts = make_columns(dimensions, metrics)
-    dff = (
-        df.groupby(dimensions, dropna=False)
-        .size()
-        .reset_index()
-        .rename(columns={0: "size"})
-    )
-    logger.info(f"Developers {dff.shape=}")
-    table_obj = dff.to_dict("records")
-    plot_df = (
-        df.groupby(dimensions, dropna=False)
-        .size()
-        .reset_index()
-        .rename(columns={0: "size"})
-    )
-    plot_df = add_id_column(plot_df, dimensions=dimensions)
-    fig = overview_plot(
-        plot_df,
-        y_vals=["size"],
-        xaxis_col=groupby[0],
-        title="Developers",
-    )
-
-    return table_obj, column_dicts, fig
-
-
 operators = [
     ["ge ", ">="],
     ["le ", "<="],
@@ -368,24 +312,6 @@ def txt_view_table(
 
 
 @app.callback(
-    Output(UPDATED_AT + AFFIX_TABLE, "data"),
-    Output(UPDATED_AT + AFFIX_TABLE, "columns"),
-    Input(UPDATED_AT + AFFIX_TABLE, "derived_viewport_row_ids"),
-)
-def updated_at_table(
-    derived_viewport_row_ids: list[str],
-):
-    logger.info("Updates At Table")
-    metrics = ["size"]
-    query_dict = {"id": UPDATED_AT}
-    df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [x for x in df.columns if x not in metrics and x != "id"]
-    column_dicts = make_columns(dimensions, metrics)
-    table_obj = df.to_dict("records")
-    return table_obj, column_dicts
-
-
-@app.callback(
     Output(NETWORKS + AFFIX_TABLE, "data"),
     Output(NETWORKS + AFFIX_TABLE, "columns"),
     Output(NETWORKS + AFFIX_PLOT, "figure"),
@@ -426,64 +352,6 @@ def networks_table(derived_viewport_row_ids: list[str], switches: list[str]):
         df=df, y_vals=y_vals, xaxis_col=xaxis_col, bar_column=bar_column, title=title
     )
     return table_obj, column_dicts, fig
-
-
-@app.callback(
-    Output(LATEST_UPDATES + AFFIX_TABLE, "data"),
-    Output(LATEST_UPDATES + AFFIX_TABLE, "columns"),
-    Output(LATEST_UPDATES + AFFIX_PLOT, "figure"),
-    Output("cards-group", "children"),
-    Input(LATEST_UPDATES + AFFIX_GROUPBY, "value"),
-    Input(LATEST_UPDATES + AFFIX_TABLE, "derived_viewport_row_ids"),
-)
-def latest_updates_table(
-    groupby,
-    derived_viewport_row_ids: list[str],
-):
-    logger.info("Latest Updates Table")
-    metrics = ["size"]
-    query_dict = {"id": LATEST_UPDATES}
-    df = get_cached_dataframe(query_json=json.dumps(query_dict))
-
-    dimensions = [x for x in groupby if x not in metrics and x != "id"]
-    column_dicts = make_columns(dimensions, metrics)
-    dff = (
-        df.groupby(dimensions, dropna=False)
-        .size()
-        .reset_index()
-        .rename(columns={0: "size"})
-    )
-    table_obj = dff.to_dict("records")
-    plot_df = (
-        df.groupby(dimensions, dropna=False)
-        .size()
-        .reset_index()
-        .rename(columns={0: "size"})
-    )
-    plot_df = add_id_column(plot_df, dimensions=dimensions)
-    fig = overview_plot(
-        plot_df,
-        y_vals=["size"],
-        xaxis_col=groupby[0],
-        title="Updates",
-    )
-
-    cards_group = get_cards_group()
-    card_ids = [
-        "txt-entry-crawled-at",
-        "ad-domain-updated-at",
-    ]
-    for card_name in card_ids:
-        column_name = card_name.replace("-", "_")
-        cards_group[f"{card_name}-body"] = dash.html.P(
-            [
-                f'Latest:  {df[column_name].max().strftime("%Y-%m-%d %H:%M:%S")}',
-                dash.html.Br(),
-                f'Earliest: {df[column_name].min().strftime("%Y-%m-%d %H:%M:%S")}',
-            ]
-        )
-
-    return table_obj, column_dicts, fig, cards_group.children
 
 
 def add_id_column(df: pd.DataFrame, dimensions: list[str]) -> pd.DataFrame:
