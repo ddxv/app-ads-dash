@@ -1,8 +1,5 @@
 # Tab IDs
-LATEST_UPDATES = "latest-updates"
-DEVELOPERS = "developers"
 NETWORKS = "networks"
-UPDATED_AT = "updated-at"
 UPDATED_HISTOGRAM = "updated-histogram"
 DEVELOPERS_SEARCH = "developers-search"
 TXT_VIEW = "txt-view"

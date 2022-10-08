@@ -165,7 +165,6 @@ def overview_plot(
     yaxis1_title = titlelize(yaxis1_col)
     yaxis2_title = titlelize(yaxis2_col)
     plot_title = titlelize(plot_title)
-    logger.info(f"PLOT: {y1_tickformat=}")
     layout = {
         "height": 600,
         "title": {"text": plot_title},
