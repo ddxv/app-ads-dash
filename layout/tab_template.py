@@ -146,9 +146,9 @@ def create_tab_layout(tab_id: str) -> html.Div:
                     ),
                     dbc.Col(
                         [
+                            plot_div,
                             options_div,
                             table_div,
-                            plot_div,
                         ]
                     ),
                 ]
@@ -264,11 +264,11 @@ def make_options_div(
 
 
 def is_percent(name: str) -> bool:
-    return any(True for x in PERCENT_NAMES if x in name)
+    return any(True for x in PERCENT_NAMES if x in name.lower())
 
 
 def is_dollar(name: str) -> bool:
-    return any(True for x in DOLLAR_NAMES if x in name)
+    return any(True for x in DOLLAR_NAMES if x in name.lower())
 
 
 def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:

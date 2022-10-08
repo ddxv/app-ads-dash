@@ -392,7 +392,7 @@ def updated_at_table(
 def networks_table(
     derived_viewport_row_ids: list[str],
 ):
-    logger.info("Networks start")
+    logger.info(f"{NETWORKS} start")
     metrics = ["size"]
     query_dict = {"id": NETWORKS}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
@@ -405,15 +405,21 @@ def networks_table(
     )
     df["percent"] = df["count"] / num_sites
     df = df.sort_values("percent", ascending=False)
+    df = df.drop("count", axis=1)
     metrics = ["percent"]
     dimensions = [x for x in df.columns if x not in metrics]
     df = add_id_column(df, dimensions=dimensions)
-    df = limit_rows_for_plotting(df=df, row_ids=derived_viewport_row_ids)
-    fig = overview_plot(
-        df=df, y_vals=metrics, xaxis_col="ad_domain_url", bar_column="percent"
-    )
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
+    df = limit_rows_for_plotting(
+        df=df, row_ids=derived_viewport_row_ids, metrics=metrics
+    )
+    xaxis_col = "ad_domain_url"
+    bar_column = "percent"
+    y_vals = metrics
+    fig = overview_plot(
+        df=df, y_vals=y_vals, xaxis_col=xaxis_col, bar_column=bar_column
+    )
     return table_obj, column_dicts, fig
 
 

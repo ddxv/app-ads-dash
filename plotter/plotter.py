@@ -4,10 +4,14 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from config import get_logger
+import plotly.io as pio
 
 logger = get_logger(__name__)
 
-COLORS = px.colors.qualitative.Alphabet
+current_theme = pio.templates.default
+
+theme_colors = list(pio.templates[current_theme]["layout"]["colorway"])
+COLORS = list(theme_colors + px.colors.qualitative.Alphabet)
 
 
 def overview_plot(
@@ -47,8 +51,12 @@ def overview_plot(
         plot_title = title
     y1_tickformat = ""
     y2_tickformat = ""
+    ids_same_as_xaxis = len(set(df_ids)) == len(set(df[xaxis_col].tolist()))
     # Switch to include bar colors in the legend separately
-    if all([True if x == bar_column else False for x in y_vals]):
+    if (
+        all([True if x == bar_column else False for x in y_vals])
+        and not ids_same_as_xaxis
+    ):
         show_bar_legend = True
     else:
         show_bar_legend = False
@@ -82,7 +90,9 @@ def overview_plot(
             # BAR / Y-AXIS 1
             if y_val == bar_column:
                 yaxis1_col.append(y_val)
-                if is_dollar(y_val):
+                if is_percent(y_val):
+                    y1_tickformat = ".0%"
+                elif is_dollar(y_val):
                     y1_tickformat = "$f"
                 if len(ordered_ids.index) == 1:
                     value_name = y_val
@@ -124,7 +134,7 @@ def overview_plot(
                     marker_dict = dict(color=COLORS[y_color_int], symbol=symbol_int)
                 # name = name.replace(dims_common_str, "")
                 if is_percent(y_val):
-                    y2_tickformat = "%.2f"
+                    y2_tickformat = ".2%"
                 if is_dollar(y_val):
                     y2_tickformat = "$.3f"
                 if y_val == "count":
@@ -151,21 +161,25 @@ def overview_plot(
         bar_type = "group"
     else:
         bar_type = "stack"
+    xaxis_title = titlelize(xaxis_col)
+    yaxis1_title = titlelize(yaxis1_col)
+    yaxis2_title = titlelize(yaxis2_col)
+    plot_title = titlelize(plot_title)
+    logger.info(f"PLOT: {y1_tickformat=}")
     layout = {
         "height": 600,
-        "xaxis": {
-            "showgrid": False,
-            "title": xaxis_col,
-        },
         "title": {"text": plot_title},
+        "xaxis": {
+            "title": xaxis_title,
+        },
         "yaxis": {
+            "title": yaxis1_title,
             "type": "linear",
             "side": "right",
-            "title": f"{','.join(set(yaxis1_col))}",
             "tickformat": y1_tickformat,
         },
         "yaxis2": {
-            "title": f"{','.join(set(yaxis2_col))}",
+            "title": yaxis2_title,
             "anchor": "x",
             "overlaying": "y",
             "side": "left",
@@ -178,6 +192,16 @@ def overview_plot(
     }
     fig.layout = layout
     return fig
+
+
+def titlelize(original: str | list) -> str:
+    if isinstance(original, list):
+        title = ", ".join([x.replace("_", " ").title() for x in set(original)])
+    elif isinstance(original, str):
+        title = original.replace("_", " ").title()
+    else:
+        title = original
+    return title
 
 
 def guess_bar_column(df: pd.DataFrame):
