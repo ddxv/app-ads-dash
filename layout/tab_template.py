@@ -4,6 +4,7 @@ from dash import dcc
 from dash import html
 from dash import dash_table
 from plotly import graph_objects as go
+import datetime
 from dbcon.queries import TABLES_WITH_TIMES, query_overview, SCHEMA_OVERVIEW
 from config import get_logger
 from ids import (
@@ -12,11 +13,13 @@ from ids import (
     AFFIX_PLOT,
     AFFIX_GROUPBY,
     AFFIX_SWITCHES,
+    AFFIX_DATE_PICKER,
     AFFIX_TABLE,
     DEVELOPERS,
     LATEST_UPDATES,
     TXT_VIEW,
     DEVELOPERS_SEARCH,
+    UPDATED_HISTOGRAM,
     AFFIX_BUTTON,
     NETWORKS,
 )
@@ -26,7 +29,8 @@ logger = get_logger(__name__)
 
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
-
+    if UPDATED_HISTOGRAM == tab_id:
+        options_div = make_options_div(tab_id, date_picker=True)
     if NETWORKS == tab_id:
         switch_options = [
             {
@@ -225,6 +229,28 @@ def make_switch_options(
     return checklist_col
 
 
+def make_date_picker_column(tab_id: str, date_picker: bool | None) -> dbc.Col:
+    date_picker_col = dbc.Col([])
+    if date_picker:
+        date_picker_col = dbc.Col(
+            [
+                dcc.DatePickerRange(
+                    id=tab_id + AFFIX_DATE_PICKER,
+                    persistence_type="session",
+                    start_date=datetime.datetime.strftime(
+                        datetime.datetime.now() - datetime.timedelta(days=30),
+                        DATE_FORMAT,
+                    ),
+                    end_date=datetime.datetime.strftime(
+                        datetime.datetime.now(), DATE_FORMAT
+                    ),
+                ),
+            ],
+            width={"size": "auto", "order": "last"},
+        )
+    return date_picker_col
+
+
 def make_search_column(tab_id: str, search_hint: str | None) -> dbc.Col:
     search_col = dbc.Col([])
     if search_hint:
@@ -257,6 +283,7 @@ def make_options_div(
     switch_options: list[dict[str:str]] = None,
     switch_defaults: list[str] = None,
     groupby_time: bool = None,
+    date_picker: bool = None,
     search_hint: str = None,
 ) -> html.Div:
     options_row = dbc.Row([])
@@ -267,6 +294,7 @@ def make_options_div(
     checklist = make_switch_options(tab_id, switch_options, switch_defaults)
     options_row.children.append(checklist)
     time_col = make_groupby_time_column(tab_id, groupby_time)
+    date_picker = make_date_picker_column(tab_id, date_picker)
     options_row.children.append(time_col)
     options_row = html.Div([options_row], style={"padding": "15px"})
     return options_row
@@ -428,3 +456,5 @@ DOLLAR_NAMES = [
 ]
 
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
+
+DATE_FORMAT = "%Y-%m-%d"

@@ -17,7 +17,7 @@ from ids import (
     TXT_VIEW,
     UPDATED_AT,
     UPDATED_HISTOGRAM,
-    DATE_PICKER_RANGE,
+    AFFIX_DATE_PICKER,
     TXT_VIEW_TABLE,
     NETWORKS,
 )
@@ -120,7 +120,7 @@ def render_content(tab):
     Output(UPDATED_HISTOGRAM + "-buttongroup", "children"),
     Output(UPDATED_HISTOGRAM + "-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
-    Input(DATE_PICKER_RANGE, "start_date"),
+    Input(UPDATED_HISTOGRAM + AFFIX_DATE_PICKER, "start_date"),
 )
 def histograms(n_clicks, start_date):
     logger.info(f"Updated histogram {dash.ctx.triggered_id=}")
@@ -148,7 +148,7 @@ def histograms(n_clicks, start_date):
 
 @app.callback(
     Output(UPDATED_HISTOGRAM + AFFIX_PLOT, "figure"),
-    Input(DATE_PICKER_RANGE, "start_date"),
+    Input(UPDATED_HISTOGRAM + AFFIX_DATE_PICKER, "start_date"),
     Input(UPDATED_HISTOGRAM + "-memory-output", "data"),
     Input(UPDATED_HISTOGRAM + AFFIX_TABLE, "derived_viewport_row_ids"),
 )

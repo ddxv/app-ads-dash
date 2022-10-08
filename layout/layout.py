@@ -8,8 +8,6 @@ from ids import (
     NETWORKS,
 )
 from layout.tab_template import create_tab_layout
-import datetime
-from dash import dcc
 import dash_bootstrap_components as dbc
 
 
@@ -22,23 +20,6 @@ def main_content_list() -> list:
                         dbc.Row(  # Top Row tabs
                             [
                                 dbc.Col([TABS]),
-                                dbc.Col(
-                                    [
-                                        dcc.DatePickerRange(
-                                            id="date-picker-range",
-                                            persistence_type="session",
-                                            start_date=datetime.datetime.strftime(
-                                                datetime.datetime.now()
-                                                - datetime.timedelta(days=30),
-                                                DATE_FORMAT,
-                                            ),
-                                            end_date=datetime.datetime.strftime(
-                                                datetime.datetime.now(), DATE_FORMAT
-                                            ),
-                                        ),
-                                    ],
-                                    width={"size": "auto", "order": "last"},
-                                ),
                             ],
                         ),
                         dbc.Row(
@@ -62,8 +43,6 @@ def get_tab_layout_dict():
         tab_layout[tab_tag] = default_layout
     return tab_layout
 
-
-DATE_FORMAT = "%Y-%m-%d"
 
 TABS = dbc.Tabs(
     id="tabs-selector",

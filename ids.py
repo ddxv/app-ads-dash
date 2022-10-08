@@ -1,6 +1,3 @@
-# Singles
-DATE_PICKER_RANGE = "date-picker-range"
-
 # Tab IDs
 LATEST_UPDATES = "latest-updates"
 DEVELOPERS = "developers"
@@ -11,6 +8,7 @@ DEVELOPERS_SEARCH = "developers-search"
 TXT_VIEW = "txt-view"
 
 # Tab Options
+AFFIX_DATE_PICKER = "-date-picker-range"
 AFFIX_PLOT = "-plot"
 AFFIX_GROUPBY = "-groupby"
 AFFIX_GROUPBY_TIME = "-groupby-time"
