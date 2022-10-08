@@ -10,43 +10,47 @@ from ids import (
 from layout.tab_template import create_tab_layout
 import datetime
 from dash import dcc
-from dash import html
 import dash_bootstrap_components as dbc
 
 
-def main_content_div():
-    top_padding = 15
-    main_content = html.Div(
-        [
-            html.Div(
-                [
-                    dcc.DatePickerRange(
-                        id="date-picker-range",
-                        persistence_type="session",
-                        start_date=datetime.datetime.strftime(
-                            datetime.datetime.now() - datetime.timedelta(days=30),
-                            DATE_FORMAT,
+def main_content_list() -> list:
+    main_content = [
+        dbc.Card(
+            [
+                dbc.CardHeader(
+                    [
+                        dbc.Row(  # Top Row tabs
+                            [
+                                dbc.Col([TABS]),
+                                dbc.Col(
+                                    [
+                                        dcc.DatePickerRange(
+                                            id="date-picker-range",
+                                            persistence_type="session",
+                                            start_date=datetime.datetime.strftime(
+                                                datetime.datetime.now()
+                                                - datetime.timedelta(days=30),
+                                                DATE_FORMAT,
+                                            ),
+                                            end_date=datetime.datetime.strftime(
+                                                datetime.datetime.now(), DATE_FORMAT
+                                            ),
+                                        ),
+                                    ],
+                                    width={"size": "auto", "order": "last"},
+                                ),
+                            ],
                         ),
-                        end_date=datetime.datetime.strftime(
-                            datetime.datetime.now(), DATE_FORMAT
+                        dbc.Row(
+                            [
+                                dbc.CardBody(id="tabs-content"),
+                            ],
                         ),
-                    ),
-                ],
-                style={
-                    "display": "inline-block",
-                    "padding-top": f"{top_padding}px",
-                    "float": "right",
-                },
-            ),
-            html.Div(
-                [
-                    TABS,
-                    html.Div(id="tabs-content"),
-                ],
-                style={"display": "block", "padding-top": "20px"},
-            ),
-        ]
-    )
+                    ]
+                )
+            ]
+        )
+    ]
     return main_content
 
 
@@ -81,7 +85,7 @@ TABS = dbc.Tabs(
 TAB_LAYOUT_DICT = get_tab_layout_dict()
 
 APP_LAYOUT = dbc.Container(
-    [main_content_div()],
+    main_content_list(),
     fluid=True,
     className="dbc",
 )
