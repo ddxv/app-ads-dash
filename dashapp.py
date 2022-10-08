@@ -8,6 +8,7 @@ from ids import (
     AFFIX_BUTTON,
     AFFIX_GROUPBY,
     AFFIX_LOADING,
+    AFFIX_SWITCHES,
     AFFIX_TABLE,
     DEVELOPERS,
     DEVELOPERS_SEARCH,
@@ -34,6 +35,7 @@ from dbcon.queries import (
 )
 from flask_caching import Cache
 from config import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -388,24 +390,26 @@ def updated_at_table(
     Output(NETWORKS + AFFIX_TABLE, "columns"),
     Output(NETWORKS + AFFIX_PLOT, "figure"),
     Input(NETWORKS + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(NETWORKS + AFFIX_SWITCHES, "value"),
 )
-def networks_table(
-    derived_viewport_row_ids: list[str],
-):
+def networks_table(derived_viewport_row_ids: list[str], switches: list[str]):
     logger.info(f"{NETWORKS} start")
     metrics = ["size"]
     query_dict = {"id": NETWORKS}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    if switches and "show_reseller" in switches:
+        df = df[df["relationship"] == "RESELLER"]
+    else:
+        df = df[df["relationship"] == "DIRECT"]
     num_sites = len(df["developer_domain_url"].unique())
     df = (
-        df.groupby(["ad_domain_url", "relationship"])["developer_domain_url"]
+        df.groupby(["ad_domain_url"])["developer_domain_url"]
         .size()
         .reset_index()
         .rename(columns={"developer_domain_url": "count"})
     )
     df["percent"] = df["count"] / num_sites
     df = df.sort_values("percent", ascending=False)
-    df = df.drop("count", axis=1)
     metrics = ["percent"]
     dimensions = [x for x in df.columns if x not in metrics]
     df = add_id_column(df, dimensions=dimensions)
@@ -417,8 +421,9 @@ def networks_table(
     xaxis_col = "ad_domain_url"
     bar_column = "percent"
     y_vals = metrics
+    title = "Network Popularity According to App-Ads.txt"
     fig = overview_plot(
-        df=df, y_vals=y_vals, xaxis_col=xaxis_col, bar_column=bar_column
+        df=df, y_vals=y_vals, xaxis_col=xaxis_col, bar_column=bar_column, title=title
     )
     return table_obj, column_dicts, fig
 

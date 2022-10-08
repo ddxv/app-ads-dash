@@ -18,6 +18,7 @@ from ids import (
     TXT_VIEW,
     DEVELOPERS_SEARCH,
     AFFIX_BUTTON,
+    NETWORKS,
 )
 
 logger = get_logger(__name__)
@@ -26,6 +27,14 @@ logger = get_logger(__name__)
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
 
+    if NETWORKS == tab_id:
+        switch_options = [
+            {
+                "label": "View Resellers",
+                "value": "show_reseller",
+            },
+        ]
+        options_div = make_options_div(tab_id, switch_options=switch_options)
     if DEVELOPERS_SEARCH == tab_id:
         options_div = make_options_div(tab_id, search_hint="Name, ids or URL parts...")
     if TXT_VIEW == tab_id:
@@ -245,7 +254,7 @@ def make_options_div(
     tab_id=str,
     groupby_options: list[dict] = None,
     groupby_defaults: list[str] = None,
-    switch_options: list[dict] = None,
+    switch_options: list[dict[str:str]] = None,
     switch_defaults: list[str] = None,
     groupby_time: bool = None,
     search_hint: str = None,
