@@ -16,15 +16,10 @@ def get_dash_users() -> dict:
 
 def get_developer_and_networks_count():
     sel_query = """SELECT
-                    DISTINCT
-                    av.developer_domain_url,
-                    av.ad_domain_url,
-                    av.relationship
-                FROM
-                    app_ads_view av
-                WHERE
-                    developer_domain_crawled_at ::date = txt_entry_crawled_at ::date
-                ;
+                    *
+                    FROM 
+                    network_counts
+                    ;
                 """
     df = pd.read_sql(sel_query, DBCON.engine)
     return df

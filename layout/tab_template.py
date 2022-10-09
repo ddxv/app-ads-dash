@@ -32,8 +32,16 @@ def make_tab_options(tab_id: str) -> html.Div:
     if NETWORKS == tab_id:
         switch_options = [
             {
+                "label": "View Treemap Plot",
+                "value": "view_treemap",
+            },
+            {
+                "label": "View Horizontal Barchart",
+                "value": "view_horizontalbars",
+            },
+            {
                 "label": "View Resellers",
-                "value": "show_reseller",
+                "value": "view_reseller",
             },
         ]
         options_div = make_options_div(tab_id, switch_options=switch_options)

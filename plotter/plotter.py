@@ -12,6 +12,45 @@ current_theme = pio.templates.default
 
 theme_colors = list(pio.templates[current_theme]["layout"]["colorway"])
 COLORS = list(theme_colors + px.colors.qualitative.Alphabet)
+PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
+
+
+def horizontal_barchart(df, xaxis, yaxis):
+    PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
+    df = df.sort_values(xaxis)
+    fig = go.Figure()
+    bar_categories = df[yaxis].unique()
+    i = 0
+    for barcat in bar_categories:
+        temp = df[df[yaxis] == barcat]
+        fig = fig.add_trace(
+            go.Bar(
+                x=temp[xaxis],
+                y=temp[yaxis],
+                orientation="h",
+                marker={"color": PASTELS[i]},
+                text=f"{temp[yaxis].values[0]} {temp[xaxis].values[0]:.2%}",
+                textposition="inside",
+                textfont={"size": 24, "color": "grey"},
+            )
+        )
+        i += 1
+    fig = fig.update_layout(showlegend=False, yaxis={"showticklabels": False})
+    return fig
+
+
+def treemap(df, path: list[str], values: str | list[str], color: str):
+    df = df.head(len(PASTELS))
+    df = df.reset_index(drop=True)
+    color_dict = {row.ad_domain_url: PASTELS[i] for i, row in df.iterrows()}
+    fig = px.treemap(
+        df,
+        path=path,
+        values=values,
+        color=color,
+        color_discrete_map=color_dict,
+    )
+    return fig
 
 
 def overview_plot(

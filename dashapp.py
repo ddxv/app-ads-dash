@@ -20,7 +20,7 @@ from ids import (
 )
 from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
 from layout.tab_template import make_columns, get_left_buttons_layout
-from plotter.plotter import overview_plot
+from plotter.plotter import horizontal_barchart, treemap, overview_plot
 from dbcon.queries import (
     get_app_txt_view,
     query_search_developers,
@@ -323,34 +323,47 @@ def networks_table(derived_viewport_row_ids: list[str], switches: list[str]):
     metrics = ["size"]
     query_dict = {"id": NETWORKS}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    if switches and "show_reseller" in switches:
+    if switches and "view_reseller" in switches:
         df = df[df["relationship"] == "RESELLER"]
     else:
         df = df[df["relationship"] == "DIRECT"]
-    num_sites = len(df["developer_domain_url"].unique())
-    df = (
-        df.groupby(["ad_domain_url"])["developer_domain_url"]
-        .size()
-        .reset_index()
-        .rename(columns={"developer_domain_url": "count"})
-    )
-    df["percent"] = df["count"] / num_sites
+    num_sites = df["publishers_count"].sum()
+    df["percent"] = df["publishers_count"] / num_sites
     df = df.sort_values("percent", ascending=False)
     metrics = ["percent"]
     dimensions = [x for x in df.columns if x not in metrics]
     df = add_id_column(df, dimensions=dimensions)
+
+    df["percent"] = df["publishers_count"] / df["publishers_total"]
+
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
     df = limit_rows_for_plotting(
         df=df, row_ids=derived_viewport_row_ids, metrics=metrics
     )
-    xaxis_col = "ad_domain_url"
-    bar_column = "percent"
-    y_vals = metrics
-    title = "Network Popularity According to App-Ads.txt"
-    fig = overview_plot(
-        df=df, y_vals=y_vals, xaxis_col=xaxis_col, bar_column=bar_column, title=title
-    )
+    if switches and "view_treemap" in switches:
+        path = ["ad_domain_url"]
+        values = "percent"
+        color = "ad_domain_url"
+        fig = treemap(df, path=path, values=values, color=color)
+    elif switches and "view_horizontalbars" in switches:
+        xaxis = "percent"
+        yaxis = "ad_domain_url"
+        df = df.head(10)
+        df = df.reset_index(drop=True)
+        fig = horizontal_barchart(df, xaxis=xaxis, yaxis=yaxis)
+    else:
+        xaxis_col = "ad_domain_url"
+        bar_column = "percent"
+        y_vals = metrics
+        title = "According to App-Ads.txt"
+        fig = overview_plot(
+            df=df,
+            y_vals=y_vals,
+            xaxis_col=xaxis_col,
+            bar_column=bar_column,
+            title=title,
+        )
     return table_obj, column_dicts, fig
 
 
