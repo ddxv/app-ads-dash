@@ -351,7 +351,12 @@ def networks_table(derived_viewport_row_ids: list[str], switches: list[str]):
         yaxis = "ad_domain_url"
         df = df.head(10)
         df = df.reset_index(drop=True)
-        fig = horizontal_barchart(df, xaxis=xaxis, yaxis=yaxis)
+        fig = horizontal_barchart(
+            df,
+            xaxis=xaxis,
+            yaxis=yaxis,
+            title="Ad Network Market Percentage According to App-Ads.txt",
+        )
     else:
         xaxis_col = "ad_domain_url"
         bar_column = "percent"

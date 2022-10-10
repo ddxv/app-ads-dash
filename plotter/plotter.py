@@ -15,27 +15,41 @@ COLORS = list(theme_colors + px.colors.qualitative.Alphabet)
 PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
 
 
-def horizontal_barchart(df, xaxis, yaxis):
-    PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
+def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
     df = df.sort_values(xaxis)
     fig = go.Figure()
     bar_categories = df[yaxis].unique()
     i = 0
     for barcat in bar_categories:
         temp = df[df[yaxis] == barcat]
+        my_color = "#ff0082"
         fig = fig.add_trace(
             go.Bar(
                 x=temp[xaxis],
                 y=temp[yaxis],
                 orientation="h",
-                marker={"color": PASTELS[i]},
+                marker={"color": my_color},
                 text=f"{temp[yaxis].values[0]} {temp[xaxis].values[0]:.2%}",
-                textposition="inside",
-                textfont={"size": 24, "color": "grey"},
+                textposition="auto",
+                textfont={"size": 48, "color": "white"},
             )
         )
         i += 1
-    fig = fig.update_layout(showlegend=False, yaxis={"showticklabels": False})
+    fig = fig.update_layout(
+        {
+            "showlegend": False,
+            "yaxis": {"showticklabels": False},
+            "font": {"size": 18},
+            "title": {"text": title, "font": {"size": 48}},
+            "height": 800,
+            "xaxis": {
+                "title": "Percent Advertising Apps Integrated",
+                "type": "linear",
+                "side": "right",
+                "tickformat": ".0%",
+            },
+        }
+    )
     return fig
 
 
