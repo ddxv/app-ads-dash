@@ -12,6 +12,7 @@ from ids import (
     AFFIX_LOADING,
     AFFIX_PLOT,
     AFFIX_GROUPBY,
+    AFFIX_RADIOS,
     AFFIX_SWITCHES,
     AFFIX_DATE_PICKER,
     AFFIX_TABLE,
@@ -32,19 +33,27 @@ def make_tab_options(tab_id: str) -> html.Div:
     if NETWORKS == tab_id:
         switch_options = [
             {
-                "label": "View Treemap Plot",
-                "value": "view_treemap",
+                "label": "View Resellers",
+                "value": "view_reseller",
             },
+        ]
+        radio_options = [
             {
                 "label": "View Horizontal Barchart",
                 "value": "view_horizontalbars",
             },
             {
-                "label": "View Resellers",
-                "value": "view_reseller",
+                "label": "View Vertical Barchart",
+                "value": "view_verticalbars",
+            },
+            {
+                "label": "View Treemap Plot",
+                "value": "view_treemap",
             },
         ]
-        options_div = make_options_div(tab_id, switch_options=switch_options)
+        options_div = make_options_div(
+            tab_id, switch_options=switch_options, radio_options=radio_options
+        )
     if DEVELOPERS_SEARCH == tab_id:
         options_div = make_options_div(tab_id, search_hint="Name, ids or URL parts...")
     if TXT_VIEW == tab_id:
@@ -164,8 +173,33 @@ def make_groupby_time_column(tab_id: str, groupby_time: bool) -> dbc.Col:
     return time_col
 
 
+def make_radio_buttons(
+    tab_id: str, radio_options: list[dict[str:str]], radio_default: str = None
+) -> dbc.Col:
+    button_group = dbc.Col([])
+    if radio_options:
+        if not radio_default:
+            radio_default = radio_options[0]["value"]
+        button_group = dbc.Col(
+            [
+                dbc.RadioItems(
+                    id=tab_id + AFFIX_RADIOS,
+                    className="btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-primary",
+                    labelCheckedClassName="active",
+                    options=radio_options,
+                    value=radio_default,
+                ),
+                html.Div(id="output"),
+            ],
+            className="radio-group",
+        )
+    return button_group
+
+
 def make_groupby_column(
-    tab_id, groupby_columns: list[dict], groupby_defaults: list[str] | None
+    tab_id: str, groupby_columns: list[dict], groupby_defaults: list[str] | None
 ) -> dbc.Col:
     groupby_col = dbc.Col([])
     if groupby_columns and not groupby_defaults:
@@ -257,21 +291,31 @@ def make_options_div(
     groupby_defaults: list[str] = None,
     switch_options: list[dict[str:str]] = None,
     switch_defaults: list[str] = None,
+    radio_options: list[dict[str:str]] = None,
+    radio_default: str = None,
     groupby_time: bool = None,
     date_picker: bool = None,
     search_hint: str = None,
 ) -> html.Div:
     options_row = dbc.Row([])
     search_col = make_search_column(tab_id, search_hint)
-    options_row.children.append(search_col)
+    if len(search_col.children) > 0:
+        options_row.children.append(search_col)
     groupby_col = make_groupby_column(tab_id, groupby_options, groupby_defaults)
-    options_row.children.append(groupby_col)
-    checklist = make_switch_options(tab_id, switch_options, switch_defaults)
-    options_row.children.append(checklist)
+    if len(groupby_col.children) > 0:
+        options_row.children.append(groupby_col)
+    checklist_col = make_switch_options(tab_id, switch_options, switch_defaults)
+    if len(checklist_col.children) > 0:
+        options_row.children.append(checklist_col)
+    radios_col = make_radio_buttons(tab_id, radio_options, radio_default)
+    if len(radios_col.children) > 0:
+        options_row.children.append(radios_col)
     time_col = make_groupby_time_column(tab_id, groupby_time)
-    options_row.children.append(time_col)
+    if len(time_col.children) > 0:
+        options_row.children.append(time_col)
     date_picker_col = make_date_picker_column(tab_id, date_picker)
-    options_row.children.append(date_picker_col)
+    if len(date_picker_col.children) > 0:
+        options_row.children.append(date_picker_col)
     options_row = html.Div([options_row], style={"padding": "15px"})
     return options_row
 

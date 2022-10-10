@@ -53,7 +53,7 @@ def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
     return fig
 
 
-def treemap(df, path: list[str], values: str | list[str], color: str):
+def treemap(df, path: list[str], values: str | list[str], color: str, title: str):
     df = df.head(len(PASTELS))
     df = df.reset_index(drop=True)
     color_dict = {row.ad_domain_url: PASTELS[i] for i, row in df.iterrows()}
@@ -63,6 +63,7 @@ def treemap(df, path: list[str], values: str | list[str], color: str):
         values=values,
         color=color,
         color_discrete_map=color_dict,
+        title=title,
     )
     return fig
 

@@ -6,6 +6,7 @@ TXT_VIEW = "txt-view"
 
 # Tab Options
 AFFIX_DATE_PICKER = "-date-picker"
+AFFIX_RADIOS = "-radios"
 AFFIX_PLOT = "-plot"
 AFFIX_GROUPBY = "-groupby"
 AFFIX_GROUPBY_TIME = "-groupby-time"

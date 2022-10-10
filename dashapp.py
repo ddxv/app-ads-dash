@@ -8,6 +8,7 @@ from ids import (
     AFFIX_BUTTON,
     AFFIX_GROUPBY,
     AFFIX_LOADING,
+    AFFIX_RADIOS,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
     DEVELOPERS_SEARCH,
@@ -317,8 +318,11 @@ def txt_view_table(
     Output(NETWORKS + AFFIX_PLOT, "figure"),
     Input(NETWORKS + AFFIX_TABLE, "derived_viewport_row_ids"),
     Input(NETWORKS + AFFIX_SWITCHES, "value"),
+    Input(NETWORKS + AFFIX_RADIOS, "value"),
 )
-def networks_table(derived_viewport_row_ids: list[str], switches: list[str]):
+def networks_table(
+    derived_viewport_row_ids: list[str], switches: list[str], radios: str
+):
     logger.info(f"{NETWORKS} start")
     metrics = ["size"]
     query_dict = {"id": NETWORKS}
@@ -341,27 +345,25 @@ def networks_table(derived_viewport_row_ids: list[str], switches: list[str]):
     df = limit_rows_for_plotting(
         df=df, row_ids=derived_viewport_row_ids, metrics=metrics
     )
-    if switches and "view_treemap" in switches:
-        path = ["ad_domain_url"]
+    title = "Ad Network Market Percentage According to App-Ads.txt"
+    xaxis_col = "ad_domain_url"
+    bar_column = "percent"
+    y_vals = metrics
+    if radios and "view_treemap" in radios:
+        path = [xaxis_col]
         values = "percent"
-        color = "ad_domain_url"
-        fig = treemap(df, path=path, values=values, color=color)
-    elif switches and "view_horizontalbars" in switches:
-        xaxis = "percent"
-        yaxis = "ad_domain_url"
+        color = xaxis_col
+        fig = treemap(df, path=path, values=values, color=color, title=title)
+    elif radios and "view_horizontalbars" in radios:
         df = df.head(10)
         df = df.reset_index(drop=True)
         fig = horizontal_barchart(
             df,
-            xaxis=xaxis,
-            yaxis=yaxis,
-            title="Ad Network Market Percentage According to App-Ads.txt",
+            xaxis=bar_column,  # Note switched
+            yaxis=xaxis_col,  # Note switched
+            title=title,
         )
     else:
-        xaxis_col = "ad_domain_url"
-        bar_column = "percent"
-        y_vals = metrics
-        title = "According to App-Ads.txt"
         fig = overview_plot(
             df=df,
             y_vals=y_vals,
