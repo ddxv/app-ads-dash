@@ -26,7 +26,7 @@ from dbcon.queries import (
     get_app_txt_view,
     query_search_developers,
     query_updated_timestamps,
-    get_developer_and_networks_count,
+    query_networks_count,
 )
 from flask_caching import Cache
 from config import get_logger
@@ -58,7 +58,7 @@ def get_cached_dataframe(query_json):
     elif query_dict["id"] == TXT_VIEW:
         df = get_app_txt_view(query_dict["developer_url"])
     elif query_dict["id"] == NETWORKS:
-        df = get_developer_and_networks_count()
+        df = query_networks_count(top_only=query_dict["top_only"])
     elif query_dict["id"] == DEVELOPERS_SEARCH:
         df = query_search_developers(
             search_input=query_dict["search_input"], limit=1000
@@ -325,7 +325,11 @@ def networks_table(
 ):
     logger.info(f"{NETWORKS} start")
     metrics = ["size"]
-    query_dict = {"id": NETWORKS}
+    if switches and "top_only" in switches:
+        top_only = True
+    else:
+        top_only = False
+    query_dict = {"id": NETWORKS, "top_only": top_only}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     if switches and "view_reseller" in switches:
         df = df[df["relationship"] == "RESELLER"]
@@ -345,7 +349,10 @@ def networks_table(
     df = limit_rows_for_plotting(
         df=df, row_ids=derived_viewport_row_ids, metrics=metrics
     )
-    title = "Ad Network Market Percentage According to App-Ads.txt"
+    if top_only:
+        title = "Ad Network Marketshare of Top Apps"
+    else:
+        title = "Ad Network Marketshare of All Apps"
     xaxis_col = "ad_domain_url"
     bar_column = "percent"
     y_vals = metrics

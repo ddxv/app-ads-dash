@@ -29,9 +29,9 @@ def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
                 y=temp[yaxis],
                 orientation="h",
                 marker={"color": my_color},
-                text=f"{temp[yaxis].values[0]} {temp[xaxis].values[0]:.2%}",
+                text=f"{temp[yaxis].values[0]} {temp[xaxis].values[0]:.0%}",
                 textposition="auto",
-                textfont={"size": 48, "color": "white"},
+                textfont={"size": 34, "color": "white"},
             )
         )
         i += 1

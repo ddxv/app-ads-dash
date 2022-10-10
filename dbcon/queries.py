@@ -14,11 +14,15 @@ def get_dash_users() -> dict:
     return users_dict
 
 
-def get_developer_and_networks_count():
-    sel_query = """SELECT
+def query_networks_count(top_only: bool = False):
+    if top_only:
+        table_name = "network_counts_top"
+    else:
+        table_name = "network_counts"
+    sel_query = f"""SELECT
                     *
                     FROM 
-                    network_counts
+                    {table_name}
                     ;
                 """
     df = pd.read_sql(sel_query, DBCON.engine)

@@ -36,6 +36,10 @@ def make_tab_options(tab_id: str) -> html.Div:
                 "label": "View Resellers",
                 "value": "view_reseller",
             },
+            {
+                "label": "View Top 5%",
+                "value": "top_only",
+            },
         ]
         radio_options = [
             {
