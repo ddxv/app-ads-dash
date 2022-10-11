@@ -38,7 +38,7 @@ def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
         domain = domain.replace(".com", "")
         domain = domain.title()
         fig.add_annotation(
-            x=0.1,
+            x=0.01,
             y=i,
             text=domain,
             showarrow=False,
