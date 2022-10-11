@@ -29,10 +29,21 @@ def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
                 y=temp[yaxis],
                 orientation="h",
                 marker={"color": my_color},
-                text=f"{temp[yaxis].values[0]} {temp[xaxis].values[0]:.0%}",
-                textposition="auto",
+                text=f"{temp[xaxis].values[0]:.0%}",
+                textposition="outside",
                 textfont={"size": 34, "color": "white"},
             )
+        )
+        domain = temp[yaxis].values[0]
+        domain = domain.replace(".com", "")
+        domain = domain.title()
+        fig.add_annotation(
+            x=0.1,
+            y=i,
+            text=domain,
+            showarrow=False,
+            font={"size": 34, "color": "white"},
+            xanchor="left",
         )
         i += 1
     fig = fig.update_layout(
