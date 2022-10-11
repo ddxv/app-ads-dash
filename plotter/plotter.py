@@ -16,6 +16,7 @@ PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
 
 
 def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
+    default_font_size = 34
     df = df.sort_values(xaxis)
     fig = go.Figure()
     bar_categories = df[yaxis].unique()
@@ -31,18 +32,22 @@ def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
                 marker={"color": my_color},
                 text=f"{temp[xaxis].values[0]:.0%}",
                 textposition="outside",
-                textfont={"size": 34, "color": "white"},
+                textfont={"size": default_font_size, "color": "white"},
             )
         )
         domain = temp[yaxis].values[0]
         domain = domain.replace(".com", "")
         domain = domain.title()
+        if i > 5:
+            domain_font_size = default_font_size
+        else:
+            domain_font_size = int(default_font_size * 0.75)
         fig.add_annotation(
             x=0.01,
             y=i,
             text=domain,
             showarrow=False,
-            font={"size": 34, "color": "white"},
+            font={"size": domain_font_size, "color": "white"},
             xanchor="left",
         )
         i += 1
@@ -50,11 +55,11 @@ def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
         {
             "showlegend": False,
             "yaxis": {"showticklabels": False},
-            "font": {"size": 18},
+            "font": {"size": default_font_size},
             "title": {"text": title, "font": {"size": 48}},
             "height": 800,
             "xaxis": {
-                "title": "Percent Advertising Apps Integrated",
+                "title": "Percent Integrated",
                 "type": "linear",
                 "side": "right",
                 "tickformat": ".0%",
