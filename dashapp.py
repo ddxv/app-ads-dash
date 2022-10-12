@@ -350,9 +350,9 @@ def networks_table(
         df=df, row_ids=derived_viewport_row_ids, metrics=metrics
     )
     if top_only:
-        title = "Ad Network Marketshare of Top Apps"
+        title = "Marketshare of Programmatic Ad Networks"
     else:
-        title = "Ad Network Marketshare of All Apps"
+        title = "Marketshare of Programmatic Ad Networks"
     xaxis_col = "ad_domain_url"
     bar_column = "percent"
     y_vals = metrics
