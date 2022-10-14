@@ -65,7 +65,29 @@ def get_app_txt_view(developer_url: str) -> pd.DataFrame:
     return df
 
 
-def query_updated_timestamps(table_name: str, start_date="2021-01-01") -> pd.DataFrame:
+def query_store_apps_overview(start_date: str):
+    logger.info("Query logging.store_apps_snapshot")
+    sel_query = f"""SELECT
+                        sas.*,
+                        s.name as store_name,
+                        cr.outcome
+                    FROM
+                    logging.store_apps_snapshot sas
+                    LEFT JOIN crawl_results cr
+                        ON cr.id = sas.crawl_result
+                    LEFT JOIN stores s
+                        ON s.id = sas.store
+                    where updated_at >= '{start_date}'
+                    ;
+                """
+    df = pd.read_sql(sel_query, con=DBCON.engine)
+    df = df.drop(["store", "crawl_result"], axis=0)
+    return df
+
+
+def query_updated_timestamps(
+    table_name: str, start_date: str = "2021-01-01"
+) -> pd.DataFrame:
     logger.info(f"Query updated times: {table_name=}")
     if table_name == "store_apps":
         audit_select = " audit_dates.updated_count, "

@@ -25,6 +25,7 @@ from plotter.plotter import horizontal_barchart, treemap, overview_plot
 from dbcon.queries import (
     get_app_txt_view,
     query_search_developers,
+    query_store_apps_overview,
     query_updated_timestamps,
     query_networks_count,
 )
@@ -51,10 +52,13 @@ CACHE.clear()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
     if query_dict["id"] == INTERNAL_LOGS:
-        df = query_updated_timestamps(
-            table_name=query_dict["table_name"], start_date=query_dict["start_date"]
-        )
-        df["table_name"] = query_dict["table_name"]
+        table_name = query_dict["table_name"]
+        if table_name == "overview":
+            df = query_store_apps_overview(start_date=query_dict["start_date"])
+        else:
+            df = query_updated_timestamps(
+                table_name=table_name, start_date=query_dict["start_date"]
+            )
     elif query_dict["id"] == TXT_VIEW:
         df = get_app_txt_view(query_dict["developer_url"])
     elif query_dict["id"] == NETWORKS:
@@ -69,7 +73,7 @@ def get_cached_dataframe(query_json):
 
 
 def limit_rows_for_plotting(
-    df: pd.DataFrame, row_ids: list[str], metrics: list[str] = None
+    df: pd.DataFrame, row_ids: list[str] | None, metrics: list[str] = None
 ) -> pd.DataFrame:
     logger.info("Limit Rows for Plotting")
     original_shape = df.shape
@@ -113,17 +117,22 @@ def render_content(tab):
 )
 def internal_logs(n_clicks, start_date):
     logger.info(f"Internal logs: {dash.ctx.triggered_id=}")
-    table_name = "store_apps"
+    table_name = "overview"
     if dash.ctx.triggered_id and dash.ctx.triggered_id != INTERNAL_LOGS + AFFIX_TABLE:
         table_name = dash.ctx.triggered_id["index"]
-    metrics = ["updated_count", "created_count", "last_updated_count"]
+    if table_name == "overview":
+        metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
+    else:
+        metrics = ["updated_count", "created_count", "last_updated_count"]
     query_dict = {
         "id": INTERNAL_LOGS,
         "table_name": table_name,
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [x for x in df.columns if x not in metrics and x != "date"]
+    dimensions = [
+        x for x in df.columns if x not in metrics and x not in ["date", "updated_at"]
+    ]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
     buttons = get_left_buttons_layout(INTERNAL_LOGS, active_x=table_name)
@@ -144,24 +153,41 @@ def internal_logs_plot(
     derived_viewport_row_ids,
 ):
     logger.info(f"Internal logs plot {table_name=}")
-    metrics = ["updated_count", "created_count", "last_updated_count"]
+    if table_name == "overview":
+        metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
+        date_col = "updated_at"
+        bar_column = "total_rows"
+    else:
+        metrics = ["updated_count", "created_count", "last_updated_count"]
+        date_col = "date"
+        bar_column = "updated_count"
     query_dict = {
         "id": INTERNAL_LOGS,
         "table_name": table_name,
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [x for x in df.columns if x not in metrics and x != "date"]
+    dimensions = [
+        x for x in df.columns if x not in metrics and x not in ["date", "updated_at"]
+    ]
+    if table_name == "overview":
+        df = (
+            df.groupby(
+                [pd.Grouper(key="updated_at", freq="H")] + dimensions, dropna=False
+            )
+            .last()
+            .reset_index()
+        )
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Internal logs plot_df: {df.shape=}")
     df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
     fig = overview_plot(
         df=df,
-        xaxis_col="date",
+        xaxis_col=date_col,
         y_vals=metrics,
         title="Updated Counts by Date",
         stack_bars=True,
-        bar_column="created_count",
+        bar_column=bar_column,
     )
     return fig
 

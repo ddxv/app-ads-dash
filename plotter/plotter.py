@@ -228,9 +228,9 @@ def overview_plot(
             fig.add_trace(my_dict)
         y_color_int += 1
     if stack_bars:
-        bar_type = "group"
-    else:
         bar_type = "stack"
+    else:
+        bar_type = "group"
     xaxis_title = titlelize(xaxis_col)
     yaxis1_title = titlelize(yaxis1_col)
     yaxis2_title = titlelize(yaxis2_col)
