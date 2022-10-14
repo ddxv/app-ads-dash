@@ -118,7 +118,7 @@ def render_content(tab):
 def internal_logs(n_clicks, start_date):
     logger.info(f"Internal logs: {dash.ctx.triggered_id=}")
     table_name = "overview"
-    if dash.ctx.triggered_id and dash.ctx.triggered_id != INTERNAL_LOGS + AFFIX_TABLE:
+    if dash.ctx.triggered_id and not isinstance(dash.ctx.triggered_id, str):
         table_name = dash.ctx.triggered_id["index"]
     if table_name == "overview":
         metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
@@ -160,7 +160,7 @@ def internal_logs_plot(
     else:
         metrics = ["updated_count", "created_count", "last_updated_count"]
         date_col = "date"
-        bar_column = "updated_count"
+        bar_column = "created_count"
     query_dict = {
         "id": INTERNAL_LOGS,
         "table_name": table_name,
@@ -179,7 +179,7 @@ def internal_logs_plot(
             .reset_index()
         )
     df = add_id_column(df, dimensions=dimensions)
-    logger.info(f"Internal logs plot_df: {df.shape=}")
+    logger.info(f"Internal logs plot_df: {df.shape=} {dimensions=}")
     df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
     fig = overview_plot(
         df=df,

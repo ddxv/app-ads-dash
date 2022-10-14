@@ -81,7 +81,7 @@ def query_store_apps_overview(start_date: str):
                     ;
                 """
     df = pd.read_sql(sel_query, con=DBCON.engine)
-    df = df.drop(["store", "crawl_result"], axis=0)
+    df = df.drop(["store", "crawl_result"], axis=1)
     return df
 
 
