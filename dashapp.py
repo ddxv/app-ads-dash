@@ -14,7 +14,7 @@ from ids import (
     DEVELOPERS_SEARCH,
     AFFIX_PLOT,
     TXT_VIEW,
-    UPDATED_HISTOGRAM,
+    INTERNAL_LOGS,
     AFFIX_DATE_PICKER,
     TXT_VIEW_TABLE,
     NETWORKS,
@@ -50,7 +50,7 @@ CACHE.clear()
 @CACHE.memoize()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
-    if query_dict["id"] == UPDATED_HISTOGRAM:
+    if query_dict["id"] == INTERNAL_LOGS:
         df = query_updated_timestamps(
             table_name=query_dict["table_name"], start_date=query_dict["start_date"]
         )
@@ -104,24 +104,21 @@ def render_content(tab):
 
 
 @app.callback(
-    Output(UPDATED_HISTOGRAM + AFFIX_TABLE, "data"),
-    Output(UPDATED_HISTOGRAM + AFFIX_TABLE, "columns"),
-    Output(UPDATED_HISTOGRAM + "-buttongroup", "children"),
-    Output(UPDATED_HISTOGRAM + "-memory-output", "data"),
+    Output(INTERNAL_LOGS + AFFIX_TABLE, "data"),
+    Output(INTERNAL_LOGS + AFFIX_TABLE, "columns"),
+    Output(INTERNAL_LOGS + "-buttongroup", "children"),
+    Output(INTERNAL_LOGS + "-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
-    Input(UPDATED_HISTOGRAM + AFFIX_DATE_PICKER, "start_date"),
+    Input(INTERNAL_LOGS + AFFIX_DATE_PICKER, "start_date"),
 )
-def histograms(n_clicks, start_date):
-    logger.info(f"Updated histogram {dash.ctx.triggered_id=}")
+def internal_logs(n_clicks, start_date):
+    logger.info(f"Internal logs: {dash.ctx.triggered_id=}")
     table_name = "store_apps"
-    if (
-        dash.ctx.triggered_id
-        and dash.ctx.triggered_id != UPDATED_HISTOGRAM + AFFIX_TABLE
-    ):
+    if dash.ctx.triggered_id and dash.ctx.triggered_id != INTERNAL_LOGS + AFFIX_TABLE:
         table_name = dash.ctx.triggered_id["index"]
     metrics = ["updated_count", "created_count", "last_updated_count"]
     query_dict = {
-        "id": UPDATED_HISTOGRAM,
+        "id": INTERNAL_LOGS,
         "table_name": table_name,
         "start_date": start_date,
     }
@@ -129,34 +126,34 @@ def histograms(n_clicks, start_date):
     dimensions = [x for x in df.columns if x not in metrics and x != "date"]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
-    buttons = get_left_buttons_layout("updated-histogram", active_x=table_name)
-    logger.info(f"Updated histogram: {table_name=} {df.shape=}")
+    buttons = get_left_buttons_layout(INTERNAL_LOGS, active_x=table_name)
+    logger.info(f"Internal Logs: {table_name=} {df.shape=}")
     table_obj = df.to_dict("records")
     return table_obj, column_dicts, buttons, table_name
 
 
 @app.callback(
-    Output(UPDATED_HISTOGRAM + AFFIX_PLOT, "figure"),
-    Input(UPDATED_HISTOGRAM + AFFIX_DATE_PICKER, "start_date"),
-    Input(UPDATED_HISTOGRAM + "-memory-output", "data"),
-    Input(UPDATED_HISTOGRAM + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Output(INTERNAL_LOGS + AFFIX_PLOT, "figure"),
+    Input(INTERNAL_LOGS + AFFIX_DATE_PICKER, "start_date"),
+    Input(INTERNAL_LOGS + "-memory-output", "data"),
+    Input(INTERNAL_LOGS + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
-def histograms_plot(
+def internal_logs_plot(
     start_date,
     table_name,
     derived_viewport_row_ids,
 ):
-    logger.info(f"Updated histogram plot {table_name=}")
+    logger.info(f"Internal logs plot {table_name=}")
     metrics = ["updated_count", "created_count", "last_updated_count"]
     query_dict = {
-        "id": UPDATED_HISTOGRAM,
+        "id": INTERNAL_LOGS,
         "table_name": table_name,
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != "date"]
     df = add_id_column(df, dimensions=dimensions)
-    logger.info(f"Updated histogram plot_df: {df.shape=}")
+    logger.info(f"Internal logs plot_df: {df.shape=}")
     df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
     fig = overview_plot(
         df=df,

@@ -1,6 +1,6 @@
 # Tab IDs
 NETWORKS = "networks"
-UPDATED_HISTOGRAM = "updated-histogram"
+INTERNAL_LOGS = "internal-logs"
 DEVELOPERS_SEARCH = "developers-search"
 TXT_VIEW = "txt-view"
 

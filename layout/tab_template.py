@@ -18,7 +18,7 @@ from ids import (
     AFFIX_TABLE,
     TXT_VIEW,
     DEVELOPERS_SEARCH,
-    UPDATED_HISTOGRAM,
+    INTERNAL_LOGS,
     AFFIX_BUTTON,
     NETWORKS,
 )
@@ -31,7 +31,7 @@ TABS = dbc.Tabs(
     persistence=True,
     persistence_type="memory",
     children=[
-        dbc.Tab(label="Crawler: Updated Counts", tab_id=UPDATED_HISTOGRAM),
+        dbc.Tab(label="Crawler: Updated Counts", tab_id=INTERNAL_LOGS),
         dbc.Tab(label="Ad Networks", tab_id=NETWORKS),
         dbc.Tab(label="Search: Developers", tab_id=DEVELOPERS_SEARCH),
         dbc.Tab(label="Search: App-Ads.txt File ", tab_id=TXT_VIEW),
@@ -50,7 +50,7 @@ def get_tab_layout_dict():
 
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
-    if UPDATED_HISTOGRAM == tab_id:
+    if INTERNAL_LOGS == tab_id:
         options_div = make_options_div(tab_id, date_picker=True)
     if NETWORKS == tab_id:
         switch_options = [
@@ -162,7 +162,7 @@ def create_tab_layout(tab_id: str) -> html.Div:
             dbc.Row(  # Entire Page Row
                 [
                     None
-                    if tab_id != "updated-histogram"
+                    if tab_id != INTERNAL_LOGS
                     else dbc.Col(
                         [buttons_div],
                         width={"size": 2, "order": "first"},
