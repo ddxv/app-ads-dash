@@ -19,8 +19,8 @@ from ids import (
     TXT_VIEW_TABLE,
     NETWORKS,
 )
-from layout.layout import APP_LAYOUT, TAB_LAYOUT_DICT
-from layout.tab_template import make_columns, get_left_buttons_layout
+from layout.layout import APP_LAYOUT
+from layout.tab_template import make_columns, get_left_buttons_layout, TAB_LAYOUT_DICT
 from plotter.plotter import horizontal_barchart, treemap, overview_plot
 from dbcon.queries import (
     get_app_txt_view,

@@ -26,6 +26,28 @@ from ids import (
 logger = get_logger(__name__)
 
 
+TABS = dbc.Tabs(
+    id="tabs-selector",
+    persistence=True,
+    persistence_type="memory",
+    children=[
+        dbc.Tab(label="Crawler: Updated Counts", tab_id=UPDATED_HISTOGRAM),
+        dbc.Tab(label="Ad Networks", tab_id=NETWORKS),
+        dbc.Tab(label="Search: Developers", tab_id=DEVELOPERS_SEARCH),
+        dbc.Tab(label="Search: App-Ads.txt File ", tab_id=TXT_VIEW),
+    ],
+)
+
+
+def get_tab_layout_dict():
+    tab_layout = {}
+    tab_tags = [x.tab_id for x in TABS.children]
+    for tab_tag in tab_tags:
+        default_layout = create_tab_layout(tab_tag)
+        tab_layout[tab_tag] = default_layout
+    return tab_layout
+
+
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
     if UPDATED_HISTOGRAM == tab_id:
@@ -391,8 +413,6 @@ def get_left_buttons_layout(tab_id, info=None, active_x=None) -> html.Div:
     return mydiv
 
 
-logger.info("Set layout column defaults")
-
 TXT_VIEW_COLUMNS = [
     "my_domain_url",
     "their_domain_url",
@@ -421,3 +441,5 @@ DOLLAR_NAMES = [
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
 
 DATE_FORMAT = "%Y-%m-%d"
+
+TAB_LAYOUT_DICT = get_tab_layout_dict()
