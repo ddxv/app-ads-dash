@@ -1,5 +1,5 @@
-import dash
 from dash import html
+import dash
 
 dash.register_page(__name__, name="Home", path="/")
 
@@ -13,3 +13,5 @@ layout = html.Div(
         ),
     ]
 )
+
+dash.register_page(__name__, name="Home", path="/", layout=layout)

@@ -26,26 +26,49 @@ from ids import (
 logger = get_logger(__name__)
 
 
-TABS = dbc.Tabs(
-    id="tabs-selector",
-    persistence=True,
-    persistence_type="memory",
-    children=[
-        dbc.Tab(label="Crawler: Updated Counts", tab_id=INTERNAL_LOGS),
-        dbc.Tab(label="Ad Networks", tab_id=NETWORKS),
-        dbc.Tab(label="Search: Developers", tab_id=DEVELOPERS_SEARCH),
-        dbc.Tab(label="Search: App-Ads.txt File ", tab_id=TXT_VIEW),
-    ],
-)
+def make_main_content_list(page_id: str, tab_options) -> list:
+    tabs = make_tabs(page_id=page_id, tab_options=tab_options)
+    main_content = [
+        dbc.Card(
+            [
+                dbc.CardHeader(
+                    [
+                        dbc.Row(  # Top Row tabs
+                            [
+                                dbc.Col([tabs]),
+                            ],
+                        ),
+                        dbc.Row(
+                            [
+                                dbc.CardBody(id=page_id + "-tabs-content"),
+                            ],
+                        ),
+                    ]
+                )
+            ]
+        )
+    ]
+    return main_content
 
 
-def get_tab_layout_dict():
+def get_tab_layout_dict(page_id: str, tab_options: list[dict]) -> dict:
+    tabs = make_tabs(page_id, tab_options=tab_options)
     tab_layout = {}
-    tab_tags = [x.tab_id for x in TABS.children]
+    tab_tags = [x.tab_id for x in tabs.children]
     for tab_tag in tab_tags:
         default_layout = create_tab_layout(tab_tag)
         tab_layout[tab_tag] = default_layout
     return tab_layout
+
+
+def make_tabs(page_id: str, tab_options: list[dict]) -> dbc.Tabs:
+    tabs = dbc.Tabs(
+        id=page_id + "-tabs-selector",
+        persistence=True,
+        persistence_type="memory",
+        children=[dbc.Tab(label=x["label"], tab_id=x["tab_id"]) for x in tab_options],
+    )
+    return tabs
 
 
 def make_tab_options(tab_id: str) -> html.Div:
@@ -441,5 +464,3 @@ DOLLAR_NAMES = [
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
 
 DATE_FORMAT = "%Y-%m-%d"
-
-TAB_LAYOUT_DICT = get_tab_layout_dict()
