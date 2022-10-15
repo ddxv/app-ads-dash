@@ -51,7 +51,7 @@ def requires_auth(f):
     return decorated
 
 
-@server.route("/appads")
+@server.route("/dash")
 @requires_auth
 def appads():
     logger.info("Loading dash")
@@ -62,7 +62,7 @@ def appads():
 @requires_auth
 def home():
     logger.info("Loading home page")
-    return redirect(url_for("appads"))
+    return redirect(url_for("dash"))
 
 
 if __name__ == "__main__":

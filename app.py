@@ -14,7 +14,7 @@ load_figure_template("darkly")
 app = dash.Dash(
     name=__name__,
     server=server,
-    url_base_pathname="/appads/",
+    url_base_pathname="/dash/",
     external_stylesheets=[dbc.themes.DARKLY, dbc_css],
     suppress_callback_exceptions=True,
     use_pages=True,
