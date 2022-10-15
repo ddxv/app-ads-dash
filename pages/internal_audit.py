@@ -1,13 +1,14 @@
-# from app import app
 import dash
 from dash import callback, Input, Output
 import pandas as pd
 import json
 from ids import (
+    AFFIX_SWITCHES,
     AFFIX_TABLE,
     AFFIX_PLOT,
     INTERNAL_LOGS,
     AFFIX_DATE_PICKER,
+    STORE_APPS_HISTORY,
 )
 from layout.tab_template import (
     make_columns,
@@ -30,6 +31,7 @@ PAGE_ID = "internal-audit"
 
 TAB_OPTIONS = [
     {"label": "Crawler: Updated Counts", "tab_id": INTERNAL_LOGS},
+    {"label": "Store Apps Historical", "tab_id": STORE_APPS_HISTORY},
 ]
 
 TABS_DICT = get_tab_layout_dict(page_id=PAGE_ID, tab_options=TAB_OPTIONS)
@@ -57,22 +59,18 @@ def render_content(tab):
 )
 def internal_logs(n_clicks, start_date):
     logger.info(f"Internal logs: {dash.ctx.triggered_id=}")
-    table_name = "overview"
+    table_name = "store_apps"
     if dash.ctx.triggered_id and not isinstance(dash.ctx.triggered_id, str):
         table_name = dash.ctx.triggered_id["index"]
-    if table_name == "overview":
-        metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
-    else:
-        metrics = ["updated_count", "created_count", "last_updated_count"]
+    metrics = ["updated_count", "created_count", "last_updated_count"]
+    date_col = "date"
     query_dict = {
         "id": INTERNAL_LOGS,
         "table_name": table_name,
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [
-        x for x in df.columns if x not in metrics and x not in ["date", "updated_at"]
-    ]
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
     buttons = get_left_buttons_layout(INTERNAL_LOGS, active_x=table_name)
@@ -93,33 +91,84 @@ def internal_logs_plot(
     derived_viewport_row_ids,
 ):
     logger.info(f"Internal logs plot {table_name=}")
-    if table_name == "overview":
-        metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
-        date_col = "updated_at"
-        bar_column = "total_rows"
-    else:
-        metrics = ["updated_count", "created_count", "last_updated_count"]
-        date_col = "date"
-        bar_column = "created_count"
+    metrics = ["updated_count", "created_count", "last_updated_count"]
+    date_col = "date"
+    bar_column = "created_count"
     query_dict = {
         "id": INTERNAL_LOGS,
         "table_name": table_name,
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    dimensions = [
-        x for x in df.columns if x not in metrics and x not in ["date", "updated_at"]
-    ]
-    if table_name == "overview":
-        df = (
-            df.groupby(
-                [pd.Grouper(key="updated_at", freq="H")] + dimensions, dropna=False
-            )
-            .last()
-            .reset_index()
-        )
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Internal logs plot_df: {df.shape=} {dimensions=}")
+    df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
+    fig = overview_plot(
+        df=df,
+        xaxis_col=date_col,
+        y_vals=metrics,
+        title="Updated Counts by Date",
+        stack_bars=True,
+        bar_column=bar_column,
+    )
+    return fig
+
+
+@callback(
+    Output(STORE_APPS_HISTORY + AFFIX_TABLE, "data"),
+    Output(STORE_APPS_HISTORY + AFFIX_TABLE, "columns"),
+    Input(STORE_APPS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
+    Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
+)
+def store_apps_history(start_date, switches):
+    logger.info("Store apps historical data")
+    metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
+    date_col = "updated_at"
+    query_dict = {
+        "id": STORE_APPS_HISTORY,
+        "start_date": start_date,
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
+    if switches and len(switches) > 0:
+        dimensions = [x for x in dimensions if x in switches]
+        metrics = [x for x in metrics if x in switches]
+    df = df.set_index(date_col).groupby(dimensions, dropna=False).last().reset_index()
+    df = add_id_column(df, dimensions=dimensions)
+    column_dicts = make_columns(dimensions, metrics)
+    logger.info(f"Store apps history: {dimensions=} {df.shape=}")
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts
+
+
+@callback(
+    Output(STORE_APPS_HISTORY + AFFIX_PLOT, "figure"),
+    Input(STORE_APPS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
+    Input(STORE_APPS_HISTORY + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
+)
+def store_apps_history_plot(start_date, derived_viewport_row_ids, switches):
+    logger.info("Store apps history plot")
+    metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
+    date_col = "updated_at"
+    bar_column = "total_rows"
+    query_dict = {
+        "id": STORE_APPS_HISTORY,
+        "start_date": start_date,
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
+    if switches and len(switches) > 0:
+        dimensions = [x for x in dimensions if x in switches]
+        metrics = [x for x in metrics if x in switches]
+    df = (
+        df.groupby([pd.Grouper(key=date_col, freq="H")] + dimensions, dropna=False)
+        .last()
+        .reset_index()
+    )
+    df = add_id_column(df, dimensions=dimensions)
+    logger.info(f"Store apps history plot: {dimensions=} {df.shape=}")
     df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
     fig = overview_plot(
         df=df,

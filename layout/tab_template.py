@@ -16,6 +16,7 @@ from ids import (
     AFFIX_SWITCHES,
     AFFIX_DATE_PICKER,
     AFFIX_TABLE,
+    STORE_APPS_HISTORY,
     TXT_VIEW,
     DEVELOPERS_SEARCH,
     INTERNAL_LOGS,
@@ -73,6 +74,40 @@ def make_tabs(page_id: str, tab_options: list[dict]) -> dbc.Tabs:
 
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
+    if STORE_APPS_HISTORY == tab_id:
+        switch_options = [
+            {
+                "label": "Store",
+                "value": "store_name",
+            },
+            {
+                "label": "Crawl Outcome",
+                "value": "outcome",
+            },
+            # Metrics
+            {
+                "label": "Total Rows",
+                "value": "total_rows",
+            },
+            {
+                "label": "Days Delay Average",
+                "value": "avg_days",
+            },
+            {
+                "label": "Days Delay Max",
+                "value": "max_days",
+            },
+            {
+                "label": "Rows Older than 15 Days",
+                "value": "rows_older_than15",
+            },
+        ]
+        options_div = make_options_div(
+            tab_id,
+            date_picker=True,
+            switch_options=switch_options,
+            switch_defaults=["store_name", "total_rows"],
+        )
     if INTERNAL_LOGS == tab_id:
         options_div = make_options_div(tab_id, date_picker=True)
     if NETWORKS == tab_id:
@@ -414,7 +449,7 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
 
 def get_left_buttons_layout(tab_id, info=None, active_x=None) -> html.Div:
     mydiv = html.Div([])
-    tables = ["overview"] + TABLES_WITH_TIMES
+    tables = TABLES_WITH_TIMES
     mydiv = dbc.ButtonGroup(
         [
             dbc.Button(

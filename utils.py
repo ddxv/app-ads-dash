@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from flask_caching import Cache
 from config import get_logger
-from ids import INTERNAL_LOGS, TXT_VIEW, NETWORKS, DEVELOPERS_SEARCH
+from ids import INTERNAL_LOGS, TXT_VIEW, NETWORKS, DEVELOPERS_SEARCH, STORE_APPS_HISTORY
 from dbcon.queries import (
     get_app_txt_view,
     query_search_developers,
@@ -33,14 +33,13 @@ CACHE.clear()
 @CACHE.memoize()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
+    if query_dict["id"] == STORE_APPS_HISTORY:
+        df = query_store_apps_overview(start_date=query_dict["start_date"])
     if query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
-        if table_name == "overview":
-            df = query_store_apps_overview(start_date=query_dict["start_date"])
-        else:
-            df = query_updated_timestamps(
-                table_name=table_name, start_date=query_dict["start_date"]
-            )
+        df = query_updated_timestamps(
+            table_name=table_name, start_date=query_dict["start_date"]
+        )
     elif query_dict["id"] == TXT_VIEW:
         df = get_app_txt_view(query_dict["developer_url"])
     elif query_dict["id"] == NETWORKS:
@@ -57,16 +56,15 @@ def get_cached_dataframe(query_json):
 def limit_rows_for_plotting(
     df: pd.DataFrame, row_ids: list[str] | None, metrics: list[str] = None
 ) -> pd.DataFrame:
-    logger.info("Limit Rows for Plotting")
     original_shape = df.shape
     if row_ids:
-        logger.info(f"Rows selected: {row_ids=}")
+        logger.info(f"Limit plot ids: {row_ids=}")
         df = df[df["id"].isin(row_ids)]
     if not row_ids:
-        logger.warning("NO row_ids or derived_row_ids! attempting to manually select")
         if metrics and len(metrics) > 0:
             sort_column = metrics[0]
         else:
+            logger.warning("Limit plot ids: No row_ids! Attempt manual select")
             sort_column = "count"
         idf = df.groupby("id")[sort_column].sum().reset_index()
         idf = (
@@ -76,7 +74,7 @@ def limit_rows_for_plotting(
         )
         row_ids = idf["id"].unique().tolist()
         df = df[df["id"].isin(row_ids)]
-    logger.info(f"limit_rows_for_plotting: {original_shape=} new_shape: {df.shape}")
+    logger.info(f"Limit plot ids: {original_shape=} new_shape: {df.shape}")
     return df
 
 

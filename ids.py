@@ -1,8 +1,11 @@
-# Tab IDs
+# Analytics Tab IDs
 NETWORKS = "networks"
-INTERNAL_LOGS = "internal-logs"
 DEVELOPERS_SEARCH = "developers-search"
 TXT_VIEW = "txt-view"
+
+# Internal Tab IDs
+INTERNAL_LOGS = "internal-logs"
+STORE_APPS_HISTORY = "internal-overview"
 
 # Tab Options
 AFFIX_DATE_PICKER = "-date-picker"
