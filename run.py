@@ -9,7 +9,7 @@ from flask import (
 )
 from functools import wraps
 from dbcon.queries import get_dash_users
-from testdash import app as dashapp
+from dashapp import app as dashapp
 
 logger = get_logger(__name__)
 
