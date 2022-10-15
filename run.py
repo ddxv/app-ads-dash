@@ -8,9 +8,8 @@ from flask import (
     redirect,
 )
 from functools import wraps
-
 from dbcon.queries import get_dash_users
-from dashapp import app as dashapp
+from testdash import app as dashapp
 
 logger = get_logger(__name__)
 
@@ -52,9 +51,9 @@ def requires_auth(f):
     return decorated
 
 
-@server.route("/dash")
+@server.route("/appads")
 @requires_auth
-def dash():
+def appads():
     logger.info("Loading dash")
     return render_template("dashboard.html", template="Flask")
 
