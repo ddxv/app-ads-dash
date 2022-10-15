@@ -62,7 +62,7 @@ def appads():
 @requires_auth
 def home():
     logger.info("Loading home page")
-    return redirect(url_for("dash"))
+    return redirect(url_for("appads"))
 
 
 if __name__ == "__main__":
