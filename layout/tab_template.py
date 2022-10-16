@@ -6,7 +6,8 @@ from dash import dash_table
 from plotly import graph_objects as go
 import datetime
 from dbcon.queries import TABLES_WITH_TIMES
-from config import get_logger
+from utils import get_earlier_date
+from config import get_logger, DATE_FORMAT
 from ids import (
     AFFIX_GROUPBY_TIME,
     AFFIX_LOADING,
@@ -330,10 +331,7 @@ def make_date_picker_column(tab_id: str, date_picker: bool | None) -> dbc.Col:
                 dcc.DatePickerRange(
                     id=tab_id + AFFIX_DATE_PICKER,
                     persistence_type="session",
-                    start_date=datetime.datetime.strftime(
-                        datetime.datetime.now() - datetime.timedelta(days=30),
-                        DATE_FORMAT,
-                    ),
+                    start_date=get_earlier_date(days=30),
                     end_date=datetime.datetime.strftime(
                         datetime.datetime.now(), DATE_FORMAT
                     ),
@@ -497,5 +495,3 @@ DOLLAR_NAMES = [
 ]
 
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
-
-DATE_FORMAT = "%Y-%m-%d"
