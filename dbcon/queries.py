@@ -70,7 +70,7 @@ def query_store_apps_overview(start_date: str):
     sel_query = f"""SELECT
                         sas.*,
                         s.name as store_name,
-                        cr.outcome
+                        coalesce(cr.outcome, 'not_crawled')
                     FROM
                     logging.store_apps_snapshot sas
                     LEFT JOIN crawl_results cr
