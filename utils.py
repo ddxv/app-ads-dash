@@ -1,7 +1,8 @@
 import json
+import datetime
 import pandas as pd
 from flask_caching import Cache
-from config import get_logger
+from config import get_logger, DATE_FORMAT
 from ids import INTERNAL_LOGS, TXT_VIEW, NETWORKS, DEVELOPERS_SEARCH, STORE_APPS_HISTORY
 from dbcon.queries import (
     get_app_txt_view,
@@ -15,19 +16,34 @@ import dash
 
 logger = get_logger(__name__)
 
-app = dash.get_app()
+CACHE_CONFIG = {
+    "CACHE_TYPE": "filesystem",
+    "CACHE_DIR": "/tmp/appdash/",
+    # higher numbers will store more data in the filesystem
+    "CACHE_THRESHOLD": 50,
+}
 
 
-CACHE = Cache(
-    app.server,
-    config={
-        "CACHE_TYPE": "filesystem",
-        "CACHE_DIR": "/tmp/appdash/",
-        # higher numbers will store more data in the filesystem
-        "CACHE_THRESHOLD": 50,
-    },
-)
-CACHE.clear()
+def create_new_cache():
+    try:
+        app = dash.get_app()
+        server = app.server
+    except Exception:
+        # Ok if importing via repl
+        logger.warning("Dash app not set first, not caching across dash server")
+        from flask import Flask
+
+        server = Flask(__name__)
+    cache = Cache(
+        app=server,
+        config=CACHE_CONFIG,
+    )
+    with server.app_context():
+        cache.clear()
+    return cache
+
+
+CACHE = create_new_cache()
 
 
 @CACHE.memoize()
@@ -35,7 +51,7 @@ def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
     if query_dict["id"] == STORE_APPS_HISTORY:
         df = query_store_apps_overview(start_date=query_dict["start_date"])
-    if query_dict["id"] == INTERNAL_LOGS:
+    elif query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
         df = query_updated_timestamps(
             table_name=table_name, start_date=query_dict["start_date"]
@@ -83,6 +99,14 @@ def add_id_column(df: pd.DataFrame, dimensions: list[str]) -> pd.DataFrame:
         lambda row: " ".join(row.values.astype(str)), axis=1
     )
     return df
+
+
+def get_earlier_date(days: int = 30) -> str:
+    my_date = datetime.datetime.strftime(
+        datetime.datetime.now() - datetime.timedelta(days=days),
+        DATE_FORMAT,
+    )
+    return my_date
 
 
 MAX_ROWS = 10

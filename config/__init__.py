@@ -47,6 +47,7 @@ sys.excepthook = handle_exception
 
 logger = get_logger(__name__)
 
+DATE_FORMAT = "%Y-%m-%d"
 
 CONFIG_FILENAME = "config.yml"
 

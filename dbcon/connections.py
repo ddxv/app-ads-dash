@@ -5,14 +5,14 @@ from sshtunnel import SSHTunnelForwarder
 logger = get_logger(__name__)
 
 
-def OpenSSHTunnel(server_name):
+def OpenSSHTunnel(server_name: str):
     with SSHTunnelForwarder(
         (CONFIG[server_name]["host"], 22),  # Remote server IP and SSH port
         ssh_username=CONFIG[server_name]["os_user"],
         remote_bind_address=("127.0.0.1", 5432),
     ) as server:  # PostgreSQL server IP and sever port on remote machine
-        server.start()  # start ssh sever
-        logger.info(f"Connecting via SSH {server_name=} and bind to local")
+        # server.start()  # start ssh sever
+        logger.info(f"Opened SSH Tunnel {server_name=}")
     return server
 
 
@@ -30,18 +30,17 @@ def get_db_connection(server_name: str):
 
 def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
     # PROD, set in the OS environment, is true if python running in EC2 security group
-    server_ip = CONFIG[server_name]["host"]
-    if server_ip == "localhost" or server_ip.startswith("172"):
-        logger.info("Prod environment mode no SSH")
-        server_ip = CONFIG[server_name]["host"]
-        server_local_port = 5432
+    db_ip = CONFIG[server_name]["host"]
+    if db_ip == "localhost" or db_ip.startswith("172"):
+        db_ip = CONFIG[server_name]["host"]
+        db_port = 5432
     else:
-        logger.info("Connecting via SSH tunnel")
         ssh_server = OpenSSHTunnel(server_name)
         ssh_server.start()
-        server_local_port = str(ssh_server.local_bind_port)
-        server_ip = "127.0.0.1"
-    return server_ip, server_local_port
+        db_port = str(ssh_server.local_bind_port)
+        db_ip = "127.0.0.1"
+    logger.info(f"Connecting {db_ip=} {db_port=}")
+    return db_ip, db_port
 
 
 class PostgresCon:

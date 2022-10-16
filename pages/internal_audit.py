@@ -17,9 +17,12 @@ from layout.tab_template import (
     make_main_content_list,
 )
 from plotter.plotter import overview_plot
-from utils import get_cached_dataframe, limit_rows_for_plotting, add_id_column
-
-
+from utils import (
+    get_cached_dataframe,
+    get_earlier_date,
+    limit_rows_for_plotting,
+    add_id_column,
+)
 from config import get_logger
 
 logger = get_logger(__name__)
@@ -134,6 +137,16 @@ def store_apps_history(start_date, switches):
     if switches and len(switches) > 0:
         dimensions = [x for x in dimensions if x in switches]
         metrics = [x for x in metrics if x in switches]
+        agg_default = {
+            "total_rows": sum,
+            "avg_days": "mean",
+            "max_days": max,
+            "rows_older_than15": sum,
+        }
+        metric_aggs = {k: v for k, v in agg_default.items() if k in metrics}
+    # First agg across dimensions
+    df = df.groupby([date_col] + dimensions)[metrics].agg(metric_aggs).reset_index()
+    # Take last time for overview
     df = df.set_index(date_col).groupby(dimensions, dropna=False).last().reset_index()
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
@@ -148,8 +161,12 @@ def store_apps_history(start_date, switches):
     Input(STORE_APPS_HISTORY + AFFIX_TABLE, "derived_viewport_row_ids"),
     Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
 )
-def store_apps_history_plot(start_date, derived_viewport_row_ids, switches):
+def store_apps_history_plot(
+    start_date: str, derived_viewport_row_ids: list[str], switches: list[str]
+):
     logger.info("Store apps history plot")
+    if "start_date" not in locals() or not start_date:
+        start_date = get_earlier_date(days=30)
     metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
     date_col = "updated_at"
     bar_column = "total_rows"
@@ -162,6 +179,16 @@ def store_apps_history_plot(start_date, derived_viewport_row_ids, switches):
     if switches and len(switches) > 0:
         dimensions = [x for x in dimensions if x in switches]
         metrics = [x for x in metrics if x in switches]
+        agg_default = {
+            "total_rows": sum,
+            "avg_days": "mean",
+            "max_days": max,
+            "rows_older_than15": sum,
+        }
+        metric_aggs = {k: v for k, v in agg_default.items() if k in metrics}
+    # First agg across dimensions
+    df = df.groupby([date_col] + dimensions)[metrics].agg(metric_aggs).reset_index()
+    # Limit Frequency for plotting to control number of points/columns
     df = (
         df.groupby([pd.Grouper(key=date_col, freq="H")] + dimensions, dropna=False)
         .last()
@@ -170,6 +197,7 @@ def store_apps_history_plot(start_date, derived_viewport_row_ids, switches):
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Store apps history plot: {dimensions=} {df.shape=}")
     df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
+
     fig = overview_plot(
         df=df,
         xaxis_col=date_col,
