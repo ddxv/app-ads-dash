@@ -208,12 +208,12 @@ def networks_table(
         top_only = True
     else:
         top_only = False
-    if dropdown and len(dropdown) > 0 and dropdown[0] != "all_data":
+    if dropdown and dropdown != "all_data":
         logger.info(f"Networks Dropdown is {dropdown=}")
         query_dict = {"id": "networks-with-app-metrics"}
         df = get_cached_dataframe(query_json=json.dumps(query_dict))
         df = df[df["store"] == 1]
-        df = df[df["category"].isin(dropdown)]
+        df = df[df["category"] == dropdown]
         if top_only:
             error = """Top only for categories is NOT implemented, 
                 requires checking publisher install count!"""
