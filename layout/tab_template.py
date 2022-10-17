@@ -5,7 +5,7 @@ from dash import html
 from dash import dash_table
 from plotly import graph_objects as go
 import datetime
-from dbcon.queries import TABLES_WITH_TIMES
+from dbcon.queries import APP_CATEGORIES, TABLES_WITH_TIMES
 from utils import get_earlier_date
 from config import get_logger, DATE_FORMAT
 from ids import (
@@ -136,8 +136,17 @@ def make_tab_options(tab_id: str) -> html.Div:
                 "value": "view_treemap",
             },
         ]
+        groupby_options = [{"label": "All Categories", "value": "all_data"}] + [
+            {"label": x.replace("_", " ").title(), "value": x} for x in APP_CATEGORIES
+        ]
+        groupby_defaults = ["all_data"]
         options_div = make_options_div(
-            tab_id, switch_options=switch_options, radio_options=radio_options
+            tab_id,
+            switch_options=switch_options,
+            radio_options=radio_options,
+            dropdown_options=groupby_options,
+            dropdown_defaults=groupby_defaults,
+            dropdown_multi=False,
         )
     if DEVELOPERS_SEARCH == tab_id:
         options_div = make_options_div(tab_id, search_hint="Name, ids or URL parts...")
@@ -146,8 +155,8 @@ def make_tab_options(tab_id: str) -> html.Div:
         groupby_defaults = ["my_domain_url", "ad_domain_url"]
         options_div = make_options_div(
             tab_id,
-            groupby_options=groupby_options,
-            groupby_defaults=groupby_defaults,
+            dropdown_options=groupby_options,
+            dropdown_defaults=groupby_defaults,
             search_hint="Developer URL ...",
         )
     return options_div
@@ -283,22 +292,25 @@ def make_radio_buttons(
     return button_group
 
 
-def make_groupby_column(
-    tab_id: str, groupby_columns: list[dict], groupby_defaults: list[str] | None
+def make_dropdown(
+    tab_id: str,
+    dropdown_options: list[dict],
+    dropdown_defaults: list[str] | None,
+    dropdown_multi=True,
 ) -> dbc.Col:
     groupby_col = dbc.Col([])
-    if groupby_columns and not groupby_defaults:
-        groupby_defaults = [groupby_columns[0]["value"]]
-    if groupby_columns:
+    if dropdown_options and not dropdown_defaults:
+        dropdown_defaults = [dropdown_options[0]["value"]]
+    if dropdown_options:
         groupby_col.children.append(
             dcc.Dropdown(
                 id=tab_id + AFFIX_GROUPBY,
-                options=groupby_columns,
-                multi=True,
-                placeholder="Select Groupby...",
+                options=dropdown_options,
+                multi=dropdown_multi,
+                placeholder="Select ...",
                 persistence=True,
                 persistence_type="memory",
-                value=groupby_defaults,
+                value=dropdown_defaults,
             )
         )
     return groupby_col
@@ -369,8 +381,9 @@ def make_search_column(tab_id: str, search_hint: str | None) -> dbc.Col:
 
 def make_options_div(
     tab_id=str,
-    groupby_options: list[dict] = None,
-    groupby_defaults: list[str] = None,
+    dropdown_options: list[dict] = None,
+    dropdown_defaults: list[str] = None,
+    dropdown_multi: bool = True,
     switch_options: list[dict[str:str]] = None,
     switch_defaults: list[str] = None,
     radio_options: list[dict[str:str]] = None,
@@ -383,7 +396,9 @@ def make_options_div(
     search_col = make_search_column(tab_id, search_hint)
     if len(search_col.children) > 0:
         options_row.children.append(search_col)
-    groupby_col = make_groupby_column(tab_id, groupby_options, groupby_defaults)
+    groupby_col = make_dropdown(
+        tab_id, dropdown_options, dropdown_defaults, dropdown_multi=dropdown_multi
+    )
     if len(groupby_col.children) > 0:
         options_row.children.append(groupby_col)
     checklist_col = make_switch_options(tab_id, switch_options, switch_defaults)

@@ -6,6 +6,7 @@ from config import get_logger, DATE_FORMAT
 from ids import INTERNAL_LOGS, TXT_VIEW, NETWORKS, DEVELOPERS_SEARCH, STORE_APPS_HISTORY
 from dbcon.queries import (
     get_app_txt_view,
+    query_networks_with_app_metrics,
     query_search_developers,
     query_store_apps_overview,
     query_updated_timestamps,
@@ -49,7 +50,9 @@ CACHE = create_new_cache()
 @CACHE.memoize()
 def get_cached_dataframe(query_json):
     query_dict = json.loads(query_json)
-    if query_dict["id"] == STORE_APPS_HISTORY:
+    if query_dict["id"] == "networks-with-app-metrics":
+        df = query_networks_with_app_metrics()
+    elif query_dict["id"] == STORE_APPS_HISTORY:
         df = query_store_apps_overview(start_date=query_dict["start_date"])
     elif query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
@@ -80,7 +83,7 @@ def limit_rows_for_plotting(
         if metrics and len(metrics) > 0:
             sort_column = metrics[0]
         else:
-            logger.warning("Limit plot ids: No row_ids! Attempt manual select")
+            logger.warning("Limit plot ids: No row_ids! manual select")
             sort_column = "count"
         idf = df.groupby("id")[sort_column].sum().reset_index()
         idf = (

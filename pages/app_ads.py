@@ -197,9 +197,10 @@ def txt_view_table(
     Input(NETWORKS + AFFIX_TABLE, "derived_viewport_row_ids"),
     Input(NETWORKS + AFFIX_SWITCHES, "value"),
     Input(NETWORKS + AFFIX_RADIOS, "value"),
+    Input(NETWORKS + AFFIX_GROUPBY, "value"),
 )
 def networks_table(
-    derived_viewport_row_ids: list[str], switches: list[str], radios: str
+    derived_viewport_row_ids: list[str], switches: list[str], radios: str, dropdown
 ):
     logger.info(f"{NETWORKS} start")
     metrics = ["size"]
@@ -207,21 +208,28 @@ def networks_table(
         top_only = True
     else:
         top_only = False
-    query_dict = {"id": NETWORKS, "top_only": top_only}
-    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    if dropdown and len(dropdown) > 0 and dropdown[0] != "all_data":
+        logger.info(f"Networks Dropdown is {dropdown=}")
+        query_dict = {"id": "networks-with-app-metrics"}
+        df = get_cached_dataframe(query_json=json.dumps(query_dict))
+        df = df[df["store"] == 1]
+        df = df[df["category"].isin(dropdown)]
+        if top_only:
+            error = """Top only for categories is NOT implemented, 
+                requires checking publisher install count!"""
+            logger.error(error)
+    else:
+        query_dict = {"id": NETWORKS, "top_only": top_only}
+        df = get_cached_dataframe(query_json=json.dumps(query_dict))
     if switches and "view_reseller" in switches:
         df = df[df["relationship"] == "RESELLER"]
     else:
         df = df[df["relationship"] == "DIRECT"]
-    num_sites = df["publishers_count"].sum()
-    df["percent"] = df["publishers_count"] / num_sites
+    df["percent"] = df["publishers_count"] / df["publishers_total"]
     df = df.sort_values("percent", ascending=False)
     metrics = ["percent"]
     dimensions = [x for x in df.columns if x not in metrics]
     df = add_id_column(df, dimensions=dimensions)
-
-    df["percent"] = df["publishers_count"] / df["publishers_total"]
-
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
     df = limit_rows_for_plotting(

@@ -14,7 +14,35 @@ def get_dash_users() -> dict:
     return users_dict
 
 
-def query_networks_count(top_only: bool = False):
+def get_app_categories() -> list[str]:
+    sel_query = """SELECT DISTINCT category
+                    FROM networks_with_app_metrics
+                    ;
+                    """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    category_list = df["category"].tolist()
+    return category_list
+
+
+def query_networks_with_app_metrics() -> pd.DataFrame:
+    table_name = "networks_with_app_metrics"
+    sel_query = f"""SELECT
+                    *
+                    FROM 
+                    {table_name}
+                    ;
+                """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    df = df.rename(
+        columns={
+            "publisher_urls": "publishers_count",
+            "total_publisher_urls": "publishers_total",
+        }
+    )
+    return df
+
+
+def query_networks_count(top_only: bool = False) -> pd.DataFrame:
     if top_only:
         table_name = "network_counts_top"
     else:
@@ -200,6 +228,7 @@ DBCON = get_db_connection("madrone")
 DBCON.set_engine()
 SCHEMA_OVERVIEW = get_schema_overview("public")
 TABLES = SCHEMA_OVERVIEW["table_name"].unique().tolist()
+APP_CATEGORIES = get_app_categories()
 TABLES_WITH_TIMES = (
     SCHEMA_OVERVIEW[SCHEMA_OVERVIEW["column_name"].isin(["updated_at", "created_at"])][
         "table_name"
