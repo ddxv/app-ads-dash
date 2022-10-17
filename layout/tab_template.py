@@ -139,7 +139,7 @@ def make_tab_options(tab_id: str) -> html.Div:
         groupby_options = [{"label": "All Categories", "value": "all_data"}] + [
             {"label": x.replace("_", " ").title(), "value": x} for x in APP_CATEGORIES
         ]
-        groupby_defaults = ["all_data"]
+        groupby_defaults = "all_data"
         options_div = make_options_div(
             tab_id,
             switch_options=switch_options,

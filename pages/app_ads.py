@@ -209,6 +209,8 @@ def networks_table(
     else:
         top_only = False
     if dropdown and dropdown != "all_data":
+        cat_title = f"{dropdown.replace('_', ' ').title()}"
+        title = f"{cat_title} Marketshare of Programmatic Ad Networks"
         logger.info(f"Networks Dropdown is {dropdown=}")
         query_dict = {"id": "networks-with-app-metrics"}
         df = get_cached_dataframe(query_json=json.dumps(query_dict))
@@ -219,6 +221,7 @@ def networks_table(
                 requires checking publisher install count!"""
             logger.error(error)
     else:
+        title = "Marketshare of Programmatic Ad Networks"
         query_dict = {"id": NETWORKS, "top_only": top_only}
         df = get_cached_dataframe(query_json=json.dumps(query_dict))
     if switches and "view_reseller" in switches:
@@ -235,10 +238,6 @@ def networks_table(
     df = limit_rows_for_plotting(
         df=df, row_ids=derived_viewport_row_ids, metrics=metrics
     )
-    if top_only:
-        title = "Marketshare of Programmatic Ad Networks"
-    else:
-        title = "Marketshare of Programmatic Ad Networks"
     xaxis_col = "ad_domain_url"
     bar_column = "percent"
     y_vals = metrics
