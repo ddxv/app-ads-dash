@@ -20,7 +20,7 @@ def get_app_categories() -> list[str]:
                     ;
                     """
     df = pd.read_sql(sel_query, DBCON.engine)
-    category_list = df["category"].tolist()
+    category_list = df["category"].tolist().sort()
     return category_list
 
 
