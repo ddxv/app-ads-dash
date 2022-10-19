@@ -108,6 +108,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             date_picker=True,
             switch_options=switch_options,
             switch_defaults=["store_name", "total_rows"],
+            groupby_time=True,
         )
     if INTERNAL_LOGS == tab_id:
         options_div = make_options_div(tab_id, date_picker=True)

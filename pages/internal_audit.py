@@ -3,6 +3,7 @@ from dash import callback, Input, Output
 import pandas as pd
 import json
 from ids import (
+    AFFIX_GROUPBY_TIME,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
     AFFIX_PLOT,
@@ -160,11 +161,15 @@ def store_apps_history(start_date, switches):
     Input(STORE_APPS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
     Input(STORE_APPS_HISTORY + AFFIX_TABLE, "derived_viewport_row_ids"),
     Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
+    Input(STORE_APPS_HISTORY + AFFIX_GROUPBY_TIME, "value"),
 )
 def store_apps_history_plot(
-    start_date: str, derived_viewport_row_ids: list[str], switches: list[str]
+    start_date: str,
+    derived_viewport_row_ids: list[str],
+    switches: list[str],
+    groupby_time,
 ):
-    logger.info("Store apps history plot")
+    logger.info(f"Store apps history plot, {groupby_time=}")
     if "start_date" not in locals() or not start_date:
         start_date = get_earlier_date(days=30)
     metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
@@ -190,7 +195,9 @@ def store_apps_history_plot(
     df = df.groupby([date_col] + dimensions)[metrics].agg(metric_aggs).reset_index()
     # Limit Frequency for plotting to control number of points/columns
     df = (
-        df.groupby([pd.Grouper(key=date_col, freq="H")] + dimensions, dropna=False)
+        df.groupby(
+            [pd.Grouper(key=date_col, freq=groupby_time)] + dimensions, dropna=False
+        )
         .last()
         .reset_index()
     )
