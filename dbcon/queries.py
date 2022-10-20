@@ -58,7 +58,11 @@ def query_networks_count(top_only: bool = False) -> pd.DataFrame:
     return df
 
 
-def get_app_txt_view(developer_url: str) -> pd.DataFrame:
+def get_app_txt_view(developer_url: str, direct_only=True) -> pd.DataFrame:
+    if direct_only:
+        direct_only_str = "AND av.relationship = 'DIRECT'"
+    else:
+        direct_only_str = ""
     sel_query = f"""WITH cte1 AS (
             SELECT
                 av.developer_domain_url,
@@ -69,6 +73,7 @@ def get_app_txt_view(developer_url: str) -> pd.DataFrame:
                 app_ads_view av
             WHERE
                 av.developer_domain_url ILIKE '{developer_url}'
+                {direct_only_str}
                 )
             SELECT
                 c1.developer_domain_url AS my_domain_url,
