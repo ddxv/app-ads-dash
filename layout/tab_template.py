@@ -114,6 +114,12 @@ def make_tab_options(tab_id: str) -> html.Div:
     if INTERNAL_LOGS == tab_id:
         options_div = make_options_div(tab_id, date_picker=True)
     if NETWORK_UNIQUES == tab_id:
+        switch_options = [
+            {
+                "label": "View Best",
+                "value": "view_best",
+            },
+        ]
         radio_options = [
             {
                 "label": "View Horizontal Barchart",

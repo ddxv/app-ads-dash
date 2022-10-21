@@ -58,7 +58,7 @@ def query_networks_count(top_only: bool = False) -> pd.DataFrame:
     return df
 
 
-def query_network_uniqueness(limit=20):
+def query_network_uniqueness(limit=50):
     sel_query = f"""
         SELECT
         ad_domain_url,

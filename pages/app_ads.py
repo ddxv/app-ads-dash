@@ -274,13 +274,21 @@ def networks_table(
     Output(NETWORK_UNIQUES + AFFIX_PLOT, "figure"),
     Input(NETWORK_UNIQUES + AFFIX_TABLE, "derived_viewport_row_ids"),
     Input(NETWORK_UNIQUES + AFFIX_RADIOS, "value"),
+    Input(NETWORK_UNIQUES + AFFIX_SWITCHES, "value"),
 )
-def network_uniques(derived_viewport_row_ids: list[str], radios):
+def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     logger.info(f"{NETWORK_UNIQUES} start")
     metrics = ["percent"]
     query_dict = {"id": NETWORK_UNIQUES}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    df = df.sort_values("percent", ascending=False)
+    ascending = False
+    if switches and "view_best" in switches:
+        ascending = False
+        title = "Best Uniqueness of DIRECT Publisher IDs"
+    else:
+        ascending = True
+        title = "Worst Uniqueness of DIRECT Publisher IDs"
+    df = df.sort_values("percent", ascending=ascending)
     dimensions = [x for x in df.columns if x not in metrics]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
@@ -291,7 +299,6 @@ def network_uniques(derived_viewport_row_ids: list[str], radios):
     xaxis_col = "ad_domain_url"
     bar_column = "percent"
     y_vals = metrics
-    title = "Uniqueness of DIRECT Publisher IDs"
     if radios and "view_horizontalbars" in radios:
         df = df.head(10)
         df = df.reset_index(drop=True)
