@@ -294,7 +294,10 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
     df = limit_rows_for_plotting(
-        df=df, row_ids=derived_viewport_row_ids, metrics=metrics
+        df=df,
+        row_ids=derived_viewport_row_ids,
+        metrics=metrics,
+        sort_ascending=ascending,
     )
     xaxis_col = "ad_domain_url"
     bar_column = "percent"

@@ -83,7 +83,10 @@ def get_cached_dataframe(query_json):
 
 
 def limit_rows_for_plotting(
-    df: pd.DataFrame, row_ids: list[str] | None, metrics: list[str] = None
+    df: pd.DataFrame,
+    row_ids: list[str] | None,
+    metrics: list[str] = None,
+    sort_ascending: bool = False,
 ) -> pd.DataFrame:
     original_shape = df.shape
     if row_ids:
@@ -97,7 +100,7 @@ def limit_rows_for_plotting(
             sort_column = "count"
         idf = df.groupby("id")[sort_column].sum().reset_index()
         idf = (
-            idf.sort_values(sort_column, ascending=False)
+            idf.sort_values(sort_column, ascending=sort_ascending)
             .reset_index(drop=True)
             .head(MAX_ROWS)
         )

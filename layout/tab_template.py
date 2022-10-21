@@ -120,6 +120,7 @@ def make_tab_options(tab_id: str) -> html.Div:
                 "value": "view_best",
             },
         ]
+        switch_defaults = ["view_best"]
         radio_options = [
             {
                 "label": "View Horizontal Barchart",
@@ -130,7 +131,12 @@ def make_tab_options(tab_id: str) -> html.Div:
                 "value": "view_verticalbars",
             },
         ]
-        options_div = make_options_div(tab_id, radio_options=radio_options)
+        options_div = make_options_div(
+            tab_id,
+            radio_options=radio_options,
+            switch_options=switch_options,
+            switch_defaults=switch_defaults,
+        )
     if NETWORKS == tab_id:
         switch_options = [
             {
