@@ -1,5 +1,6 @@
 # Analytics Tab IDs
 NETWORKS = "networks"
+NETWORK_UNIQUES = "network-uniques"
 DEVELOPERS_SEARCH = "developers-search"
 TXT_VIEW = "txt-view"
 

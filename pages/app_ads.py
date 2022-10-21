@@ -16,6 +16,7 @@ from ids import (
     TXT_VIEW,
     TXT_VIEW_TABLE,
     NETWORKS,
+    NETWORK_UNIQUES,
 )
 from layout.tab_template import make_columns
 from plotter.plotter import horizontal_barchart, treemap, overview_plot
@@ -28,6 +29,7 @@ dash.register_page(__name__, name="App-Ads.txt Analytics")
 
 APP_TAB_OPTIONS = [
     {"label": "Ad Networks", "tab_id": NETWORKS},
+    {"label": "Ad Network: Uniqueness Ranking", "tab_id": NETWORK_UNIQUES},
     {"label": "Search: Developers", "tab_id": DEVELOPERS_SEARCH},
     {"label": "Search App-Ads.txt File", "tab_id": TXT_VIEW},
 ]
@@ -247,6 +249,50 @@ def networks_table(
         color = xaxis_col
         fig = treemap(df, path=path, values=values, color=color, title=title)
     elif radios and "view_horizontalbars" in radios:
+        df = df.head(10)
+        df = df.reset_index(drop=True)
+        fig = horizontal_barchart(
+            df,
+            xaxis=bar_column,  # Note switched
+            yaxis=xaxis_col,  # Note switched
+            title=title,
+        )
+    else:
+        fig = overview_plot(
+            df=df,
+            y_vals=y_vals,
+            xaxis_col=xaxis_col,
+            bar_column=bar_column,
+            title=title,
+        )
+    return table_obj, column_dicts, fig
+
+
+@callback(
+    Output(NETWORK_UNIQUES + AFFIX_TABLE, "data"),
+    Output(NETWORK_UNIQUES + AFFIX_TABLE, "columns"),
+    Output(NETWORK_UNIQUES + AFFIX_PLOT, "figure"),
+    Input(NETWORK_UNIQUES + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(NETWORK_UNIQUES + AFFIX_RADIOS, "value"),
+)
+def network_uniques(derived_viewport_row_ids: list[str], radios):
+    logger.info(f"{NETWORK_UNIQUES} start")
+    metrics = ["percent"]
+    query_dict = {"id": NETWORK_UNIQUES}
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    df = df.sort_values("percent", ascending=False)
+    dimensions = [x for x in df.columns if x not in metrics]
+    df = add_id_column(df, dimensions=dimensions)
+    column_dicts = make_columns(dimensions, metrics)
+    table_obj = df.to_dict("records")
+    df = limit_rows_for_plotting(
+        df=df, row_ids=derived_viewport_row_ids, metrics=metrics
+    )
+    xaxis_col = "ad_domain_url"
+    bar_column = "percent"
+    y_vals = metrics
+    title = "Uniqueness of DIRECT Publisher IDs"
+    if radios and "view_horizontalbars" in radios:
         df = df.head(10)
         df = df.reset_index(drop=True)
         fig = horizontal_barchart(

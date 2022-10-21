@@ -3,9 +3,17 @@ import datetime
 import pandas as pd
 from flask_caching import Cache
 from config import get_logger, DATE_FORMAT
-from ids import INTERNAL_LOGS, TXT_VIEW, NETWORKS, DEVELOPERS_SEARCH, STORE_APPS_HISTORY
+from ids import (
+    INTERNAL_LOGS,
+    NETWORK_UNIQUES,
+    TXT_VIEW,
+    NETWORKS,
+    DEVELOPERS_SEARCH,
+    STORE_APPS_HISTORY,
+)
 from dbcon.queries import (
     get_app_txt_view,
+    query_network_uniqueness,
     query_networks_with_app_metrics,
     query_search_developers,
     query_store_apps_overview,
@@ -61,6 +69,8 @@ def get_cached_dataframe(query_json):
         )
     elif query_dict["id"] == TXT_VIEW:
         df = get_app_txt_view(query_dict["developer_url"])
+    elif query_dict["id"] == NETWORK_UNIQUES:
+        df = query_network_uniqueness()
     elif query_dict["id"] == NETWORKS:
         df = query_networks_count(top_only=query_dict["top_only"])
     elif query_dict["id"] == DEVELOPERS_SEARCH:

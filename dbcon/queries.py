@@ -58,6 +58,25 @@ def query_networks_count(top_only: bool = False) -> pd.DataFrame:
     return df
 
 
+def query_network_uniqueness(limit=20):
+    sel_query = f"""
+        SELECT
+        ad_domain_url,
+        count(DISTINCT publisher_id) AS publisher_count,
+        sum(is_unique) AS unique_count
+    FROM
+        publisher_url_developer_ids_uniques
+    GROUP BY
+        ad_domain_url
+    ORDER BY publisher_count DESC
+    LIMIT {limit}
+    ;
+    """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    df["percent"] = df["unique_count"] / df["publisher_count"]
+    return df
+
+
 def get_app_txt_view(developer_url: str, direct_only=True) -> pd.DataFrame:
     if direct_only:
         direct_only_str = "AND av.relationship = 'DIRECT'"

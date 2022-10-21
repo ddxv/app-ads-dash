@@ -17,6 +17,7 @@ from ids import (
     AFFIX_SWITCHES,
     AFFIX_DATE_PICKER,
     AFFIX_TABLE,
+    NETWORK_UNIQUES,
     STORE_APPS_HISTORY,
     TXT_VIEW,
     DEVELOPERS_SEARCH,
@@ -112,6 +113,18 @@ def make_tab_options(tab_id: str) -> html.Div:
         )
     if INTERNAL_LOGS == tab_id:
         options_div = make_options_div(tab_id, date_picker=True)
+    if NETWORK_UNIQUES == tab_id:
+        radio_options = [
+            {
+                "label": "View Horizontal Barchart",
+                "value": "view_horizontalbars",
+            },
+            {
+                "label": "View Vertical Barchart",
+                "value": "view_verticalbars",
+            },
+        ]
+        options_div = make_options_div(tab_id, radio_options=radio_options)
     if NETWORKS == tab_id:
         switch_options = [
             {
