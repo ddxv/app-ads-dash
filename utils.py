@@ -85,7 +85,7 @@ def get_cached_dataframe(query_json):
 def limit_rows_for_plotting(
     df: pd.DataFrame,
     row_ids: list[str] | None,
-    metrics: list[str] = None,
+    sort_by_columns: list[str] = None,
     sort_ascending: bool = False,
 ) -> pd.DataFrame:
     original_shape = df.shape
@@ -93,8 +93,8 @@ def limit_rows_for_plotting(
         logger.info(f"Limit plot ids: {row_ids=}")
         df = df[df["id"].isin(row_ids)]
     if not row_ids:
-        if metrics and len(metrics) > 0:
-            sort_column = metrics[0]
+        if sort_by_columns and len(sort_by_columns) > 0:
+            sort_column = sort_by_columns[0]
         else:
             logger.warning("Limit plot ids: No row_ids! manual select")
             sort_column = "count"

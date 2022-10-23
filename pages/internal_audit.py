@@ -107,7 +107,7 @@ def internal_logs_plot(
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Internal logs plot_df: {df.shape=} {dimensions=}")
-    df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
+    df = limit_rows_for_plotting(df, derived_viewport_row_ids, sort_by_columns=metrics)
     fig = overview_plot(
         df=df,
         xaxis_col=date_col,
@@ -203,7 +203,7 @@ def store_apps_history_plot(
     )
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Store apps history plot: {dimensions=} {df.shape=}")
-    df = limit_rows_for_plotting(df, derived_viewport_row_ids, metrics=metrics)
+    df = limit_rows_for_plotting(df, derived_viewport_row_ids, sort_by_columns=metrics)
 
     fig = overview_plot(
         df=df,
