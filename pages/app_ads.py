@@ -282,11 +282,10 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     query_dict = {"id": NETWORK_UNIQUES}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     ascending = False
-    df = df.sort_values("publisher_count", ascending=ascending)
+    sort_by = ["publisher_count"]
     if switches and "view_best" in switches:
         ascending = False
         title = "Best/Biggest Uniqueness of DIRECT Publisher IDs"
-        df = df.sort_values("percent", ascending=ascending)
     else:
         ascending = True
         title = "Worst/Smallest Uniqueness of DIRECT Publisher IDs"
@@ -299,15 +298,16 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     df = limit_rows_for_plotting(
         df=df,
         row_ids=derived_viewport_row_ids,
-        sort_by_columns=["publisher_count"],
+        sort_by_columns=sort_by,
         sort_ascending=ascending,
     )
 
     xaxis_col = "ad_domain_url"
     bar_column = "percent"
     y_vals = metrics
+    df = df.sort_values(sort_by, ascending=ascending)
     if radios and "view_horizontalbars" in radios:
-        df = df.head(10)
+        df = df.head(20)
         df = df.reset_index(drop=True)
         fig = horizontal_barchart(
             df,
