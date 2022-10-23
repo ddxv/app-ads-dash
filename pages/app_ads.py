@@ -285,7 +285,7 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     sort_by = ["publisher_count"]
     if switches and "view_best" in switches:
         ascending = False
-        title = "Best/Biggest Uniqueness of DIRECT Publisher IDs"
+        title = "Uniqueness of DIRECT Publisher IDs"
     else:
         ascending = True
         title = "Worst/Smallest Uniqueness of DIRECT Publisher IDs"
