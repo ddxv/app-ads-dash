@@ -282,7 +282,7 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     query_dict = {"id": NETWORK_UNIQUES}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     ascending = False
-    # df = df.sort_values("publisher_count", ascending=ascending)
+    df = df.sort_values("publisher_count", ascending=ascending)
     if switches and "view_best" in switches:
         ascending = False
         title = "Best/Biggest Uniqueness of DIRECT Publisher IDs"
