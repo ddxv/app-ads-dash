@@ -299,7 +299,7 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     df = limit_rows_for_plotting(
         df=df,
         row_ids=derived_viewport_row_ids,
-        sort_by_columns="publisher_count",
+        sort_by_columns=["publisher_count"],
         sort_ascending=ascending,
     )
 
