@@ -15,7 +15,11 @@ COLORS = list(theme_colors + px.colors.qualitative.Alphabet)
 PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
 
 
-def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
+def horizontal_barchart(
+    df: pd.DataFrame, xaxis: str, yaxis: str, title: str, x_title: str = None
+):
+    if not x_title:
+        x_title = xaxis
     default_font_size = 34
     df = df.sort_values(xaxis)
     fig = go.Figure()
@@ -59,7 +63,7 @@ def horizontal_barchart(df: pd.DataFrame, xaxis: str, yaxis: str, title: str):
             "title": {"text": title, "font": {"size": 48}},
             "height": 800,
             "xaxis": {
-                "title": "Percent Integrated",
+                "title": x_title,
                 "type": "linear",
                 "side": "right",
                 "tickformat": ".0%",

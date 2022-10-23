@@ -256,6 +256,7 @@ def networks_table(
             xaxis=bar_column,  # Note switched
             yaxis=xaxis_col,  # Note switched
             title=title,
+            xaxis_title="Percent Integrated",
         )
     else:
         fig = overview_plot(
@@ -314,6 +315,7 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
             xaxis=bar_column,  # Note switched
             yaxis=xaxis_col,  # Note switched
             title=title,
+            xaxis_title="Average Uniqueness of Publisher IDs",
         )
     else:
         fig = overview_plot(
