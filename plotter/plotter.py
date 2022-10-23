@@ -16,9 +16,9 @@ PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
 
 
 def horizontal_barchart(
-    df: pd.DataFrame, xaxis: str, yaxis: str, title: str, x_title: str = None
+    df: pd.DataFrame, xaxis: str, yaxis: str, title: str, xaxis_title: str = None
 ):
-    if not x_title:
+    if not xaxis_title:
         x_title = xaxis
     default_font_size = 34
     df = df.sort_values(xaxis)
