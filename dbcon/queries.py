@@ -91,7 +91,7 @@ def get_app_txt_view(developer_url: str, direct_only=True) -> pd.DataFrame:
             FROM
                 app_ads_view av
             WHERE
-                av.developer_domain_url ILIKE '{developer_url}'
+                av.developer_domain_url LIKE '{developer_url}'
                 {direct_only_str}
                 )
             SELECT

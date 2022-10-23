@@ -386,7 +386,9 @@ def make_search_column(tab_id: str, search_hint: str | None) -> dbc.Col:
         search_col.children.append(
             dbc.InputGroup(
                 [
-                    dbc.Input(id=f"{tab_id}-input", placeholder=search_hint),
+                    dbc.Input(
+                        id=f"{tab_id}-input", placeholder=search_hint, debounce=True
+                    ),
                     dbc.Button(
                         [
                             "Search ",
