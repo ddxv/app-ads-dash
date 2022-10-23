@@ -20,6 +20,8 @@ def horizontal_barchart(
 ):
     if not xaxis_title:
         x_title = xaxis
+    else:
+        x_title = xaxis_title
     default_font_size = 34
     df = df.sort_values(xaxis)
     fig = go.Figure()
