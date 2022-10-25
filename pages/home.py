@@ -1,16 +1,14 @@
-from dash import html
+from dash import html, dcc
 import dash
 
 dash.register_page(__name__, name="Home", path="/")
 
+with open("README.md") as f:
+    README_LINES = f.readlines()
+
 layout = html.Div(
     children=[
-        html.H1(children="This is our Home page"),
-        html.Div(
-            children="""
-        This is our Home page content.
-    """
-        ),
+        html.Div(dcc.Markdown(README_LINES)),
     ]
 )
 
