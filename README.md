@@ -1,6 +1,6 @@
 # App-Ads-Dash: Exploratory Dash for Mobile app-ads.txt Insights
 
-This is a free resource for anyone interested in mobile advertising data. Data is built from my open source project [AdsCrawler on Github](https://github.com/ddxv/adscrawler) and visualized by [App-Ads-Dash on Github](https://github.com/ddxv/app-ads-dash). 
+This is a free resource for anyone interested in mobile advertising data. Data is built from my open source project [AdsCrawler on Github](https://github.com/ddxv/adscrawler) and visualized by [App-Ads-Dash on Github](https://github.com/ddxv/app-ads-dash). A hosted version of the dash is publicly available at [ads.jamesoclaire.com](https://ads.jamesoclaire.com). Some blog articles about the data can also be [found on my blog](https://jamesoclaire.com).
 
 ![GitHub Logo](/static/bars_example.png)
 
