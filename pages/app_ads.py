@@ -24,7 +24,7 @@ from config import get_logger
 
 logger = get_logger(__name__)
 
-dash.register_page(__name__, name="App-Ads.txt Analytics")
+dash.register_page(__name__, name="App-Ads.txt Insights")
 
 
 APP_TAB_OPTIONS = [
