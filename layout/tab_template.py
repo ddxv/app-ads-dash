@@ -543,4 +543,4 @@ DOLLAR_NAMES = [
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
 
 with open("/home/james/app-ads-dash/README.md") as f:
-    README_LINES = f.readlines()
+    README_LINES = f.read()
