@@ -1,3 +1,6 @@
+# Home Page
+HOME_TAB = "home-about"
+
 # Analytics Tab IDs
 NETWORKS = "networks"
 NETWORK_UNIQUES = "network-uniques"

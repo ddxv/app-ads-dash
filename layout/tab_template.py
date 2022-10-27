@@ -17,6 +17,7 @@ from ids import (
     AFFIX_SWITCHES,
     AFFIX_DATE_PICKER,
     AFFIX_TABLE,
+    HOME_TAB,
     NETWORK_UNIQUES,
     STORE_APPS_HISTORY,
     TXT_VIEW,
@@ -250,6 +251,14 @@ def create_tab_layout(tab_id: str) -> html.Div:
     table_div = make_table_div(tab_id)
     plot_div = make_plot_div(tab_id)
     buttons_div = get_left_buttons_layout(tab_id)
+    if tab_id == HOME_TAB:
+        tab_content = [dcc.Markdown(README_LINES)]
+    else:
+        tab_content = [
+            plot_div,
+            options_div,
+            table_div,
+        ]
     tab_layout = html.Div(
         [
             dcc.Store(id=f"{tab_id}-memory-output", storage_type="memory"),
@@ -261,13 +270,7 @@ def create_tab_layout(tab_id: str) -> html.Div:
                         [buttons_div],
                         width={"size": 2, "order": "first"},
                     ),
-                    dbc.Col(
-                        [
-                            plot_div,
-                            options_div,
-                            table_div,
-                        ]
-                    ),
+                    dbc.Col(tab_content),
                 ]
             ),
             dbc.Row([dbc.Col()]),
@@ -538,3 +541,6 @@ DOLLAR_NAMES = [
 ]
 
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
+
+with open("/home/james/app-ads-dash/README.md") as f:
+    README_LINES = f.readlines()
