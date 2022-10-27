@@ -252,7 +252,7 @@ def create_tab_layout(tab_id: str) -> html.Div:
     plot_div = make_plot_div(tab_id)
     buttons_div = get_left_buttons_layout(tab_id)
     if tab_id == HOME_TAB:
-        tab_content = [dcc.Markdown(README_LINES)]
+        tab_content = [dcc.Markdown(README_LINES, dangerously_allow_html=True)]
     else:
         tab_content = [
             plot_div,
@@ -542,5 +542,5 @@ DOLLAR_NAMES = [
 
 PERCENT_NAMES = ["roas", "ctr", "ctr", "percent"]
 
-with open("/home/james/app-ads-dash/README.md") as f:
+with open("README.md") as f:
     README_LINES = f.read()
