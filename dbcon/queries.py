@@ -58,7 +58,7 @@ def query_networks_count(top_only: bool = False) -> pd.DataFrame:
     return df
 
 
-def query_network_uniqueness(limit=50):
+def query_network_uniqueness(limit=100):
     sel_query = f"""
         SELECT
         ad_domain_url,
@@ -249,15 +249,19 @@ def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:
     return df
 
 
-DBCON = get_db_connection("madrone")
-DBCON.set_engine()
-SCHEMA_OVERVIEW = get_schema_overview("public")
-TABLES = SCHEMA_OVERVIEW["table_name"].unique().tolist()
-APP_CATEGORIES = get_app_categories()
-TABLES_WITH_TIMES = (
-    SCHEMA_OVERVIEW[SCHEMA_OVERVIEW["column_name"].isin(["updated_at", "created_at"])][
-        "table_name"
-    ]
-    .unique()
-    .tolist()
-)
+try:
+    DBCON = get_db_connection("madrone")
+    DBCON.set_engine()
+    SCHEMA_OVERVIEW = get_schema_overview("public")
+    TABLES = SCHEMA_OVERVIEW["table_name"].unique().tolist()
+    APP_CATEGORIES = get_app_categories()
+    TABLES_WITH_TIMES = (
+        SCHEMA_OVERVIEW[
+            SCHEMA_OVERVIEW["column_name"].isin(["updated_at", "created_at"])
+        ]["table_name"]
+        .unique()
+        .tolist()
+    )
+except Exception:
+    APP_CATEGORIES = ["cat1", "cat2"]
+    TABLES_WITH_TIMES = ["overview", "store_apps"]

@@ -151,7 +151,10 @@ def overview_plot(
             # logger.info(f":{symbol_int=}")
             # symbol_int +=1
         for i in range(len(main_ids_color_cats)):
-            color = COLORS[i]
+            if df[xaxis_col].dtype == "O":
+                color = "#AA0DFE"
+            else:
+                color = COLORS[i]
             cat = main_ids_color_cats[i]
             df.loc[df.id == cat, "color"] = color
         df.loc[df.color.isnull(), "color"] = COLORS[len(main_ids_color_cats)]
