@@ -110,6 +110,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             date_picker=True,
             switch_options=switch_options,
             switch_defaults=["store_name", "total_rows"],
+            switch_title="Columns",
             groupby_time=True,
         )
     if INTERNAL_LOGS == tab_id:
@@ -135,8 +136,10 @@ def make_tab_options(tab_id: str) -> html.Div:
         options_div = make_options_div(
             tab_id,
             radio_options=radio_options,
+            radio_title="Plot Type",
             switch_options=switch_options,
             switch_defaults=switch_defaults,
+            switch_title="Filter By",
         )
     if NETWORKS == tab_id:
         switch_options = [
@@ -170,9 +173,12 @@ def make_tab_options(tab_id: str) -> html.Div:
         options_div = make_options_div(
             tab_id,
             switch_options=switch_options,
+            switch_title="Filter By",
             radio_options=radio_options,
+            radio_title="Plot Type",
             dropdown_options=groupby_options,
             dropdown_defaults=groupby_defaults,
+            dropdown_title="Select Category",
             dropdown_multi=False,
         )
     if DEVELOPERS_SEARCH == tab_id:
@@ -184,6 +190,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             tab_id,
             dropdown_options=groupby_options,
             dropdown_defaults=groupby_defaults,
+            dropdown_title="Group By",
             search_hint="Developer URL ...",
         )
     return options_div
@@ -297,9 +304,15 @@ def make_groupby_time_column(tab_id: str, groupby_time: bool) -> dbc.Col:
 
 
 def make_radio_buttons(
-    tab_id: str, radio_options: list[dict[str:str]], radio_default: str = None
+    tab_id: str,
+    radio_options: list[dict[str:str]],
+    radio_default: str = None,
+    title: str = None,
 ) -> dbc.Col:
     button_group = dbc.Col([])
+    if title:
+        header = html.H4(title)
+        button_group.children.append(header)
     if radio_options:
         if not radio_default:
             radio_default = radio_options[0]["value"]
@@ -325,9 +338,13 @@ def make_dropdown(
     tab_id: str,
     dropdown_options: list[dict],
     dropdown_defaults: list[str] | None,
-    dropdown_multi=True,
+    dropdown_multi: bool = True,
+    title: str = None,
 ) -> dbc.Col:
     groupby_col = dbc.Col([])
+    if title:
+        header = html.H4(title)
+        groupby_col.children.append(header)
     if dropdown_options and not dropdown_defaults:
         dropdown_defaults = [dropdown_options[0]["value"]]
     if dropdown_options:
@@ -346,9 +363,15 @@ def make_dropdown(
 
 
 def make_switch_options(
-    tab_id: str, switch_options: list[str] | None, switch_defaults: list[str] | None
+    tab_id: str,
+    switch_options: list[str] | None,
+    switch_defaults: list[str] | None,
+    title: str,
 ) -> dbc.Col:
     checklist_col = dbc.Col([])
+    if title:
+        header = html.H4(title)
+        checklist_col.children.append(header)
     if not switch_defaults:
         switch_defaults = []
     if switch_options:
@@ -415,10 +438,13 @@ def make_options_div(
     dropdown_options: list[dict] = None,
     dropdown_defaults: list[str] = None,
     dropdown_multi: bool = True,
+    dropdown_title: str = None,
     switch_options: list[dict[str:str]] = None,
     switch_defaults: list[str] = None,
+    switch_title: str = None,
     radio_options: list[dict[str:str]] = None,
     radio_default: str = None,
+    radio_title: str = None,
     groupby_time: bool = None,
     date_picker: bool = None,
     search_hint: str = None,
@@ -428,14 +454,22 @@ def make_options_div(
     if len(search_col.children) > 0:
         options_row.children.append(search_col)
     groupby_col = make_dropdown(
-        tab_id, dropdown_options, dropdown_defaults, dropdown_multi=dropdown_multi
+        tab_id,
+        dropdown_options,
+        dropdown_defaults,
+        dropdown_multi=dropdown_multi,
+        title=dropdown_title,
     )
     if len(groupby_col.children) > 0:
         options_row.children.append(groupby_col)
-    checklist_col = make_switch_options(tab_id, switch_options, switch_defaults)
+    checklist_col = make_switch_options(
+        tab_id, switch_options, switch_defaults, title=switch_title
+    )
     if len(checklist_col.children) > 0:
         options_row.children.append(checklist_col)
-    radios_col = make_radio_buttons(tab_id, radio_options, radio_default)
+    radios_col = make_radio_buttons(
+        tab_id, radio_options, radio_default, title=radio_title
+    )
     if len(radios_col.children) > 0:
         options_row.children.append(radios_col)
     time_col = make_groupby_time_column(tab_id, groupby_time)
