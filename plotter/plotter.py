@@ -243,6 +243,7 @@ def overview_plot(
     plot_title = titlelize(plot_title)
     layout = {
         "height": 600,
+        "font": {"size": 24},
         "title": {"text": plot_title},
         "xaxis": {
             "title": xaxis_title,

@@ -5,7 +5,6 @@ This is a free resource for anyone interested in mobile advertising data. Data i
 [<img src="/static/bars_example.png" width="500"/>](/static/bars_example.png)
 
 
-
 ## Why
 Advertising is the backbone of a free and open internet, but despite this is maligned. This means that the expectations for public data on advertising has begun to decline, but I believe that publicly available data for advertising is an important tool for fighting fraud, fighting monopolies and helping people make good decisions about the ways their apps/sites earn and spend advertising money.
 
