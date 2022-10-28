@@ -1,7 +1,12 @@
 import dash
 from dash import callback, Input, Output, State
 from layout.tab_template import get_tab_layout_dict, make_main_content_list
-from utils import get_cached_dataframe, limit_rows_for_plotting, add_id_column
+from utils import (
+    get_cached_dataframe,
+    limit_rows_for_plotting,
+    add_id_column,
+    titlelize,
+)
 from dash.exceptions import PreventUpdate
 import json
 from ids import (
@@ -38,6 +43,8 @@ APP_TAB_OPTIONS = [
 PAGE_ID = "analytics"
 
 APP_TABS_DICT = get_tab_layout_dict(page_id=PAGE_ID, tab_options=APP_TAB_OPTIONS)
+
+layout = make_main_content_list(page_id=PAGE_ID, tab_options=APP_TAB_OPTIONS)
 
 
 @callback(
@@ -282,6 +289,9 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
     metrics = ["percent"]
     query_dict = {"id": NETWORK_UNIQUES}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    df["ad_domain_url"] = df["ad_domain_url"].apply(
+        lambda x: titlelize(x.replace(".com", ""))
+    )
     ascending = False
     sort_by = ["publisher_count"]
     if switches and "view_best" in switches:
@@ -326,6 +336,3 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
             title=title,
         )
     return table_obj, column_dicts, fig
-
-
-layout = make_main_content_list(page_id=PAGE_ID, tab_options=APP_TAB_OPTIONS)

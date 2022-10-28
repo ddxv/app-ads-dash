@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from config import get_logger
+from utils import titlelize
 import plotly.io as pio
 
 logger = get_logger(__name__)
@@ -269,16 +270,6 @@ def overview_plot(
     }
     fig.layout = layout
     return fig
-
-
-def titlelize(original: str | list) -> str:
-    if isinstance(original, list):
-        title = ", ".join([x.replace("_", " ").title() for x in set(original)])
-    elif isinstance(original, str):
-        title = original.replace("_", " ").title()
-    else:
-        title = original
-    return title
 
 
 def guess_bar_column(df: pd.DataFrame):

@@ -125,4 +125,14 @@ def get_earlier_date(days: int = 30) -> str:
     return my_date
 
 
+def titlelize(original: str | list) -> str:
+    if isinstance(original, list):
+        title = ", ".join([x.replace("_", " ").title() for x in set(original)])
+    elif isinstance(original, str):
+        title = original.replace("_", " ").title()
+    else:
+        title = original
+    return title
+
+
 MAX_ROWS = 10
