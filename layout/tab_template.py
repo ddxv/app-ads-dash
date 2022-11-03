@@ -106,7 +106,7 @@ def make_tab_options(tab_id: str) -> html.Div:
             tab_id,
             date_picker=True,
             switch_options=switch_options,
-            switch_defaults=["total_rows"],
+            switch_defaults=["outcome", "total_rows"],
             switch_title="Columns",
             groupby_time=True,
         )

@@ -247,7 +247,7 @@ def pub_domains_history(start_date, switches):
     # First agg across dimensions
     df = df.groupby([date_col] + dimensions)[metrics].agg(metric_aggs).reset_index()
     # Take last time for overview
-    df = df.set_index(date_col).groupby(dimensions, dropna=False).last().reset_index()
+    # df = df.set_index(date_col).groupby.last().reset_index()
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
     logger.info(f"Store apps history: {dimensions=} {df.shape=}")
