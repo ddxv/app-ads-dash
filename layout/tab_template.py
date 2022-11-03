@@ -25,6 +25,7 @@ from ids import (
     INTERNAL_LOGS,
     AFFIX_BUTTON,
     NETWORKS,
+    PUB_URLS_HISTORY,
 )
 
 logger = get_logger(__name__)
@@ -77,6 +78,39 @@ def make_tabs(page_id: str, tab_options: list[dict]) -> dbc.Tabs:
 
 def make_tab_options(tab_id: str) -> html.Div:
     options_div = html.Div([])
+    if PUB_URLS_HISTORY == tab_id:
+        switch_options = [
+            {
+                "label": "Crawl Outcome",
+                "value": "outcome",
+            },
+            # Metrics
+            {
+                "label": "Total Rows",
+                "value": "total_rows",
+            },
+            {
+                "label": "Days Delay Average",
+                "value": "avg_days",
+            },
+            {
+                "label": "Days Delay Max",
+                "value": "max_days",
+            },
+            {
+                "label": "Rows Older than 15 Days",
+                "value": "rows_older_than15",
+            },
+        ]
+        options_div = make_options_div(
+            tab_id,
+            date_picker=True,
+            switch_options=switch_options,
+            switch_defaults=["total_rows"],
+            switch_title="Columns",
+            groupby_time=True,
+        )
+
     if STORE_APPS_HISTORY == tab_id:
         switch_options = [
             {

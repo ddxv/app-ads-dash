@@ -10,6 +10,7 @@ TXT_VIEW = "txt-view"
 # Internal Tab IDs
 INTERNAL_LOGS = "internal-logs"
 STORE_APPS_HISTORY = "internal-overview"
+PUB_URLS_HISTORY = "pub-urls"
 
 # Tab Options
 AFFIX_DATE_PICKER = "-date-picker"

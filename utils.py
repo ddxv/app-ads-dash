@@ -10,6 +10,7 @@ from ids import (
     NETWORKS,
     DEVELOPERS_SEARCH,
     STORE_APPS_HISTORY,
+    PUB_URLS_HISTORY,
 )
 from dbcon.queries import (
     get_app_txt_view,
@@ -17,6 +18,7 @@ from dbcon.queries import (
     query_networks_with_app_metrics,
     query_search_developers,
     query_store_apps_overview,
+    query_pub_domains_overview,
     query_updated_timestamps,
     query_networks_count,
 )
@@ -62,6 +64,8 @@ def get_cached_dataframe(query_json):
         df = query_networks_with_app_metrics()
     elif query_dict["id"] == STORE_APPS_HISTORY:
         df = query_store_apps_overview(start_date=query_dict["start_date"])
+    elif query_dict["id"] == PUB_URLS_HISTORY:
+        df = query_pub_domains_overview(start_date=query_dict["start_date"])
     elif query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
         df = query_updated_timestamps(

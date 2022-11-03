@@ -10,6 +10,7 @@ from ids import (
     INTERNAL_LOGS,
     AFFIX_DATE_PICKER,
     STORE_APPS_HISTORY,
+    PUB_URLS_HISTORY,
 )
 from layout.tab_template import (
     make_columns,
@@ -36,6 +37,7 @@ PAGE_ID = "internal-audit"
 TAB_OPTIONS = [
     {"label": "Crawler: Updated Counts", "tab_id": INTERNAL_LOGS},
     {"label": "Store Apps Historical", "tab_id": STORE_APPS_HISTORY},
+    {"label": "Pub URLs Historical", "tab_id": PUB_URLS_HISTORY},
 ]
 
 TABS_DICT = get_tab_layout_dict(page_id=PAGE_ID, tab_options=TAB_OPTIONS)
@@ -177,6 +179,103 @@ def store_apps_history_plot(
     bar_column = "total_rows"
     query_dict = {
         "id": STORE_APPS_HISTORY,
+        "start_date": start_date,
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
+    if switches and len(switches) > 0:
+        dimensions = [x for x in dimensions if x in switches]
+        metrics = [x for x in metrics if x in switches]
+        agg_default = {
+            "total_rows": sum,
+            "avg_days": "mean",
+            "max_days": max,
+            "rows_older_than15": sum,
+        }
+        metric_aggs = {k: v for k, v in agg_default.items() if k in metrics}
+    # First agg across dimensions
+    df = df.groupby([date_col] + dimensions)[metrics].agg(metric_aggs).reset_index()
+    # Limit Frequency for plotting to control number of points/columns
+    df = (
+        df.groupby(
+            [pd.Grouper(key=date_col, freq=groupby_time)] + dimensions, dropna=False
+        )
+        .last()
+        .reset_index()
+    )
+    df = add_id_column(df, dimensions=dimensions)
+    logger.info(f"Store apps history plot: {dimensions=} {df.shape=}")
+    df = limit_rows_for_plotting(df, derived_viewport_row_ids, sort_by_columns=metrics)
+
+    fig = overview_plot(
+        df=df,
+        xaxis_col=date_col,
+        y_vals=metrics,
+        title="Updated Counts by Date",
+        stack_bars=True,
+        bar_column=bar_column,
+    )
+    return fig
+
+
+@callback(
+    Output(PUB_URLS_HISTORY + AFFIX_TABLE, "data"),
+    Output(PUB_URLS_HISTORY + AFFIX_TABLE, "columns"),
+    Input(PUB_URLS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
+    Input(PUB_URLS_HISTORY + AFFIX_SWITCHES, "value"),
+)
+def pub_domains_history(start_date, switches):
+    logger.info("Store pub domains history data")
+    metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
+    date_col = "updated_at"
+    query_dict = {
+        "id": PUB_URLS_HISTORY,
+        "start_date": start_date,
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
+    if switches and len(switches) > 0:
+        dimensions = [x for x in dimensions if x in switches]
+        metrics = [x for x in metrics if x in switches]
+        agg_default = {
+            "total_rows": sum,
+            "avg_days": "mean",
+            "max_days": max,
+            "rows_older_than15": sum,
+        }
+        metric_aggs = {k: v for k, v in agg_default.items() if k in metrics}
+    # First agg across dimensions
+    df = df.groupby([date_col] + dimensions)[metrics].agg(metric_aggs).reset_index()
+    # Take last time for overview
+    df = df.set_index(date_col).groupby(dimensions, dropna=False).last().reset_index()
+    df = add_id_column(df, dimensions=dimensions)
+    column_dicts = make_columns(dimensions, metrics)
+    logger.info(f"Store apps history: {dimensions=} {df.shape=}")
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts
+
+
+@callback(
+    Output(PUB_URLS_HISTORY + AFFIX_PLOT, "figure"),
+    Input(PUB_URLS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
+    Input(PUB_URLS_HISTORY + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(PUB_URLS_HISTORY + AFFIX_SWITCHES, "value"),
+    Input(PUB_URLS_HISTORY + AFFIX_GROUPBY_TIME, "value"),
+)
+def pub_domains_history_plot(
+    start_date: str,
+    derived_viewport_row_ids: list[str],
+    switches: list[str],
+    groupby_time,
+):
+    logger.info(f"Pub domains plot, {groupby_time=}")
+    if "start_date" not in locals() or not start_date:
+        start_date = get_earlier_date(days=30)
+    metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
+    date_col = "updated_at"
+    bar_column = "total_rows"
+    query_dict = {
+        "id": PUB_URLS_HISTORY,
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))

@@ -138,6 +138,23 @@ def query_store_apps_overview(start_date: str):
     return df
 
 
+def query_pub_domains_overview(start_date: str):
+    logger.info("Query logging.pub_domains_snapshot")
+    sel_query = f"""SELECT
+                        ss.*,
+                        coalesce(cr.outcome, 'not_crawled') AS outcome
+                    FROM
+                    logging.snapshot_pub_domains ss
+                    LEFT JOIN crawl_results cr
+                        ON cr.id = ss.crawl_result
+                    where updated_at >= '{start_date}'
+                    ;
+                """
+    df = pd.read_sql(sel_query, con=DBCON.engine)
+    df = df.drop(["crawl_result"], axis=1)
+    return df
+
+
 def query_updated_timestamps(
     table_name: str, start_date: str = "2021-01-01"
 ) -> pd.DataFrame:
@@ -216,6 +233,8 @@ def query_search_developers(search_input: str, limit: int = 1000):
                     LIMIT {limit}
                     ;
                     """
+    import pandas as pd
+
     df = pd.read_sql(sel_query, DBCON.engine)
     return df
 
