@@ -28,6 +28,7 @@ from plotter.plotter import horizontal_barchart, treemap, overview_plot
 from config import get_logger
 
 logger = get_logger(__name__)
+logger.info("app_ads initialize")
 
 dash.register_page(__name__, name="App-Ads.txt Insights")
 

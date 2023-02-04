@@ -25,7 +25,7 @@ def check_config_dirs():
             pathlib.Path.mkdir(dir, exist_ok=True)
 
 
-def get_logger(mod_name: str, log_name: str = "ads-dash"):
+def get_logger(mod_name: str, log_name: str = "dash"):
     format = "%(asctime)s: %(name)s: %(levelname)s: %(message)s"
     check_config_dirs()
     log_dir = pathlib.Path(HOME, pathlib.Path(".config/bubbleye_adops/logs"))

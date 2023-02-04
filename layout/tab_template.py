@@ -30,6 +30,8 @@ from ids import (
 
 logger = get_logger(__name__)
 
+logger.info("layout initilialize tab templates")
+
 
 def make_main_content_list(page_id: str, tab_options) -> list:
     tabs = make_tabs(page_id=page_id, tab_options=tab_options)

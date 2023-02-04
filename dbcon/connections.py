@@ -11,7 +11,8 @@ def OpenSSHTunnel(server_name: str):
         ssh_username=CONFIG[server_name]["os_user"],
         remote_bind_address=("127.0.0.1", 5432),
     ) as server:  # PostgreSQL server IP and sever port on remote machine
-        # server.start()  # start ssh sever
+        logger.info(f"Start SSH tunnel to {server_name=}")
+        server.start()  # start ssh sever
         logger.info(f"Opened SSH Tunnel {server_name=}")
     return server
 
@@ -35,6 +36,7 @@ def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
         db_ip = CONFIG[server_name]["host"]
         db_port = 5432
     else:
+        logger.info(f"Opening SSH tunnel to {server_name=}")
         ssh_server = OpenSSHTunnel(server_name)
         ssh_server.start()
         db_port = str(ssh_server.local_bind_port)

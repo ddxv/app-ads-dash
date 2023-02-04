@@ -27,6 +27,8 @@ import dash
 
 logger = get_logger(__name__)
 
+logger.info("utils initialize cache")
+
 CACHE_CONFIG = {
     "CACHE_TYPE": "filesystem",
     "CACHE_DIR": "/tmp/appdash/",
