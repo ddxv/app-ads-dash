@@ -1,3 +1,8 @@
+from config import get_logger
+
+logger = get_logger(__name__)
+logger.info("Load IDs")
+
 # Home Page
 HOME_TAB = "home-about"
 

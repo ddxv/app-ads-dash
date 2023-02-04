@@ -269,6 +269,7 @@ def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:
 
 
 try:
+    logger.info("set db engine")
     DBCON = get_db_connection("madrone")
     DBCON.set_engine()
     SCHEMA_OVERVIEW = get_schema_overview("public")
@@ -282,5 +283,6 @@ try:
         .tolist()
     )
 except Exception:
+    logger.info("Database Connection failed")
     APP_CATEGORIES = ["cat1", "cat2"]
     TABLES_WITH_TIMES = ["overview", "store_apps"]

@@ -2,10 +2,17 @@ import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 from server import server
 import dash
+from config import get_logger
 
 dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"
 )
+
+
+logger = get_logger(__name__)
+
+logger.info("dash load start")
+
 
 # This loads the theme template from dash-bootstrap-templates library,
 # adds it to plotly.io and makes it the default figure template.

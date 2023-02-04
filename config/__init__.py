@@ -25,20 +25,27 @@ def check_config_dirs():
             pathlib.Path.mkdir(dir, exist_ok=True)
 
 
-def get_logger(mod_name):
+def get_logger(mod_name: str, log_name: str = "ads-dash"):
     format = "%(asctime)s: %(name)s: %(levelname)s: %(message)s"
-    logger = logging.getLogger(mod_name)
     check_config_dirs()
-    filename = f"{LOG_DIR}/dash.log"
+    log_dir = pathlib.Path(HOME, pathlib.Path(".config/bubbleye_adops/logs"))
+    if not pathlib.Path.exists(log_dir):
+        pathlib.Path.mkdir(log_dir, exist_ok=True)
+        print(f"Couldn't find {log_dir=} so it was created.")
+    filename = f"{log_dir}/{log_name}.log"
     # Writes to file
-    logging.basicConfig(format=format, level=logging.INFO, filename=filename)
-    # Writes to stdout
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    ch.setFormatter(logging.Formatter(format))
-    logger.addHandler(ch)
-    handler = RotatingFileHandler(filename=filename, maxBytes=10000000, backupCount=10)
-    logger.addHandler(handler)
+    rotate_handler = RotatingFileHandler(
+        filename=filename, maxBytes=50000000, backupCount=5
+    )
+    logging.basicConfig(
+        format=format,
+        level=logging.INFO,
+        handlers=[
+            rotate_handler,
+            logging.StreamHandler(),
+        ],
+    )
+    logger = logging.getLogger(mod_name)
     return logger
 
 
