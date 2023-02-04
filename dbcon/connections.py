@@ -12,7 +12,7 @@ def OpenSSHTunnel(server_name: str):
         remote_bind_address=("127.0.0.1", 5432),
     ) as server:  # PostgreSQL server IP and sever port on remote machine
         logger.info(f"Start SSH tunnel to {server_name=}")
-        server.start()  # start ssh sever
+        # server.start()  # start ssh sever
         logger.info(f"Opened SSH Tunnel {server_name=}")
     return server
 
