@@ -13,7 +13,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout the files
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Deploy to my EC2
         uses: appleboy/ssh-action@master
         env:
