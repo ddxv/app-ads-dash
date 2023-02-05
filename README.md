@@ -20,6 +20,15 @@ A hosted version of the dash is publicly available at [ads.jamesoclaire.com](htt
 ### Setup
 - If you want to run yourself, you will need the underlying data and database setup. To get that data you will need to run [AdsCrawler](https://github.com/ddxv/adscrawler).
 - Pip install the requirements: `pip install -r requirements.txt`
+- put config file in `~/.config/app-ads/config.yml` with server info like
+```
+  madrone: (any name, your server name)
+    host: 12.34.56.78 (your ip)
+    os_user: ubuntu (ssh login user)
+    user: postgres (database user)
+    password: xxxx (database user password)
+    db: madrone (database name)
+```
   
 ### Run
  - `python dashapp.py` to run locally
