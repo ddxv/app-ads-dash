@@ -1,15 +1,11 @@
-from config import get_logger
-from server import server
-from flask import (
-    request,
-    Response,
-    render_template,
-    url_for,
-    redirect,
-)
 from functools import wraps
-from dbcon.queries import get_dash_users
+
+from flask import Response, redirect, render_template, request, url_for
+
+from config import get_logger
 from dashapp import app as dashapp
+from dbcon.queries import get_dash_users
+from server import server
 
 logger = get_logger(__name__)
 

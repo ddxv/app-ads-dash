@@ -1,32 +1,32 @@
-from dash.dash_table import FormatTemplate
-import dash_bootstrap_components as dbc
-from dash import dcc
-from dash import html
-from dash import dash_table
-from plotly import graph_objects as go
 import datetime
+
+import dash_bootstrap_components as dbc
+from dash import dash_table, dcc, html
+from dash.dash_table import FormatTemplate
+from plotly import graph_objects as go
+
+from config import DATE_FORMAT, get_logger
 from dbcon.queries import APP_CATEGORIES, TABLES_WITH_TIMES
-from utils import get_earlier_date
-from config import get_logger, DATE_FORMAT
 from ids import (
+    AFFIX_BUTTON,
+    AFFIX_DATE_PICKER,
+    AFFIX_GROUPBY,
     AFFIX_GROUPBY_TIME,
     AFFIX_LOADING,
     AFFIX_PLOT,
-    AFFIX_GROUPBY,
     AFFIX_RADIOS,
     AFFIX_SWITCHES,
-    AFFIX_DATE_PICKER,
     AFFIX_TABLE,
-    HOME_TAB,
-    NETWORK_UNIQUES,
-    STORE_APPS_HISTORY,
-    TXT_VIEW,
     DEVELOPERS_SEARCH,
+    HOME_TAB,
     INTERNAL_LOGS,
-    AFFIX_BUTTON,
+    NETWORK_UNIQUES,
     NETWORKS,
     PUB_URLS_HISTORY,
+    STORE_APPS_HISTORY,
+    TXT_VIEW,
 )
+from utils import get_earlier_date
 
 logger = get_logger(__name__)
 
@@ -205,7 +205,7 @@ def make_tab_options(tab_id: str) -> html.Div:
         groupby_options = [{"label": "All Categories", "value": "all_data"}] + [
             {"label": x.replace("_", " ").title(), "value": x} for x in APP_CATEGORIES
         ]
-        groupby_defaults = "all_data"
+        groupby_defaults = ["all_data"]
         options_div = make_options_div(
             tab_id,
             switch_options=switch_options,
@@ -322,7 +322,7 @@ def create_tab_layout(tab_id: str) -> html.Div:
     return tab_layout
 
 
-def make_groupby_time_column(tab_id: str, groupby_time: bool) -> dbc.Col:
+def make_groupby_time_column(tab_id: str, groupby_time: bool | None) -> dbc.Col:
     time_col = dbc.Col([])
     if groupby_time:
         time_col.children.append(
@@ -341,9 +341,9 @@ def make_groupby_time_column(tab_id: str, groupby_time: bool) -> dbc.Col:
 
 def make_radio_buttons(
     tab_id: str,
-    radio_options: list[dict[str:str]],
-    radio_default: str = None,
-    title: str = None,
+    radio_options: list[dict[str, str]] | None,
+    radio_default: str | None = None,
+    title: str | None = None,
 ) -> dbc.Col:
     button_group = dbc.Col([])
     if title:
@@ -372,10 +372,10 @@ def make_radio_buttons(
 
 def make_dropdown(
     tab_id: str,
-    dropdown_options: list[dict],
+    dropdown_options: list[dict[str, str]] | None,
     dropdown_defaults: list[str] | None,
     dropdown_multi: bool = True,
-    title: str = None,
+    title: str | None = None,
 ) -> dbc.Col:
     groupby_col = dbc.Col([])
     if title:
@@ -400,9 +400,9 @@ def make_dropdown(
 
 def make_switch_options(
     tab_id: str,
-    switch_options: list[str] | None,
+    switch_options: list[dict[str, str]] | None,
     switch_defaults: list[str] | None,
-    title: str,
+    title: str | None,
 ) -> dbc.Col:
     checklist_col = dbc.Col([])
     if title:
@@ -471,19 +471,19 @@ def make_search_column(tab_id: str, search_hint: str | None) -> dbc.Col:
 
 def make_options_div(
     tab_id=str,
-    dropdown_options: list[dict] = None,
-    dropdown_defaults: list[str] = None,
+    dropdown_options: list[dict[str, str]] | None = None,
+    dropdown_defaults: list[str] | None = None,
     dropdown_multi: bool = True,
-    dropdown_title: str = None,
-    switch_options: list[dict[str:str]] = None,
-    switch_defaults: list[str] = None,
-    switch_title: str = None,
-    radio_options: list[dict[str:str]] = None,
-    radio_default: str = None,
-    radio_title: str = None,
-    groupby_time: bool = None,
-    date_picker: bool = None,
-    search_hint: str = None,
+    dropdown_title: str | None = None,
+    switch_options: list[dict[str, str]] | None = None,
+    switch_defaults: list[str] | None = None,
+    switch_title: str | None = None,
+    radio_options: list[dict[str, str]] | None = None,
+    radio_default: str | None = None,
+    radio_title: str | None = None,
+    groupby_time: bool | None = None,
+    date_picker: bool | None = None,
+    search_hint: str | None = None,
 ) -> html.Div:
     options_row = dbc.Row([])
     search_col = make_search_column(tab_id, search_hint)
@@ -527,13 +527,13 @@ def is_dollar(name: str) -> bool:
 
 
 def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
-    dimensions = [
+    dimensions_new = [
         {"name": i, "id": i, "selectable": False, "type": "text"} for i in dimensions
     ]
     money_metrics = [m for m in metrics if is_dollar(m)]
     percent_metrics = [m for m in metrics if is_percent(m) and m not in money_metrics]
     numeric_metrics = [x for x in metrics if x not in percent_metrics + money_metrics]
-    money_metrics = [
+    money_metrics_new = [
         {
             "name": i,
             "id": i,
@@ -542,7 +542,7 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
         }
         for i in money_metrics
     ]
-    percent_metrics = [
+    percent_metrics_new = [
         {
             "name": i,
             "id": i,
@@ -551,13 +551,13 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
         }
         for i in percent_metrics
     ]
-    numeric_metrics = [
+    numeric_metrics_new = [
         {"name": i, "id": i, "selectable": True, "type": "numeric"}
         for i in numeric_metrics
     ]
-    metric_columns = numeric_metrics + money_metrics + percent_metrics
+    metric_columns = numeric_metrics_new + money_metrics_new + percent_metrics_new
 
-    columns = dimensions + metric_columns
+    columns = dimensions_new + metric_columns
     return columns
 
 

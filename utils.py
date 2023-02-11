@@ -1,29 +1,30 @@
-import json
 import datetime
+import json
+
+import dash
 import pandas as pd
 from flask_caching import Cache
-from config import get_logger, DATE_FORMAT
-from ids import (
-    INTERNAL_LOGS,
-    NETWORK_UNIQUES,
-    TXT_VIEW,
-    NETWORKS,
-    DEVELOPERS_SEARCH,
-    STORE_APPS_HISTORY,
-    PUB_URLS_HISTORY,
-)
+
+from config import DATE_FORMAT, get_logger
 from dbcon.queries import (
     get_app_txt_view,
     query_network_uniqueness,
+    query_networks_count,
     query_networks_with_app_metrics,
+    query_pub_domains_overview,
     query_search_developers,
     query_store_apps_overview,
-    query_pub_domains_overview,
     query_updated_timestamps,
-    query_networks_count,
 )
-import dash
-
+from ids import (
+    DEVELOPERS_SEARCH,
+    INTERNAL_LOGS,
+    NETWORK_UNIQUES,
+    NETWORKS,
+    PUB_URLS_HISTORY,
+    STORE_APPS_HISTORY,
+    TXT_VIEW,
+)
 
 logger = get_logger(__name__)
 
@@ -91,7 +92,7 @@ def get_cached_dataframe(query_json):
 def limit_rows_for_plotting(
     df: pd.DataFrame,
     row_ids: list[str] | None,
-    sort_by_columns: list[str] = None,
+    sort_by_columns: list[str] | None = None,
     sort_ascending: bool = False,
 ) -> pd.DataFrame:
     original_shape = df.shape
@@ -131,13 +132,13 @@ def get_earlier_date(days: int = 30) -> str:
     return my_date
 
 
-def titlelize(original: str | list) -> str:
+def titlelize(original: str | list | None) -> str:
     if isinstance(original, list):
         title = ", ".join([x.replace("_", " ").title() for x in set(original)])
     elif isinstance(original, str):
         title = original.replace("_", " ").title()
     else:
-        title = original
+        title = ""
     return title
 
 

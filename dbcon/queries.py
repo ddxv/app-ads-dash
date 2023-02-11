@@ -1,6 +1,7 @@
 import pandas as pd
-from dbcon.connections import get_db_connection
+
 from config import get_logger
+from dbcon.connections import get_db_connection
 
 logger = get_logger(__name__)
 

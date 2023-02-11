@@ -1,9 +1,9 @@
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
-from config import get_logger
-from app import app
 
+from app import app
+from config import get_logger
 
 logger = get_logger(__name__)
 

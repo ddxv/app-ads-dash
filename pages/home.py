@@ -1,8 +1,9 @@
 import dash
-from layout.tab_template import get_tab_layout_dict, make_main_content_list
-from dash import Output, Input, callback
-from ids import HOME_TAB
+from dash import Input, Output, callback
+
 from config import get_logger
+from ids import HOME_TAB
+from layout.tab_template import get_tab_layout_dict, make_main_content_list
 
 logger = get_logger(__name__)
 

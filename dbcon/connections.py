@@ -1,11 +1,12 @@
-from config import CONFIG, get_logger
 from sqlalchemy import create_engine
 from sshtunnel import SSHTunnelForwarder
+
+from config import CONFIG, get_logger
 
 logger = get_logger(__name__)
 
 
-def OpenSSHTunnel(server_name: str):
+def open_ssh_tunnel(server_name: str):
     with SSHTunnelForwarder(
         (CONFIG[server_name]["host"], 22),  # Remote server IP and SSH port
         ssh_username=CONFIG[server_name]["os_user"],
@@ -34,10 +35,10 @@ def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
     db_ip = CONFIG[server_name]["host"]
     if db_ip == "localhost" or db_ip.startswith("172"):
         db_ip = CONFIG[server_name]["host"]
-        db_port = 5432
+        db_port = str(5432)
     else:
         logger.info(f"Opening SSH tunnel to {server_name=}")
-        ssh_server = OpenSSHTunnel(server_name)
+        ssh_server = open_ssh_tunnel(server_name)
         ssh_server.start()
         db_port = str(ssh_server.local_bind_port)
         db_ip = "127.0.0.1"

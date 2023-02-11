@@ -1,31 +1,36 @@
-import dash
-from dash import callback, Input, Output, State
-from layout.tab_template import get_tab_layout_dict, make_main_content_list
-from utils import (
-    get_cached_dataframe,
-    limit_rows_for_plotting,
-    add_id_column,
-    titlelize,
-)
-from dash.exceptions import PreventUpdate
 import json
+
+import dash
+from dash import Input, Output, State, callback
+from dash.exceptions import PreventUpdate
+
+from config import get_logger
 from ids import (
     AFFIX_BUTTON,
     AFFIX_GROUPBY,
     AFFIX_LOADING,
+    AFFIX_PLOT,
     AFFIX_RADIOS,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
     DEVELOPERS_SEARCH,
-    AFFIX_PLOT,
+    NETWORK_UNIQUES,
+    NETWORKS,
     TXT_VIEW,
     TXT_VIEW_TABLE,
-    NETWORKS,
-    NETWORK_UNIQUES,
 )
-from layout.tab_template import make_columns
-from plotter.plotter import horizontal_barchart, treemap, overview_plot
-from config import get_logger
+from layout.tab_template import (
+    get_tab_layout_dict,
+    make_columns,
+    make_main_content_list,
+)
+from plotter.plotter import horizontal_barchart, overview_plot, treemap
+from utils import (
+    add_id_column,
+    get_cached_dataframe,
+    limit_rows_for_plotting,
+    titlelize,
+)
 
 logger = get_logger(__name__)
 logger.info("app_ads initialize")
@@ -222,7 +227,7 @@ def networks_table(
         cat_title = f"{dropdown.replace('_', ' ').title()}"
         title = f"{cat_title} Marketshare of Programmatic Ad Networks"
         logger.info(f"Networks Dropdown is {dropdown=}")
-        query_dict = {"id": "networks-with-app-metrics"}
+        query_dict: dict = {"id": "networks-with-app-metrics"}
         df = get_cached_dataframe(query_json=json.dumps(query_dict))
         df = df[df["store"] == 1]
         df = df[df["category"] == dropdown]

@@ -1,31 +1,33 @@
-import dash
-from dash import callback, Input, Output
-import pandas as pd
 import json
+
+import dash
+import pandas as pd
+from dash import Input, Output, callback
+
+from config import get_logger
 from ids import (
+    AFFIX_DATE_PICKER,
     AFFIX_GROUPBY_TIME,
+    AFFIX_PLOT,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
-    AFFIX_PLOT,
     INTERNAL_LOGS,
-    AFFIX_DATE_PICKER,
-    STORE_APPS_HISTORY,
     PUB_URLS_HISTORY,
+    STORE_APPS_HISTORY,
 )
 from layout.tab_template import (
-    make_columns,
     get_left_buttons_layout,
     get_tab_layout_dict,
+    make_columns,
     make_main_content_list,
 )
 from plotter.plotter import overview_plot
 from utils import (
+    add_id_column,
     get_cached_dataframe,
     get_earlier_date,
     limit_rows_for_plotting,
-    add_id_column,
 )
-from config import get_logger
 
 logger = get_logger(__name__)
 
