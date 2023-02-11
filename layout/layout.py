@@ -1,5 +1,6 @@
-from layout.tab_template import TABS
 import dash_bootstrap_components as dbc
+
+from layout.tab_template import TABS
 
 
 def main_content_list() -> list:

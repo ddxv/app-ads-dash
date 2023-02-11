@@ -1,11 +1,12 @@
-from layout.tab_template import is_dollar, is_percent
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
-from config import get_logger
-from utils import titlelize
+import plotly.graph_objects as go
 import plotly.io as pio
+
+from config import get_logger
+from layout.tab_template import is_dollar, is_percent
+from utils import titlelize
 
 logger = get_logger(__name__)
 
@@ -17,7 +18,7 @@ PASTELS = px.colors.qualitative.Pastel1 + px.colors.qualitative.Pastel2
 
 
 def horizontal_barchart(
-    df: pd.DataFrame, xaxis: str, yaxis: str, title: str, xaxis_title: str = None
+    df: pd.DataFrame, xaxis: str, yaxis: str, title: str, xaxis_title: str | None = None
 ):
     if not xaxis_title:
         x_title = xaxis
@@ -94,10 +95,10 @@ def treemap(df, path: list[str], values: str | list[str], color: str, title: str
 def overview_plot(
     df: pd.DataFrame,
     y_vals: list[str],
-    bar_column: str = None,
+    bar_column: str | None = None,
     stack_bars: bool = False,
-    xaxis_col: str = None,
-    title: str = None,
+    xaxis_col: str | None = None,
+    title: str | None = None,
 ):
     # logger.info(f"Start Plot: {df.shape}, {y_vals=}")
     fig = go.Figure()
@@ -217,6 +218,7 @@ def overview_plot(
                     y2_tickformat = ".2%"
                 if is_dollar(y_val):
                     y2_tickformat = "$.3f"
+                line_dict: dict = {}
                 if y_val == "count":
                     line_dict = {"shape": "hv"}
                 else:

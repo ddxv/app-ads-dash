@@ -1,8 +1,9 @@
+import dash
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
-from server import server
-import dash
+
 from config import get_logger
+from server import server
 
 dbc_css = (
     "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates@V1.0.4/dbc.min.css"

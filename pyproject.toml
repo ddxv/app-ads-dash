@@ -1,4 +1,7 @@
 [project]
+name = "app-ads-dash"
+description = ""
+version = "23.2.11.1"
 authors = [{ name = "James O'Claire" }]
 
 dependencies = [
@@ -10,9 +13,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-name = "app-ads-dash"
-description = ""
-version = "23.2.11.1"
 dev = ["pre-commit"]
 
 [tool.isort]

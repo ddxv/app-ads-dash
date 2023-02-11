@@ -1,8 +1,9 @@
-import pathlib
-import yaml
 import logging
-from logging.handlers import RotatingFileHandler
+import pathlib
 import sys
+from logging.handlers import RotatingFileHandler
+
+import yaml
 
 HOME = pathlib.Path.home()
 TOP_CONFIGDIR = pathlib.Path(HOME, pathlib.Path(".config"))
