@@ -1,0 +1,30 @@
+[project]
+authors = [{ name = "James O'Claire" }]
+
+dependencies = [
+    "dash",
+    "dash_bootstrap_components",
+    "dash_bootstrap_templates",
+    "pandas",
+    "sqlalchemy",
+]
+
+[project.optional-dependencies]
+name = "app-ads-dash"
+description = ""
+version = "23.2.11.1"
+dev = ["pre-commit"]
+
+[tool.isort]
+profile = 'black'
+
+[tool.ruff]
+# Enable flake8-bugbear (`B`) rules.
+select = ["E", "F", "B", "I", "N"]
+target-version = 'py311'
+
+# Never enforce `E501` (line length violations).
+ignore = ["E501"]
+
+# Avoid trying to fix flake8-bugbear (`B`) violations.
+unfixable = ["B"]
