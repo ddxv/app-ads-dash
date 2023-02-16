@@ -29,7 +29,7 @@ def check_config_dirs():
 def get_logger(mod_name: str, log_name: str = "dash"):
     format = "%(asctime)s: %(name)s: %(levelname)s: %(message)s"
     check_config_dirs()
-    log_dir = pathlib.Path(HOME, pathlib.Path(".config/bubbleye_adops/logs"))
+    log_dir = pathlib.Path(HOME, pathlib.Path(".config/app-ads/logs"))
     if not pathlib.Path.exists(log_dir):
         pathlib.Path.mkdir(log_dir, exist_ok=True)
         print(f"Couldn't find {log_dir=} so it was created.")
