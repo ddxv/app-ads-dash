@@ -224,6 +224,8 @@ def networks_table(
     else:
         top_only = False
     if dropdown and dropdown != "all_data":
+        if isinstance(dropdown, list):
+            dropdown = ", ".join(dropdown)
         cat_title = f"{dropdown.replace('_', ' ').title()}"
         title = f"{cat_title} Marketshare of Programmatic Ad Networks"
         logger.info(f"Networks Dropdown is {dropdown=}")
