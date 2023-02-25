@@ -215,7 +215,10 @@ def txt_view_table(
     Input(NETWORKS + AFFIX_GROUPBY, "value"),
 )
 def networks_table(
-    derived_viewport_row_ids: list[str], switches: list[str], radios: str, dropdown
+    derived_viewport_row_ids: list[str],
+    switches: list[str],
+    radios: str,
+    dropdown: list[str],
 ):
     logger.info(f"{NETWORKS} start")
     metrics = ["size"]
@@ -223,16 +226,17 @@ def networks_table(
         top_only = True
     else:
         top_only = False
-    if dropdown and dropdown != "all_data":
-        if isinstance(dropdown, list):
-            dropdown = ", ".join(dropdown)
-        cat_title = f"{dropdown.replace('_', ' ').title()}"
+    if dropdown and dropdown[0] != "all_data":
+        category = dropdown[0]
+        if isinstance(category, list):
+            category = ", ".join(category)
+        cat_title = f"{category.replace('_', ' ').title()}"
         title = f"{cat_title} Marketshare of Programmatic Ad Networks"
-        logger.info(f"Networks Dropdown is {dropdown=}")
+        logger.info(f"Networks Dropdown is {category=}")
         query_dict: dict = {"id": "networks-with-app-metrics"}
         df = get_cached_dataframe(query_json=json.dumps(query_dict))
         df = df[df["store"] == 1]
-        df = df[df["category"] == dropdown]
+        df = df[df["category"] == category]
         if top_only:
             error = """Top only for categories is NOT implemented, 
                 requires checking publisher install count!"""
