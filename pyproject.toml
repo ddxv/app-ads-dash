@@ -19,7 +19,6 @@ dev = ["pre-commit"]
 profile = 'black'
 
 [tool.ruff]
-# Enable flake8-bugbear (`B`) rules.
 select = ["E", "F", "B", "I", "N"]
 target-version = 'py311'
 
