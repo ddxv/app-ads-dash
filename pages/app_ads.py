@@ -78,7 +78,7 @@ def developers_search(
     metrics = ["size"]
     if not input_value:
         logger.info(f"Developers Search {input_value=} prevent update")
-        PreventUpdate
+        raise PreventUpdate
     query_dict = {
         "id": DEVELOPERS_SEARCH,
         "search_input": input_value,
@@ -186,7 +186,7 @@ def txt_view_table(
     logger.info(f"{TXT_VIEW} Table {developer_url=}")
     metrics = ["size"]
     if not developer_url:
-        PreventUpdate
+        raise PreventUpdate
     query_dict = {"id": TXT_VIEW, "developer_url": developer_url}
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     logger.info(f"{TXT_VIEW} Table {developer_url=} {df.shape=}")
