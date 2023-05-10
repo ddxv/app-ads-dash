@@ -63,8 +63,8 @@ def render_content(tab):
 
 
 @callback(
-    Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "data"),
-    Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "columns"),
+    Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "rowData"),
+    Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "columnDefs"),
     Input(DEVELOPERS_SEARCH + AFFIX_BUTTON, "n_clicks"),
     State(DEVELOPERS_SEARCH + "-input", "value"),
     Input(DEVELOPERS_SEARCH + AFFIX_TABLE, "derived_viewport_row_ids"),
@@ -161,8 +161,8 @@ def filter_table(dff, page_current, page_size, sort_by, filter):
 
 
 @callback(
-    Output(TXT_VIEW_TABLE, "data"),
-    Output(TXT_VIEW_TABLE, "columns"),
+    Output(TXT_VIEW_TABLE, "rowData"),
+    Output(TXT_VIEW_TABLE, "columnDefs"),
     Output(TXT_VIEW + f"-search{AFFIX_LOADING}", "children"),
     Input(TXT_VIEW_TABLE, "page_current"),
     Input(TXT_VIEW_TABLE, "page_size"),
@@ -206,8 +206,8 @@ def txt_view_table(
 
 
 @callback(
-    Output(NETWORKS + AFFIX_TABLE, "data"),
-    Output(NETWORKS + AFFIX_TABLE, "columns"),
+    Output(NETWORKS + AFFIX_TABLE, "rowData"),
+    Output(NETWORKS + AFFIX_TABLE, "columnDefs"),
     Output(NETWORKS + AFFIX_PLOT, "figure"),
     Input(NETWORKS + AFFIX_TABLE, "derived_viewport_row_ids"),
     Input(NETWORKS + AFFIX_SWITCHES, "value"),
@@ -289,8 +289,8 @@ def networks_table(
 
 
 @callback(
-    Output(NETWORK_UNIQUES + AFFIX_TABLE, "data"),
-    Output(NETWORK_UNIQUES + AFFIX_TABLE, "columns"),
+    Output(NETWORK_UNIQUES + AFFIX_TABLE, "rowData"),
+    Output(NETWORK_UNIQUES + AFFIX_TABLE, "columnDefs"),
     Output(NETWORK_UNIQUES + AFFIX_PLOT, "figure"),
     Input(NETWORK_UNIQUES + AFFIX_TABLE, "derived_viewport_row_ids"),
     Input(NETWORK_UNIQUES + AFFIX_RADIOS, "value"),

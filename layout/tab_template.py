@@ -1,8 +1,8 @@
 import datetime
 
+import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
-from dash import dash_table, dcc, html
-from dash.dash_table import FormatTemplate
+from dash import dcc, html
 from plotly import graph_objects as go
 
 from config import DATE_FORMAT, get_logger
@@ -233,36 +233,45 @@ def make_tab_options(tab_id: str) -> html.Div:
 
 
 def make_table_div(tab_id: str) -> html.Div:
-    if tab_id in [TXT_VIEW]:
-        page_action = "custom"
-        sort_action = "custom"
-        filter_action = "custom"
-    else:
-        page_action = "native"
-        sort_action = "native"
-        filter_action = "native"
+    # if tab_id in [TXT_VIEW]:
+    #     page_action = "custom"
+    #     sort_action = "custom"
+    #     filter_action = "custom"
+    # else:
+    #     page_action = "native"
+    #     sort_action = "native"
+    #     filter_action = "native"
+    defaultColDef = {
+        "filter": True,
+        "resizable": True,
+        "sortable": True,
+        "editable": False,
+        "floatingFilter": True,
+    }
     table_div = html.Div(
         [
-            dash_table.DataTable(
+            dag.AgGrid(
                 id=tab_id + AFFIX_TABLE,
-                style_header={
-                    "overflowX": "scroll",
-                    "fontWeight": "bold",
-                },
-                filter_action=filter_action,
-                filter_options={"case": "insensitive"},
-                sort_action=sort_action,
-                sort_mode="multi",
-                page_action=page_action,
-                page_current=0,
-                page_size=15,
-                style_table={"overflowX": "auto"},
-                persistence=False,
-                persisted_props=[
-                    "columns.name",
-                    "hidden_columns",
-                    "sort_by",
-                ],
+                defaultColDef=defaultColDef,
+                # OLD DATATABLE defs
+                # style_header={
+                #     "overflowX": "scroll",
+                #     "fontWeight": "bold",
+                # },
+                # filter_action=filter_action,
+                # filter_options={"case": "insensitive"},
+                # sort_action=sort_action,
+                # sort_mode="multi",
+                # page_action=page_action,
+                # page_current=0,
+                # page_size=15,
+                # style_table={"overflowX": "auto"},
+                # persistence=False,
+                # persisted_props=[
+                #     "columns.name",
+                #     "hidden_columns",
+                #     "sort_by",
+                # ],
             ),
         ],
     )
@@ -528,7 +537,7 @@ def is_dollar(name: str) -> bool:
 
 def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     dimensions_new = [
-        {"name": i, "id": i, "selectable": False, "type": "text"} for i in dimensions
+        {"field": i, "id": i, "selectable": False, "type": "text"} for i in dimensions
     ]
     money_metrics = [m for m in metrics if is_dollar(m)]
     percent_metrics = [m for m in metrics if is_percent(m) and m not in money_metrics]
@@ -538,7 +547,7 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
             "name": i,
             "id": i,
             "type": "numeric",
-            "format": FormatTemplate.money(2),
+            # "format": FormatTemplate.money(2),
         }
         for i in money_metrics
     ]
@@ -547,7 +556,7 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
             "name": i,
             "id": i,
             "type": "numeric",
-            "format": FormatTemplate.percentage(2),
+            # "format": FormatTemplate.percentage(2),
         }
         for i in percent_metrics
     ]

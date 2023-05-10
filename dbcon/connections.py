@@ -31,7 +31,6 @@ def get_db_connection(server_name: str):
 
 
 def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
-    # PROD, set in the OS environment, is true if python running in EC2 security group
     db_ip = CONFIG[server_name]["host"]
     if db_ip == "localhost" or db_ip.startswith("172"):
         db_ip = CONFIG[server_name]["host"]
