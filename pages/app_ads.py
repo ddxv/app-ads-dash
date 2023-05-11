@@ -67,12 +67,12 @@ def render_content(tab):
     Output(DEVELOPERS_SEARCH + AFFIX_TABLE, "columnDefs"),
     Input(DEVELOPERS_SEARCH + AFFIX_BUTTON, "n_clicks"),
     State(DEVELOPERS_SEARCH + "-input", "value"),
-    Input(DEVELOPERS_SEARCH + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(DEVELOPERS_SEARCH + AFFIX_TABLE, "virtualRowData"),
 )
 def developers_search(
     button,
     input_value,
-    derived_viewport_row_ids: list[str],
+    virtual_row_data: list[str],
 ):
     logger.info(f"Developers Search {input_value=}")
     metrics = ["size"]
@@ -171,7 +171,7 @@ def filter_table(dff, page_current, page_size, sort_by, filter):
     Input(TXT_VIEW + AFFIX_BUTTON, "n_clicks"),
     State(TXT_VIEW + "-input", "value"),
     Input(TXT_VIEW + AFFIX_GROUPBY, "value"),
-    Input(TXT_VIEW_TABLE, "derived_viewport_row_ids"),
+    Input(TXT_VIEW_TABLE, "virtualRowData"),
 )
 def txt_view_table(
     page_current,
@@ -181,7 +181,7 @@ def txt_view_table(
     button,
     developer_url,
     groupby,
-    derived_viewport_row_ids: list[str],
+    virtual_row_data: list[str],
 ):
     logger.info(f"{TXT_VIEW} Table {developer_url=}")
     metrics = ["size"]
@@ -209,13 +209,13 @@ def txt_view_table(
     Output(NETWORKS + AFFIX_TABLE, "rowData"),
     Output(NETWORKS + AFFIX_TABLE, "columnDefs"),
     Output(NETWORKS + AFFIX_PLOT, "figure"),
-    Input(NETWORKS + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(NETWORKS + AFFIX_TABLE, "virtualRowData"),
     Input(NETWORKS + AFFIX_SWITCHES, "value"),
     Input(NETWORKS + AFFIX_RADIOS, "value"),
     Input(NETWORKS + AFFIX_GROUPBY, "value"),
 )
 def networks_table(
-    derived_viewport_row_ids: list[str],
+    virtual_row_ids: list[str],
     switches: list[str],
     radios: str,
     dropdown: list[str],
@@ -257,7 +257,7 @@ def networks_table(
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
     df = limit_rows_for_plotting(
-        df=df, row_ids=derived_viewport_row_ids, sort_by_columns=metrics
+        df=df, row_ids=virtual_row_ids, sort_by_columns=metrics
     )
     xaxis_col = "ad_domain_url"
     bar_column = "percent"
@@ -292,11 +292,11 @@ def networks_table(
     Output(NETWORK_UNIQUES + AFFIX_TABLE, "rowData"),
     Output(NETWORK_UNIQUES + AFFIX_TABLE, "columnDefs"),
     Output(NETWORK_UNIQUES + AFFIX_PLOT, "figure"),
-    Input(NETWORK_UNIQUES + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(NETWORK_UNIQUES + AFFIX_TABLE, "virtualRowData"),
     Input(NETWORK_UNIQUES + AFFIX_RADIOS, "value"),
     Input(NETWORK_UNIQUES + AFFIX_SWITCHES, "value"),
 )
-def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
+def network_uniques(virtual_row_data: list[str], radios, switches):
     logger.info(f"{NETWORK_UNIQUES} start")
     metrics = ["percent"]
     query_dict = {"id": NETWORK_UNIQUES}
@@ -320,7 +320,7 @@ def network_uniques(derived_viewport_row_ids: list[str], radios, switches):
 
     df = limit_rows_for_plotting(
         df=df,
-        row_ids=derived_viewport_row_ids,
+        row_ids=virtual_row_data,
         sort_by_columns=sort_by,
         sort_ascending=ascending,
     )

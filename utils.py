@@ -96,7 +96,8 @@ def limit_rows_for_plotting(
     sort_ascending: bool = False,
 ) -> pd.DataFrame:
     original_shape = df.shape
-    if row_ids:
+    if row_ids and len(row_ids) > 0:
+        row_ids = pd.DataFrame.from_records(row_ids[:MAX_ROWS])["id"].tolist()
         logger.info(f"Limit plot ids: {row_ids=}")
         df = df[df["id"].isin(row_ids)]
     if not row_ids:

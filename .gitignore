@@ -5,6 +5,7 @@ __pycache__/
 
 # local environment
 .virtualenv/
+.vscode/
 
 # C extensions
 *.so

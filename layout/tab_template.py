@@ -253,25 +253,8 @@ def make_table_div(tab_id: str) -> html.Div:
             dag.AgGrid(
                 id=tab_id + AFFIX_TABLE,
                 defaultColDef=defaultColDef,
-                # OLD DATATABLE defs
-                # style_header={
-                #     "overflowX": "scroll",
-                #     "fontWeight": "bold",
-                # },
-                # filter_action=filter_action,
-                # filter_options={"case": "insensitive"},
-                # sort_action=sort_action,
-                # sort_mode="multi",
-                # page_action=page_action,
-                # page_current=0,
-                # page_size=15,
-                # style_table={"overflowX": "auto"},
-                # persistence=False,
-                # persisted_props=[
-                #     "columns.name",
-                #     "hidden_columns",
-                #     "sort_by",
-                # ],
+                columnSize="sizeToFit",
+                className="ag-theme-alpine-dark",
             ),
         ],
     )
