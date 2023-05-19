@@ -8,6 +8,7 @@ dependencies = [
     "dash",
     "dash_bootstrap_components",
     "dash_bootstrap_templates",
+    "dash-ag-grid",
     "pandas",
     "sqlalchemy",
 ]
