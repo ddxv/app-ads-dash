@@ -58,8 +58,8 @@ def render_content(tab):
 
 
 @callback(
-    Output(INTERNAL_LOGS + AFFIX_TABLE, "data"),
-    Output(INTERNAL_LOGS + AFFIX_TABLE, "columns"),
+    Output(INTERNAL_LOGS + AFFIX_TABLE, "rowData"),
+    Output(INTERNAL_LOGS + AFFIX_TABLE, "columnDefs"),
     Output(INTERNAL_LOGS + "-buttongroup", "children"),
     Output(INTERNAL_LOGS + "-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
@@ -124,8 +124,8 @@ def internal_logs_plot(
 
 
 @callback(
-    Output(STORE_APPS_HISTORY + AFFIX_TABLE, "data"),
-    Output(STORE_APPS_HISTORY + AFFIX_TABLE, "columns"),
+    Output(STORE_APPS_HISTORY + AFFIX_TABLE, "rowData"),
+    Output(STORE_APPS_HISTORY + AFFIX_TABLE, "columnDefs"),
     Input(STORE_APPS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
     Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
 )
@@ -221,8 +221,8 @@ def store_apps_history_plot(
 
 
 @callback(
-    Output(PUB_URLS_HISTORY + AFFIX_TABLE, "data"),
-    Output(PUB_URLS_HISTORY + AFFIX_TABLE, "columns"),
+    Output(PUB_URLS_HISTORY + AFFIX_TABLE, "rowData"),
+    Output(PUB_URLS_HISTORY + AFFIX_TABLE, "columnDefs"),
     Input(PUB_URLS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
     Input(PUB_URLS_HISTORY + AFFIX_SWITCHES, "value"),
 )
