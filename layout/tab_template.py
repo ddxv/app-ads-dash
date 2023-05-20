@@ -247,7 +247,6 @@ def make_table_div(tab_id: str) -> html.Div:
                 defaultColDef=default_col_def,
                 columnSize="sizeToFit",
                 className="ag-theme-alpine-dark",
-                style={"height": 400, "width": "100%"},
             ),
         ],
     )
