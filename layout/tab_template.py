@@ -512,7 +512,14 @@ def is_dollar(name: str) -> bool:
 
 def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     dimensions_new = [
-        {"field": i, "id": i, "selectable": False, "type": "text"} for i in dimensions
+        {
+            "headerName": i.replace("_", " ").title(),
+            "field": i,
+            "id": i,
+            "selectable": False,
+            "type": "text",
+        }
+        for i in dimensions
     ]
     money_metrics = [m for m in metrics if is_dollar(m)]
     percent_metrics = [m for m in metrics if is_percent(m) and m not in money_metrics]
