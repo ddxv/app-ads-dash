@@ -255,7 +255,6 @@ def networks_table(
     dimensions = [x for x in df.columns if x not in metrics]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
-    table_obj = df.to_dict("records")
     df = limit_rows_for_plotting(
         df=df, row_ids=virtual_row_ids, sort_by_columns=metrics
     )
@@ -285,6 +284,7 @@ def networks_table(
             bar_column=bar_column,
             title=title,
         )
+    table_obj = df.to_dict("records")
     return table_obj, column_dicts, fig
 
 
@@ -317,7 +317,6 @@ def network_uniques(virtual_row_data: list[str], radios, switches):
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
     table_obj = df.to_dict("records")
-
     df = limit_rows_for_plotting(
         df=df,
         row_ids=virtual_row_data,

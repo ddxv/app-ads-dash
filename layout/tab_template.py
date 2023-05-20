@@ -233,15 +233,7 @@ def make_tab_options(tab_id: str) -> html.Div:
 
 
 def make_table_div(tab_id: str) -> html.Div:
-    # if tab_id in [TXT_VIEW]:
-    #     page_action = "custom"
-    #     sort_action = "custom"
-    #     filter_action = "custom"
-    # else:
-    #     page_action = "native"
-    #     sort_action = "native"
-    #     filter_action = "native"
-    defaultColDef = {
+    default_col_def = {
         "filter": True,
         "resizable": True,
         "sortable": True,
@@ -252,9 +244,10 @@ def make_table_div(tab_id: str) -> html.Div:
         [
             dag.AgGrid(
                 id=tab_id + AFFIX_TABLE,
-                defaultColDef=defaultColDef,
+                defaultColDef=default_col_def,
                 columnSize="sizeToFit",
                 className="ag-theme-alpine-dark",
+                style={"height": 400, "width": "100%"},
             ),
         ],
     )
@@ -520,26 +513,35 @@ def is_dollar(name: str) -> bool:
 
 def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     dimensions_new = [
-        {"field": i, "id": i, "selectable": False, "type": "text"} for i in dimensions
+        {
+            "headerName": i.replace("_", " ").title(),
+            "field": i,
+            "id": i,
+            "selectable": False,
+            "type": "text",
+        }
+        for i in dimensions
     ]
     money_metrics = [m for m in metrics if is_dollar(m)]
     percent_metrics = [m for m in metrics if is_percent(m) and m not in money_metrics]
     numeric_metrics = [x for x in metrics if x not in percent_metrics + money_metrics]
     money_metrics_new = [
         {
+            "headerName": i.replace("_", " ").title(),
             "name": i,
             "id": i,
             "type": "numeric",
-            # "format": FormatTemplate.money(2),
+            "valueFormatter": {"function": "d3.format('($,.2f')(params.value)"},
         }
         for i in money_metrics
     ]
     percent_metrics_new = [
         {
-            "name": i,
+            "headerName": i.replace("_", " ").title(),
+            "field": i,
             "id": i,
             "type": "numeric",
-            # "format": FormatTemplate.percentage(2),
+            "valueFormatter": {"function": "d3.format(',.1%')(params.value)"},
         }
         for i in percent_metrics
     ]
@@ -550,6 +552,7 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     metric_columns = numeric_metrics_new + money_metrics_new + percent_metrics_new
 
     columns = dimensions_new + metric_columns
+    print(columns)
     return columns
 
 
