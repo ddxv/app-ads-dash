@@ -233,15 +233,7 @@ def make_tab_options(tab_id: str) -> html.Div:
 
 
 def make_table_div(tab_id: str) -> html.Div:
-    # if tab_id in [TXT_VIEW]:
-    #     page_action = "custom"
-    #     sort_action = "custom"
-    #     filter_action = "custom"
-    # else:
-    #     page_action = "native"
-    #     sort_action = "native"
-    #     filter_action = "native"
-    defaultColDef = {
+    default_col_def = {
         "filter": True,
         "resizable": True,
         "sortable": True,
@@ -252,7 +244,7 @@ def make_table_div(tab_id: str) -> html.Div:
         [
             dag.AgGrid(
                 id=tab_id + AFFIX_TABLE,
-                defaultColDef=defaultColDef,
+                defaultColDef=default_col_def,
                 columnSize="sizeToFit",
                 className="ag-theme-alpine-dark",
             ),
