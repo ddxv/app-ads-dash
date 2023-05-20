@@ -526,19 +526,21 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     numeric_metrics = [x for x in metrics if x not in percent_metrics + money_metrics]
     money_metrics_new = [
         {
+            "headerName": i.replace("_", " ").title(),
             "name": i,
             "id": i,
             "type": "numeric",
-            # "format": FormatTemplate.money(2),
+            "valueFormatter": {"function": "d3.format('($,.2f')(params.value)"},
         }
         for i in money_metrics
     ]
     percent_metrics_new = [
         {
-            "name": i,
+            "headerName": i.replace("_", " ").title(),
+            "field": i,
             "id": i,
             "type": "numeric",
-            # "format": FormatTemplate.percentage(2),
+            "valueFormatter": {"function": "d3.format(',.1%')(params.value)"},
         }
         for i in percent_metrics
     ]
@@ -549,6 +551,7 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     metric_columns = numeric_metrics_new + money_metrics_new + percent_metrics_new
 
     columns = dimensions_new + metric_columns
+    print(columns)
     return columns
 
 
