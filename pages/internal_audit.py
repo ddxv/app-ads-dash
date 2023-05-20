@@ -91,12 +91,12 @@ def internal_logs(n_clicks, start_date):
     Output(INTERNAL_LOGS + AFFIX_PLOT, "figure"),
     Input(INTERNAL_LOGS + AFFIX_DATE_PICKER, "start_date"),
     Input(INTERNAL_LOGS + "-memory-output", "data"),
-    Input(INTERNAL_LOGS + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(INTERNAL_LOGS + AFFIX_TABLE, "virtualRowData"),
 )
 def internal_logs_plot(
-    start_date,
-    table_name,
-    derived_viewport_row_ids,
+    start_date: str,
+    table_name: str,
+    virtual_row_ids: list[str],
 ):
     logger.info(f"Internal logs plot {table_name=}")
     metrics = ["updated_count", "created_count", "last_updated_count"]
@@ -111,7 +111,7 @@ def internal_logs_plot(
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Internal logs plot_df: {df.shape=} {dimensions=}")
-    df = limit_rows_for_plotting(df, derived_viewport_row_ids, sort_by_columns=metrics)
+    df = limit_rows_for_plotting(df, virtual_row_ids, sort_by_columns=metrics)
     fig = overview_plot(
         df=df,
         xaxis_col=date_col,
@@ -129,7 +129,7 @@ def internal_logs_plot(
     Input(STORE_APPS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
     Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
 )
-def store_apps_history(start_date, switches):
+def store_apps_history(start_date: str, switches: list[str]):
     logger.info("Store apps historical data")
     metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
     date_col = "updated_at"
@@ -163,13 +163,13 @@ def store_apps_history(start_date, switches):
 @callback(
     Output(STORE_APPS_HISTORY + AFFIX_PLOT, "figure"),
     Input(STORE_APPS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
-    Input(STORE_APPS_HISTORY + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(STORE_APPS_HISTORY + AFFIX_TABLE, "virtualRowData"),
     Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
     Input(STORE_APPS_HISTORY + AFFIX_GROUPBY_TIME, "value"),
 )
 def store_apps_history_plot(
     start_date: str,
-    derived_viewport_row_ids: list[str],
+    virtual_row_ids: list[str],
     switches: list[str],
     groupby_time,
 ):
@@ -207,7 +207,7 @@ def store_apps_history_plot(
     )
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Store apps history plot: {dimensions=} {df.shape=}")
-    df = limit_rows_for_plotting(df, derived_viewport_row_ids, sort_by_columns=metrics)
+    df = limit_rows_for_plotting(df, virtual_row_ids, sort_by_columns=metrics)
 
     fig = overview_plot(
         df=df,
@@ -226,7 +226,7 @@ def store_apps_history_plot(
     Input(PUB_URLS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
     Input(PUB_URLS_HISTORY + AFFIX_SWITCHES, "value"),
 )
-def pub_domains_history(start_date, switches):
+def pub_domains_history(start_date: str, switches):
     logger.info("Store pub domains history data")
     metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
     date_col = "updated_at"
@@ -260,13 +260,13 @@ def pub_domains_history(start_date, switches):
 @callback(
     Output(PUB_URLS_HISTORY + AFFIX_PLOT, "figure"),
     Input(PUB_URLS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
-    Input(PUB_URLS_HISTORY + AFFIX_TABLE, "derived_viewport_row_ids"),
+    Input(PUB_URLS_HISTORY + AFFIX_TABLE, "virtualRowData"),
     Input(PUB_URLS_HISTORY + AFFIX_SWITCHES, "value"),
     Input(PUB_URLS_HISTORY + AFFIX_GROUPBY_TIME, "value"),
 )
 def pub_domains_history_plot(
     start_date: str,
-    derived_viewport_row_ids: list[str],
+    virtual_row_ids: list[str],
     switches: list[str],
     groupby_time,
 ):
@@ -304,7 +304,7 @@ def pub_domains_history_plot(
     )
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Store apps history plot: {dimensions=} {df.shape=}")
-    df = limit_rows_for_plotting(df, derived_viewport_row_ids, sort_by_columns=metrics)
+    df = limit_rows_for_plotting(df, virtual_row_ids, sort_by_columns=metrics)
 
     fig = overview_plot(
         df=df,
