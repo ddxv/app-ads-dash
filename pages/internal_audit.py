@@ -61,7 +61,7 @@ def render_content(tab):
     Output(INTERNAL_LOGS + AFFIX_TABLE, "rowData"),
     Output(INTERNAL_LOGS + AFFIX_TABLE, "columnDefs"),
     Output(INTERNAL_LOGS + "-buttongroup", "children"),
-    Output(INTERNAL_LOGS + "-memory-output", "rowData"),
+    Output(INTERNAL_LOGS + "-memory-output", "data"),
     Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
     Input(INTERNAL_LOGS + AFFIX_DATE_PICKER, "start_date"),
 )
@@ -90,7 +90,7 @@ def internal_logs(n_clicks, start_date):
 @callback(
     Output(INTERNAL_LOGS + AFFIX_PLOT, "figure"),
     Input(INTERNAL_LOGS + AFFIX_DATE_PICKER, "start_date"),
-    Input(INTERNAL_LOGS + "-memory-output", "rowData"),
+    Input(INTERNAL_LOGS + "-memory-output", "data"),
     Input(INTERNAL_LOGS + AFFIX_TABLE, "derived_viewport_row_ids"),
 )
 def internal_logs_plot(
