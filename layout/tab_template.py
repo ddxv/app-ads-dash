@@ -205,7 +205,7 @@ def make_tab_options(tab_id: str) -> html.Div:
         groupby_options = [{"label": "All Categories", "value": "all_data"}] + [
             {"label": x.replace("_", " ").title(), "value": x} for x in APP_CATEGORIES
         ]
-        groupby_defaults = ["all_data"]
+        groupby_defaults = "all_data"
         options_div = make_options_div(
             tab_id,
             switch_options=switch_options,
@@ -221,7 +221,7 @@ def make_tab_options(tab_id: str) -> html.Div:
         options_div = make_options_div(tab_id, search_hint="Name, ids or URL parts...")
     if TXT_VIEW == tab_id:
         groupby_options = [{"label": x, "value": x} for x in TXT_VIEW_COLUMNS]
-        groupby_defaults = ["my_domain_url", "ad_domain_url"]
+        groupby_defaults = "ad_domain_url"
         options_div = make_options_div(
             tab_id,
             dropdown_options=groupby_options,
@@ -357,7 +357,7 @@ def make_radio_buttons(
 def make_dropdown(
     tab_id: str,
     dropdown_options: list[dict[str, str]] | None,
-    dropdown_defaults: list[str] | None,
+    dropdown_defaults: str | None,
     dropdown_multi: bool = True,
     title: str | None = None,
 ) -> dbc.Col:
@@ -366,7 +366,7 @@ def make_dropdown(
         header = html.H4(title)
         groupby_col.children.append(header)
     if dropdown_options and not dropdown_defaults:
-        dropdown_defaults = [dropdown_options[0]["value"]]
+        dropdown_defaults = dropdown_options[0]["value"]
     if dropdown_options:
         groupby_col.children.append(
             dcc.Dropdown(
@@ -456,7 +456,7 @@ def make_search_column(tab_id: str, search_hint: str | None) -> dbc.Col:
 def make_options_div(
     tab_id=str,
     dropdown_options: list[dict[str, str]] | None = None,
-    dropdown_defaults: list[str] | None = None,
+    dropdown_defaults: str | None = None,
     dropdown_multi: bool = True,
     dropdown_title: str | None = None,
     switch_options: list[dict[str, str]] | None = None,

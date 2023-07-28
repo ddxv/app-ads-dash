@@ -218,7 +218,7 @@ def networks_table(
     virtual_row_ids: list[str],
     switches: list[str],
     radios: str,
-    dropdown: list[str],
+    dropdown: str,
 ):
     logger.info(f"{NETWORKS} start")
     metrics = ["size"]
@@ -226,10 +226,9 @@ def networks_table(
         top_only = True
     else:
         top_only = False
-    if dropdown and dropdown[0] != "all_data":
-        category = dropdown[0]
-        if isinstance(category, list):
-            category = ", ".join(category)
+    if dropdown and dropdown != "all_data":
+        logger.info(f"Networks Dropdown is {dropdown=}")
+        category = dropdown
         cat_title = f"{category.replace('_', ' ').title()}"
         title = f"{cat_title} Marketshare of Programmatic Ad Networks"
         logger.info(f"Networks Dropdown is {category=}")
