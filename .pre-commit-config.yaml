@@ -1,7 +1,7 @@
 repos:
   # Black
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.9.1
     hooks:
       - id: black
   # iSort
@@ -12,12 +12,12 @@ repos:
         name: isort (python)
   # Ruff
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.265
+    rev: v0.0.289
     hooks:
       - id: ruff
   # Mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.2.0
+    rev: v1.5.1
     hooks:
       - id: mypy
         additional_dependencies: ["types-requests", "types-PyYAML"]
