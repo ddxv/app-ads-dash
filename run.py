@@ -4,7 +4,13 @@ from flask import Response, redirect, render_template, request, url_for
 
 from config import get_logger
 from dashapp import app as dashapp
-from dbcon.queries import get_dash_users
+from dbcon.queries import (
+    get_apps_by_name,
+    get_appstore_categories,
+    get_dash_users,
+    get_single_app,
+    get_top_apps_by_installs,
+)
 from server import server
 
 logger = get_logger(__name__)
@@ -59,6 +65,39 @@ def appads():
 def home():
     logger.info("Loading home page")
     return redirect(url_for("/dash/"))
+
+
+@server.route("/apps")
+def app_store_home():
+    logger.info("Loading app dash")
+    cats = get_appstore_categories()
+    category_dicts = cats.to_dict(orient="records")
+    return render_template("apps_home.html", cats=category_dicts)
+
+
+@server.route("/<store>/<app_id>")
+def app_detail(store, app_id):
+    # Fetch app details from the database using store and app_id
+    app = get_single_app(app_id)
+    app_dict = app.to_dict(orient="records")[0]
+    print(app_dict)
+    return render_template("app_detail.html", app=app_dict)
+
+
+@server.route("/category/<category>")
+def category(category):
+    # Your logic here for handling the category page
+    apps = get_top_apps_by_installs(category_in=[category], limit=15)
+    apps_dict = apps.to_dict(orient="records")
+    return render_template("category_detail.html", category=category, apps=apps_dict)
+
+
+@server.route("/search")
+def search():
+    query = request.args.get("query")
+    apps = get_apps_by_name(query)
+    apps_dict = apps.to_dict(orient="records")
+    return render_template("search_results.html", apps=apps_dict, query=query)
 
 
 if __name__ == "__main__":

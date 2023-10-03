@@ -1,4 +1,5 @@
 import pandas as pd
+from sqlalchemy import text
 
 from config import get_logger
 from dbcon.connections import get_db_connection
@@ -266,6 +267,81 @@ def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:
                 ;
                 """
     df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
+def get_appstore_categories() -> pd.DataFrame:
+    sel_query = """SELECT *
+                    FROM mv_app_categories
+                    ;
+                    """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    df["store"] = df["store"].replace({1: "android", 2: "ios"})
+    df = pd.pivot_table(
+        data=df, index="category", values="app_count", columns="store", fill_value=0
+    ).reset_index()
+    return df
+
+
+def get_top_apps_by_installs(
+    category_in: list[str] | None = None, limit: int = 10
+) -> pd.DataFrame:
+    logger.info("Query top installs")
+    if category_in is not None:
+        my_list_str = "('" + "','".join(category_in) + "')"
+        where_str = f"WHERE category IN {my_list_str} "
+    else:
+        where_str = ""
+
+    sel_query = f"""SELECT
+                    *
+                    FROM store_apps sa
+                    {where_str}
+                    ORDER BY installs DESC NULLS LAST
+                    LIMIT {limit}
+                    ;
+                    """
+
+    df = pd.read_sql(sel_query, DBCON.engine)
+    df["store"] = df["store"].replace({1: "android", 2: "ios"})
+    return df
+
+
+def get_single_app(app_id: str) -> pd.DataFrame:
+    logger.info("Query for single app")
+    where_str = f"WHERE store_id = '{app_id}'"
+    where_str = text(where_str)
+    sel_query = f"""SELECT
+                    *
+                    FROM store_apps sa
+                    {where_str}
+                    ;
+                    """
+    print(sel_query)
+    df = pd.read_sql(sel_query, DBCON.engine)
+    df["store"] = df["store"].replace({1: "android", 2: "ios"})
+    return df
+
+
+def get_apps_by_name(search_input: str, limit: int = 100):
+    logger.info(f"App search: {search_input=}")
+    search_input = f"%%{search_input}%%"
+    sel_query = f"""SELECT
+                    sa.*,
+                    d.name as developer_name
+                    FROM
+                        store_apps sa
+                    LEFT JOIN developers d ON
+                        d.id = sa.developer
+                    WHERE
+                        sa.name ILIKE '{search_input}'
+                        OR sa.store_id ILIKE '{search_input}'
+                    LIMIT {limit}
+                    ;
+                    """
+
+    df = pd.read_sql(sel_query, DBCON.engine)
+    df["store"] = df["store"].replace({1: "android", 2: "ios"})
     return df
 
 
