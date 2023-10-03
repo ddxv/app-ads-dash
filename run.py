@@ -68,7 +68,7 @@ def home():
 
 
 @server.route("/apps")
-def app_store_home():
+def apps_home():
     logger.info("Loading app dash")
     cats = get_appstore_categories()
     category_dicts = cats.to_dict(orient="records")
