@@ -68,7 +68,7 @@ def home():
     return redirect(url_for("/dash/"))
 
 
-@server.route("/apps")
+@server.route("/apps/")
 def apps_home():
     logger.info("Loading app dash")
     cats = get_appstore_categories()
@@ -79,6 +79,7 @@ def apps_home():
 @server.route("/apps/<app_id>")
 def app_detail(app_id):
     # Fetch app details from the database using store and app_id
+    app_id = "1240808239"
     app = get_single_app(app_id)
     app_dict = app.to_dict(orient="records")[0]
     app_hist = get_app_history(store_app=app_dict["id"])
@@ -95,7 +96,7 @@ def category(category):
     return render_template("category_detail.html", category=category, apps=apps_dict)
 
 
-@server.route("/search")
+@server.route("/search/")
 def search():
     query = request.args.get("query")
     apps = get_apps_by_name(query)
