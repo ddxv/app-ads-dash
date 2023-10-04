@@ -53,6 +53,11 @@
         <p>Store Last Updated: {{ app.store_last_updated }}</p>
         <p>First Crawled: {{ app.created_at }}</p>
     </div>
+    <br>
+    <h2>Historical Information</h2>
+    <div class="additional-info">
+        {{ app.history|safe }}
+    </div>
 
     <a href="{{ url_for('apps_home') }}">Back to Home</a>
 </body>

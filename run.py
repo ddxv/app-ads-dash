@@ -5,6 +5,7 @@ from flask import Response, redirect, render_template, request, url_for
 from config import get_logger
 from dashapp import app as dashapp
 from dbcon.queries import (
+    get_app_history,
     get_apps_by_name,
     get_appstore_categories,
     get_dash_users,
@@ -80,8 +81,9 @@ def app_detail(store, app_id):
     # Fetch app details from the database using store and app_id
     app_id = "com.puzzlepro.at"
     app = get_single_app(app_id)
-
     app_dict = app.to_dict(orient="records")[0]
+    app_hist = get_app_history(store_app=app_dict["id"])
+    app_dict["history"] = app_hist.to_html()
     print(app_dict)
     return render_template("app_detail.html", app=app_dict)
 

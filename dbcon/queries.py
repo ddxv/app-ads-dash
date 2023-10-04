@@ -333,6 +333,20 @@ def get_single_app(app_id: str) -> pd.DataFrame:
     return df
 
 
+def get_app_history(store_app: int) -> pd.DataFrame:
+    logger.info("Query for single app")
+    where_str = f"WHERE store_app = '{store_app}'"
+    where_str = text(where_str)
+    sel_query = f"""SELECT
+                    *
+                    FROM store_apps_history sah
+                    {where_str}
+                    ;
+                    """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
 def get_apps_by_name(search_input: str, limit: int = 100):
     logger.info(f"App search: {search_input=}")
     search_input = f"%%{search_input}%%"
