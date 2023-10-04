@@ -79,7 +79,6 @@ def apps_home():
 @server.route("/apps/<app_id>")
 def app_detail(app_id):
     # Fetch app details from the database using store and app_id
-    app_id = "com.puzzlepro.at"
     app = get_single_app(app_id)
     app_dict = app.to_dict(orient="records")[0]
     app_hist = get_app_history(store_app=app_dict["id"])
