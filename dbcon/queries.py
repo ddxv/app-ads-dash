@@ -318,12 +318,13 @@ def get_single_app(app_id: str) -> pd.DataFrame:
                     {where_str}
                     ;
                     """
-    print(sel_query)
     df = pd.read_sql(sel_query, DBCON.engine)
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
-    df["installs"] = df["installs"].apply(lambda x: "{:,.0f}".format(x))
-    df["review_count"] = df["review_count"].apply(lambda x: "{:,.0f}".format(x))
-    df["rating"] = df["rating"].apply(lambda x: "{:.2f}".format(x))
+    df["installs"] = df["installs"].apply(lambda x: "{:,.0f}".format(x) if x else "N/A")
+    df["review_count"] = df["review_count"].apply(
+        lambda x: "{:,.0f}".format(x) if x else "N/A"
+    )
+    df["rating"] = df["rating"].apply(lambda x: "{:.2f}".format(x) if x else "N/A")
     ios_link = "https://apps.apple.com/us/app/-/id"
     play_link = "https://play.google.com/store/apps/details?id="
     df["store_link"] = (
