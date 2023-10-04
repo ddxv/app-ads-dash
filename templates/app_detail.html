@@ -25,6 +25,9 @@
     <h1>{{ app.name }}</h1>
 
     <div class="important-info">
+        <p>Store: {{ app.store }}</p>
+        <p>Store Link: {{ app.store_link }}</p>
+        <p>Developer ID: {{ app.developer }}</p>
         <p>Store ID: {{ app.store_id }}</p>
         <p><strong>Installs:</strong> {{ app.installs or 'N/A' }}</p>
         <p><strong>Reviews:</strong> {{ app.review_count }}</p>
@@ -35,10 +38,6 @@
 
     <h2>Additional Information</h2>
     <div class="additional-info">
-        <p>Store Link: {{ app.store_link }}</p>
-        <p>Developer ID: {{ app.developer }}</p>
-        <p>Store ID: {{ app.store_id }}</p>
-        <p>Store: {{ app.store }}</p>
         <p>Category: {{ app.category }}</p>
         <p>Free: {{ app.free }}</p>
         <p>Price: {{ app.price }}</p>
