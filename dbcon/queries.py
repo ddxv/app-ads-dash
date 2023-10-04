@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sqlalchemy import text
 
@@ -319,7 +320,30 @@ def get_single_app(app_id: str) -> pd.DataFrame:
                     """
     print(sel_query)
     df = pd.read_sql(sel_query, DBCON.engine)
-    df["store"] = df["store"].replace({1: "android", 2: "ios"})
+    df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
+    df["installs"] = df["installs"].apply(lambda x: "{:,.0f}".format(x))
+    df["review_count"] = df["review_count"].apply(lambda x: "{:,.0f}".format(x))
+    df["rating"] = df["rating"].apply(lambda x: "{:.2f}".format(x))
+    ios_link = "https://apps.apple.com/us/app/-/id"
+    play_link = "https://play.google.com/store/apps/details?id="
+    df["store_link"] = (
+        np.where(df["store"].str.contains("Google"), play_link, ios_link)
+        + df["store_id"]
+    )
+    return df
+
+
+def get_app_history(store_app: int) -> pd.DataFrame:
+    logger.info("Query for single app")
+    where_str = f"WHERE store_app = '{store_app}'"
+    where_str = text(where_str)
+    sel_query = f"""SELECT
+                    *
+                    FROM store_apps_history sah
+                    {where_str}
+                    ;
+                    """
+    df = pd.read_sql(sel_query, DBCON.engine)
     return df
 
 
