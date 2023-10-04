@@ -76,8 +76,8 @@ def apps_home():
     return render_template("apps_home.html", cats=category_dicts)
 
 
-@server.route("/<store>/<app_id>")
-def app_detail(store, app_id):
+@server.route("/apps/<app_id>")
+def app_detail(app_id):
     # Fetch app details from the database using store and app_id
     app_id = "com.puzzlepro.at"
     app = get_single_app(app_id)
