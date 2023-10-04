@@ -25,16 +25,18 @@
     <h1>{{ app.name }}</h1>
 
     <div class="important-info">
-        <p>ID: {{ app.id }}</p>
+        <p>Store ID: {{ app.store_id }}</p>
         <p><strong>Installs:</strong> {{ app.installs or 'N/A' }}</p>
         <p><strong>Reviews:</strong> {{ app.review_count }}</p>
         <p><strong>Rating:</strong> {{ app.rating }}</p>
-        <p><strong>Last Updated:</strong> {{ app.store_last_updated }}</p>
+        <p><strong>Store Last Crawled:</strong> {{ app.updated_at }}</p>
     </div>
+    <br>
 
     <h2>Additional Information</h2>
     <div class="additional-info">
-        <p>Developer: {{ app.developer }}</p>
+        <p>Store Link: {{ app.store_link }}</p>
+        <p>Developer ID: {{ app.developer }}</p>
         <p>Store ID: {{ app.store_id }}</p>
         <p>Store: {{ app.store }}</p>
         <p>Category: {{ app.category }}</p>
@@ -47,8 +49,9 @@
         <p>Ad Supported: {{ app.ad_supported or 'N/A' }}</p>
         <p>In-App Purchases: {{ app.in_app_purchases or 'N/A' }}</p>
         <p>Editor's Choice: {{ app.editors_choice or 'N/A' }}</p>
-        <p>Created At: {{ app.created_at }}</p>
-        <p>Crawl Result: {{ app.crawl_result }}</p>
+        <p>Last Crawl Result: {{ app.crawl_result }}</p>
+        <p>Store Last Updated: {{ app.store_last_updated }}</p>
+        <p>First Crawled: {{ app.created_at }}</p>
     </div>
 
     <a href="{{ url_for('apps_home') }}">Back to Home</a>
