@@ -18,15 +18,30 @@
         .additional-info p {
             margin: 5px 0;
         }
+
+        .app-icon {
+            width: 128px;
+            height: 128px;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        .app-header {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 
 <body>
-    <h1>{{ app.name }}</h1>
-
+    <div class="app-header">
+        <img src="{{ app.icon_url_512 }}" alt="{{ app.name }} Icon" class="app-icon">
+        <h1>{{ app.name }}</h1>
+    </div>
     <div class="important-info">
         <p>Store: {{ app.store }}</p>
-        <p>Store Link: {{ app.store_link }}</p>
+        <p>Store Link: <a href="{{ app.store_link }}" target="_blank" rel="noopener noreferrer">{{ app.store_link }}</a>
+        </p>
         <p>Developer ID: {{ app.developer }}</p>
         <p>Store ID: {{ app.store_id }}</p>
         <p><strong>Installs:</strong> {{ app.installs or 'N/A' }}</p>
