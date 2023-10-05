@@ -2,6 +2,8 @@
 <html>
 
 <head>
+    <a href="{{ url_for('apps_home') }}">Back to Home</a>
+    <br>
     <title>{{ app.name }}</title>
     <style>
         .important-info {
@@ -35,19 +37,28 @@
 
 <body>
     <div class="app-header">
+
+        {% if app.icon_url_512 %}
         <img src="{{ app.icon_url_512 }}" alt="{{ app.name }} Icon" class="app-icon">
+        {% else %}
+        <!-- You can display a default icon or some placeholder here if you want -->
+        {% endif %}
+
         <h1>{{ app.name }}</h1>
     </div>
     <div class="important-info">
         <p>Store: {{ app.store }}</p>
         <p>Store Link: <a href="{{ app.store_link }}" target="_blank" rel="noopener noreferrer">{{ app.store_link }}</a>
         </p>
-        <p>Developer ID: {{ app.developer }}</p>
         <p>Store ID: {{ app.store_id }}</p>
         <p><strong>Installs:</strong> {{ app.installs or 'N/A' }}</p>
         <p><strong>Reviews:</strong> {{ app.review_count }}</p>
         <p><strong>Rating:</strong> {{ app.rating }}</p>
-        <p><strong>Store Last Crawled:</strong> {{ app.updated_at }}</p>
+        <p>Developer Name: {{ app.developer_id }}</p>
+        <p>Developer ID: {{ app.developer_id }}</p>
+        <p>Developer URL: {{ app.developer_url }}</p>
+        <p>Store Last Crawled: {{ app.updated_at }}</p>
+
     </div>
     <br>
 

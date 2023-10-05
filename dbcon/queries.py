@@ -336,12 +336,21 @@ def get_top_apps_by_installs(
 
 
 def get_single_app(app_id: str) -> pd.DataFrame:
-    logger.info("Query for single app")
+    logger.info(f"Query for single app_id={app_id}")
     where_str = f"WHERE store_id = '{app_id}'"
     where_str = text(where_str)
     sel_query = f"""SELECT
-                    *
+                    sa.*,
+                    d.developer_id,
+                    d.name as developer_name,
+                    pd.url as developer_url
                     FROM store_apps sa
+                    LEFT JOIN developers d
+                    ON d.id = sa.developer
+                    LEFT JOIN app_urls_map aum
+                    ON aum.store_app = sa.id
+                    LEFT JOIN pub_domains pd
+                    ON pd.id = aum.pub_domain
                     {where_str}
                     ;
                     """
@@ -362,12 +371,12 @@ def get_single_app(app_id: str) -> pd.DataFrame:
 
 
 def get_app_history(store_app: int) -> pd.DataFrame:
-    logger.info("Query for single app")
+    logger.info(f"Query for history single app_id={store_app}")
     where_str = f"WHERE store_app = '{store_app}'"
     where_str = text(where_str)
     sel_query = f"""SELECT
                     *
-                    FROM store_apps_history sah
+                    FROM store_apps_country_history sah
                     {where_str}
                     ;
                     """
