@@ -283,9 +283,7 @@ def get_appstore_categories() -> pd.DataFrame:
     ).reset_index()
     df["total_apps"] = df["android"] + df["ios"]
     df = df.sort_values("total_apps", ascending=False)
-    # Make app count strings
-    df["android"] = df["android"].apply(lambda x: "{:,.0f}".format(x) if x else "N/A")
-    df["ios"] = df["ios"].apply(lambda x: "{:,.0f}".format(x) if x else "N/A")
+
     return df
 
 
