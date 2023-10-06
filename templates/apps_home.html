@@ -20,10 +20,15 @@
             padding: 8px;
             text-align: left;
         }
+
+        body {
+            margin: 0
+        }
     </style>
 </head>
 
 <body>
+    {% include 'navbar.html' %}
     <h1>Search</h1>
     <form action="{{ url_for('search') }}" method="get">
         <input type="text" name="query" placeholder="Search for an app...">

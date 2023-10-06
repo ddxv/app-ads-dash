@@ -35,4 +35,4 @@ def render_content(tab):
     return APP_TABS_DICT[tab]
 
 
-dash.register_page(__name__, name="Home", path="/", layout=layout)
+dash.register_page(__name__, name="About", path="/about", layout=layout)

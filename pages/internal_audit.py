@@ -32,7 +32,7 @@ from utils import (
 logger = get_logger(__name__)
 
 
-dash.register_page(__name__, name="Internal Audits")
+dash.register_page(__name__, name="Internal Audits", path="/internal")
 
 PAGE_ID = "internal-audit"
 

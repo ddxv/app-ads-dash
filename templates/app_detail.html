@@ -2,8 +2,6 @@
 <html>
 
 <head>
-    <a href="{{ url_for('apps_home') }}">Back to Home</a>
-    <br>
     <title>{{ app.name }}</title>
     <style>
         .important-info {
@@ -32,10 +30,15 @@
             display: flex;
             align-items: center;
         }
+
+        body {
+            margin: 0
+        }
     </style>
 </head>
 
 <body>
+    {% include 'navbar.html' %}
     <div class="app-header">
 
         {% if app.icon_url_512 %}
@@ -54,7 +57,7 @@
         <p><strong>Installs:</strong> {{ app.installs or 'N/A' }}</p>
         <p><strong>Reviews:</strong> {{ app.review_count }}</p>
         <p><strong>Rating:</strong> {{ app.rating }}</p>
-        <p>Developer Name: {{ app.developer_id }}</p>
+        <p>Developer Name: {{ app.developer_name }}</p>
         <p>Developer ID: {{ app.developer_id }}</p>
         <p>Developer URL: {{ app.developer_url }}</p>
         <p>Store Last Crawled: {{ app.updated_at }}</p>

@@ -19,6 +19,10 @@
             margin: 5px 0;
         }
 
+        body {
+            margin: 0
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -39,6 +43,7 @@
 </head>
 
 <body>
+    {% include 'navbar.html' %}
     <h1>Most Popular Apps: {{category}}</h1>
 
     <table>
