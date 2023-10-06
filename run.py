@@ -129,6 +129,8 @@ def category(category):
 @server.route("/search/")
 def search():
     query = request.args.get("query")
+    if not query:
+        return render_template("search_no_query.html")
     apps = get_apps_by_name(query)
     apps_dict = apps.to_dict(orient="records")
     return render_template("search_results.html", apps=apps_dict, query=query)

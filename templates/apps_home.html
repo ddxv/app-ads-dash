@@ -24,18 +24,27 @@
         body {
             margin: 0
         }
+
+        .right-aligned-container {
+            display: flex;
+            justify-content: flex-end;
+            flex-direction: column;
+            align-items: flex-end;
+        }
     </style>
 </head>
 
 <body>
     {% include 'navbar.html' %}
-    <h1>Search</h1>
+    <h1>App & Game Categories</h1>
+    <div class="right-aligned-container">
+        <h2>Search</h2>
+    </div>
     <form action="{{ url_for('search') }}" method="get">
         <input type="text" name="query" placeholder="Search for an app...">
         <input type="submit" value="Search">
     </form>
     <br>
-    <h1>App & Game Categories</h1>
     <table>
         <thead>
             <tr>

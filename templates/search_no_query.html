@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Search</title>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <h1>Please enter a search query.</h1>
+    <form action="{{ url_for('search') }}" method="get">
+        <input type="text" name="query" placeholder="Search for an app...">
+        <input type="submit" value="Search">
+        <a href="{{ url_for('apps_home') }}">Back to Home</a>
+</body>
+
+</html>
