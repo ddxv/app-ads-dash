@@ -35,7 +35,7 @@ from utils import (
 logger = get_logger(__name__)
 logger.info("app_ads initialize")
 
-dash.register_page(__name__, name="App-Ads.txt Insights")
+dash.register_page(__name__, name="App-Ads.txt Insights", path="/ads")
 
 
 APP_TAB_OPTIONS = [

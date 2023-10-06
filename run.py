@@ -19,6 +19,7 @@ from server import server
 
 logger = get_logger(__name__)
 
+
 logger.info(f"start, {dashapp=}")
 
 DASH_USERS_DICT = get_dash_users()
@@ -85,20 +86,6 @@ def requires_auth(f):
     return decorated
 
 
-@server.route("/dash")
-@requires_auth
-def appads():
-    logger.info("Loading dash")
-    return render_template("dashboard.html", template="Flask")
-
-
-@server.route("/")
-@requires_auth
-def home():
-    logger.info("Loading home page")
-    return redirect(url_for("/dash/"))
-
-
 @server.route("/apps/")
 def apps_home():
     logger.info("Loading apps home")
@@ -111,6 +98,12 @@ def apps_home():
     cats["ios"] = cats["ios"].apply(lambda x: "{:,.0f}".format(x) if x else "N/A")
     category_dicts = cats.to_dict(orient="records")
     return render_template("apps_home.html", cats=category_dicts, fig_html=fig_html)
+
+
+@server.route("/")
+def home():
+    logger.info("Loading home page")
+    return redirect(url_for("apps_home"))
 
 
 @server.route("/apps/<app_id>")
