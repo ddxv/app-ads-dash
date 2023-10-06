@@ -38,12 +38,11 @@
     {% include 'navbar.html' %}
     <h1>App & Game Categories</h1>
     <div class="right-aligned-container">
-        <h2>Search</h2>
+        <form action="{{ url_for('search') }}" method="get">
+            <input type="text" name="query" placeholder="Search for an app...">
+            <input type="submit" value="Search">
+        </form>
     </div>
-    <form action="{{ url_for('search') }}" method="get">
-        <input type="text" name="query" placeholder="Search for an app...">
-        <input type="submit" value="Search">
-    </form>
     <br>
     <table>
         <thead>
