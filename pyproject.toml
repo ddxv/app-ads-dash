@@ -11,6 +11,10 @@ dependencies = [
     "dash-ag-grid",
     "pandas",
     "sqlalchemy",
+    "gunicorn",
+    "sshtunnel",
+    "Flask",
+    "flask_caching",
 ]
 
 [project.optional-dependencies]
@@ -21,7 +25,7 @@ profile = 'black'
 
 [tool.ruff]
 select = ["E", "F", "B", "I", "N"]
-target-version = 'py311'
+target-version = 'py312'
 
 # Never enforce `E501` (line length violations).
 ignore = ["E501"]

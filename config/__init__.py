@@ -1,9 +1,8 @@
 import logging
 import pathlib
 import sys
+import tomllib
 from logging.handlers import RotatingFileHandler
-
-import yaml
 
 HOME = pathlib.Path.home()
 TOP_CONFIGDIR = pathlib.Path(HOME, pathlib.Path(".config"))
@@ -57,7 +56,7 @@ logger = get_logger(__name__)
 
 DATE_FORMAT = "%Y-%m-%d"
 
-CONFIG_FILENAME = "config.yml"
+CONFIG_FILENAME = "config.toml"
 
 CONFIG_FILE_PATH = pathlib.Path(CONFIG_DIR, CONFIG_FILENAME)
 if not pathlib.Path.exists(CONFIG_FILE_PATH):
@@ -66,8 +65,8 @@ if not pathlib.Path.exists(CONFIG_FILE_PATH):
     raise FileNotFoundError(error)
 
 
-with CONFIG_FILE_PATH.open() as f:
-    CONFIG = yaml.safe_load(f)
+with open(CONFIG_FILE_PATH, "rb") as f:
+    CONFIG = tomllib.load(f)
 
 
 DATE_FORMAT = "%Y-%m-%d"
