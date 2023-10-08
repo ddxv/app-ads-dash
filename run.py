@@ -12,6 +12,7 @@ from dbcon.queries import (
     get_apps_by_name,
     get_appstore_categories,
     get_dash_users,
+    get_rankings,
     get_single_app,
     get_top_apps_by_installs,
 )
@@ -123,6 +124,16 @@ def category(category):
     # Your logic here for handling the category page
     apps = get_top_apps_by_installs(category_in=[category], limit=15)
     apps_dict = apps.to_dict(orient="records")
+    return render_template("category_detail.html", category=category, apps=apps_dict)
+
+
+@server.route("/rankings/<collection>/<category>")
+def rankings(collection, category):
+    country = "us"
+    rankings_df = get_rankings(
+        collection_str=collection, category_str=category, country=country
+    )
+    apps_dict = rankings_df.to_dict(orient="records")
     return render_template("category_detail.html", category=category, apps=apps_dict)
 
 

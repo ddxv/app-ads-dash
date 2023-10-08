@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 from sqlalchemy import text
@@ -378,6 +380,39 @@ def get_app_history(store_app: int) -> pd.DataFrame:
                     {where_str}
                     ;
                     """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
+def get_collections() -> pd.DataFrame:
+    logger.info("Query for history for rankings")
+    sel_query = """SELECT *
+        FROM store_collections
+        ;
+        """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
+def get_rankings(collection_str: str, category_str: str, country: str) -> pd.DataFrame:
+    logger.info(f"Query ranking for {collection_str=} {category_str=}")
+    start_date = (
+        datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(days=30)
+    ).strftime("%Y-%m-%d")
+    sel_query = f"""SELECT *
+        FROM app_rankings r
+        LEFT JOIN countries
+        ON countries.id = r.country
+        LEFT JOIN collections co
+        ON co.id = r.store_collection
+        LEFT JOIN store_categories ca
+        ON ca.id = r.store_categories
+        WHERE r.crawled_date >= {start_date}
+        AND co.collection = {collection_str}
+        AND ca.category = {category_str}
+        AND r.country = {country}
+        ;
+        """
     df = pd.read_sql(sel_query, DBCON.engine)
     return df
 
