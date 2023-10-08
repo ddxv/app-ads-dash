@@ -133,8 +133,8 @@ def rankings(collection, category):
     rankings_df = get_rankings(
         collection_str=collection, category_str=category, country=country
     )
-    apps_dict = rankings_df.to_dict(orient="records")
-    return render_template("category_detail.html", category=category, apps=apps_dict)
+    ranking_dict = rankings_df.to_dict(orient="records")
+    return render_template("rankings_detail.html", ranking_dict=ranking_dict)
 
 
 @server.route("/search/")

@@ -384,10 +384,20 @@ def get_app_history(store_app: int) -> pd.DataFrame:
     return df
 
 
-def get_collections() -> pd.DataFrame:
-    logger.info("Query for history for rankings")
+def get_store_collections() -> pd.DataFrame:
+    logger.info("Query store collections")
     sel_query = """SELECT *
         FROM store_collections
+        ;
+        """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
+def get_store_categories() -> pd.DataFrame:
+    logger.info("Query store categories")
+    sel_query = """SELECT *
+        FROM store_categories
         ;
         """
     df = pd.read_sql(sel_query, DBCON.engine)
@@ -399,6 +409,7 @@ def get_rankings(collection_str: str, category_str: str, country: str) -> pd.Dat
     start_date = (
         datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(days=30)
     ).strftime("%Y-%m-%d")
+    country = country.upper()
     sel_query = f"""SELECT *
         FROM app_rankings r
         LEFT JOIN countries
@@ -407,10 +418,12 @@ def get_rankings(collection_str: str, category_str: str, country: str) -> pd.Dat
         ON co.id = r.store_collection
         LEFT JOIN store_categories ca
         ON ca.id = r.store_categories
+        LEFT JOIN countries cc
+        ON cc.id = r.country
         WHERE r.crawled_date >= {start_date}
         AND co.collection = {collection_str}
         AND ca.category = {category_str}
-        AND r.country = {country}
+        AND cc.alpha2 = {country}
         ;
         """
     df = pd.read_sql(sel_query, DBCON.engine)
