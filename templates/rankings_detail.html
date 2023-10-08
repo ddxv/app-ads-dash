@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{ category }}</title>
+    <style>
+        .important-info {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .additional-info {
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .additional-info p {
+            margin: 5px 0;
+        }
+
+        body {
+            margin: 0
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <h1>Most Popular Apps: {{category}}</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Store</th>
+                <th>App</th>
+                <th>Installs</th>
+                <th>Reviews</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in apps %}
+            <tr>
+                <td>{{app['store']}}</td>
+                <td><a href="{{ url_for('app_detail', app_id=app['store_id']) }}">
+                        {{app['name']}}</a>
+                </td>
+                <td>{{app['installs']}}</td>
+                <td>{{app['review_count']}}</td>
+                <td>{{app['rating']}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <a href="{{ url_for('apps_home') }}">Back to Home</a>
+</body>
+
+</html>
