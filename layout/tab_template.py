@@ -12,11 +12,13 @@ from ids import (
     AFFIX_DATE_PICKER,
     AFFIX_GROUPBY,
     AFFIX_GROUPBY_TIME,
+    AFFIX_LEFT_MENU,
     AFFIX_LOADING,
     AFFIX_PLOT,
     AFFIX_RADIOS,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
+    APP_HISTORY_BUTTONS,
     DEVELOPERS_SEARCH,
     HOME_TAB,
     INTERNAL_LOGS,
@@ -277,7 +279,13 @@ def create_tab_layout(tab_id: str) -> html.Div:
     options_div = make_tab_options(tab_id)
     table_div = make_table_div(tab_id)
     plot_div = make_plot_div(tab_id)
-    buttons_div = get_left_buttons_layout(tab_id)
+    if tab_id == INTERNAL_LOGS:
+        tables = TABLES_WITH_TIMES
+    elif tab_id == STORE_APPS_HISTORY:
+        tables = APP_HISTORY_BUTTONS
+    else:
+        tables = None
+    buttons_div = get_left_buttons_layout(tab_id, tables=tables)
     if tab_id == HOME_TAB:
         tab_content = [dcc.Markdown(README_LINES, dangerously_allow_html=True)]
     else:
@@ -292,7 +300,7 @@ def create_tab_layout(tab_id: str) -> html.Div:
             dbc.Row(  # Entire Page Row
                 [
                     None
-                    if tab_id != INTERNAL_LOGS
+                    if tab_id not in [INTERNAL_LOGS, STORE_APPS_HISTORY]
                     else dbc.Col(
                         [buttons_div],
                         width={"size": 2, "order": "first"},
@@ -555,27 +563,29 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
     return columns
 
 
-def get_left_buttons_layout(tab_id, info=None, active_x=None) -> html.Div:
+def get_left_buttons_layout(
+    tab_id, info=None, active_x=None, tables: list[str] | None = None
+) -> html.Div:
     mydiv = html.Div([])
-    tables = TABLES_WITH_TIMES
-    mydiv = dbc.ButtonGroup(
-        [
-            dbc.Button(
-                [
-                    html.Strong(x),
-                    ""
-                    if not info
-                    else f" {info[x]['updated_at'].strftime('%Y-%m-%d %H:%M')}",
-                ],
-                color="secondary" if x != active_x else "primary",
-                id={"type": "left-menu", "index": x},
-                style={"text-align": "left"},
-            )
-            for x in tables
-        ],
-        vertical=True,
-        id=f"{tab_id}-buttongroup",
-    )
+    if tables:
+        mydiv = dbc.ButtonGroup(
+            [
+                dbc.Button(
+                    [
+                        html.Strong(x),
+                        ""
+                        if not info
+                        else f" {info[x]['updated_at'].strftime('%Y-%m-%d %H:%M')}",
+                    ],
+                    color="secondary" if x != active_x else "primary",
+                    id={"type": tab_id + AFFIX_LEFT_MENU, "index": x},
+                    style={"text-align": "left"},
+                )
+                for x in tables
+            ],
+            vertical=True,
+            id=f"{tab_id}-buttongroup",
+        )
     return mydiv
 
 

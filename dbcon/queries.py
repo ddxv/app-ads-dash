@@ -161,7 +161,7 @@ def query_pub_domains_overview(start_date: str):
 def query_app_updated_timestamps(
     table_name: str, start_date: str = "2021-01-01"
 ) -> pd.DataFrame:
-    logger.info(f"Query updated times: {table_name=}")
+    logger.info(f"Query updated times: {table_name=} {start_date=}")
     if table_name == "store_apps":
         audit_select = " audit_dates.updated_count, "
         audit_join = """LEFT JOIN audit_dates ON
@@ -173,8 +173,9 @@ def query_app_updated_timestamps(
                     SELECT
                         store,
                         generate_series('{start_date}', 
-                            CURRENT_DATE, '1 day'::INTERVAL)::date AS date)
+                            CURRENT_DATE, '1 day'::INTERVAL)::date AS date
                     FROM generate_series(1, 2, 1) AS num_series(store)
+                    ),
                     updated_dates AS (
                     SELECT
                         store,

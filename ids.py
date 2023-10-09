@@ -28,6 +28,9 @@ AFFIX_TABLE = "-table"
 AFFIX_BUTTON = "-button"
 AFFIX_SEARCH = "-search"
 AFFIX_LOADING = "-loading"
+AFFIX_LEFT_MENU = "-left-menu"
+
+APP_HISTORY_BUTTONS = ["store_apps", "developers", "audits"]
 
 # Combined Components Names
 TXT_VIEW_TABLE = TXT_VIEW + AFFIX_TABLE

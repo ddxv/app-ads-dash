@@ -3,11 +3,14 @@ import json
 import dash
 import pandas as pd
 from dash import Input, Output, callback
+from dash.exceptions import PreventUpdate
 
 from config import get_logger
+from dbcon.queries import TABLES_WITH_TIMES
 from ids import (
     AFFIX_DATE_PICKER,
     AFFIX_GROUPBY_TIME,
+    AFFIX_LEFT_MENU,
     AFFIX_PLOT,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
@@ -37,8 +40,8 @@ dash.register_page(__name__, name="Internal Audits", path="/internal")
 PAGE_ID = "internal-audit"
 
 TAB_OPTIONS = [
-    {"label": "Crawler: Updated Counts", "tab_id": INTERNAL_LOGS},
     {"label": "Store Apps Historical", "tab_id": STORE_APPS_HISTORY},
+    {"label": "Crawler: Updated Counts", "tab_id": INTERNAL_LOGS},
     {"label": "Pub URLs Historical", "tab_id": PUB_URLS_HISTORY},
 ]
 
@@ -62,7 +65,7 @@ def render_content(tab):
     Output(INTERNAL_LOGS + AFFIX_TABLE, "columnDefs"),
     Output(INTERNAL_LOGS + "-buttongroup", "children"),
     Output(INTERNAL_LOGS + "-memory-output", "data"),
-    Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
+    Input({"type": INTERNAL_LOGS + AFFIX_LEFT_MENU, "index": dash.ALL}, "n_clicks"),
     Input(INTERNAL_LOGS + AFFIX_DATE_PICKER, "start_date"),
 )
 def internal_logs(n_clicks, start_date):
@@ -70,6 +73,8 @@ def internal_logs(n_clicks, start_date):
     table_name = "store_apps"
     if dash.ctx.triggered_id and not isinstance(dash.ctx.triggered_id, str):
         table_name = dash.ctx.triggered_id["index"]
+        if table_name is None:
+            table_name = "store_apps"
     metrics = ["updated_count", "created_count", "last_updated_count"]
     date_col = "date"
     query_dict = {
@@ -81,7 +86,9 @@ def internal_logs(n_clicks, start_date):
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
-    buttons = get_left_buttons_layout(INTERNAL_LOGS, active_x=table_name)
+    buttons = get_left_buttons_layout(
+        INTERNAL_LOGS, active_x=table_name, tables=TABLES_WITH_TIMES
+    )
     logger.info(f"Internal Logs: {table_name=} {df.shape=}")
     table_obj = df.to_dict("records")
     return table_obj, column_dicts, buttons, table_name
@@ -98,6 +105,8 @@ def internal_logs_plot(
     table_name: str,
     virtual_row_ids: list[str],
 ):
+    if table_name is None:
+        raise PreventUpdate
     logger.info(f"Internal logs plot {table_name=}")
     metrics = ["updated_count", "created_count", "last_updated_count"]
     date_col = "date"
@@ -126,16 +135,30 @@ def internal_logs_plot(
 @callback(
     Output(STORE_APPS_HISTORY + AFFIX_TABLE, "rowData"),
     Output(STORE_APPS_HISTORY + AFFIX_TABLE, "columnDefs"),
+    Output(STORE_APPS_HISTORY + "-buttongroup", "children"),
+    Output(STORE_APPS_HISTORY + "-memory-output", "data"),
+    Input(
+        {"type": STORE_APPS_HISTORY + AFFIX_LEFT_MENU, "index": dash.ALL}, "n_clicks"
+    ),
     Input(STORE_APPS_HISTORY + AFFIX_DATE_PICKER, "start_date"),
     Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
 )
-def store_apps_history(start_date: str, switches: list[str]):
+def store_apps_history(n_clicks, start_date: str, switches: list[str]):
     logger.info("Store apps historical data")
+    button_name = "store_apps"
+    if dash.ctx.triggered_id and not isinstance(dash.ctx.triggered_id, str):
+        button_name = dash.ctx.triggered_id["index"]
+        if button_name is None:
+            button_name = "store_apps"
     metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
-    date_col = "updated_at"
+    if button_name == "audits":
+        date_col = "updated_at"
+    else:
+        date_col = "date"
     query_dict = {
         "id": STORE_APPS_HISTORY,
         "start_date": start_date,
+        "button_name": button_name,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
@@ -156,8 +179,9 @@ def store_apps_history(start_date: str, switches: list[str]):
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
     logger.info(f"Store apps history: {dimensions=} {df.shape=}")
+    buttons = get_left_buttons_layout(STORE_APPS_HISTORY, active_x=button_name)
     table_obj = df.to_dict("records")
-    return table_obj, column_dicts
+    return table_obj, column_dicts, buttons, button_name
 
 
 @callback(
@@ -166,14 +190,18 @@ def store_apps_history(start_date: str, switches: list[str]):
     Input(STORE_APPS_HISTORY + AFFIX_TABLE, "virtualRowData"),
     Input(STORE_APPS_HISTORY + AFFIX_SWITCHES, "value"),
     Input(STORE_APPS_HISTORY + AFFIX_GROUPBY_TIME, "value"),
+    Input(STORE_APPS_HISTORY + "-memory-output", "data"),
 )
 def store_apps_history_plot(
     start_date: str,
     virtual_row_ids: list[str],
     switches: list[str],
     groupby_time,
+    button_name: str,
 ):
     logger.info(f"Store apps history plot, {groupby_time=}")
+    if button_name is None:
+        raise PreventUpdate
     if "start_date" not in locals() or not start_date:
         start_date = get_earlier_date(days=30)
     metrics = ["total_rows", "avg_days", "max_days", "rows_older_than15"]
@@ -182,6 +210,7 @@ def store_apps_history_plot(
     query_dict = {
         "id": STORE_APPS_HISTORY,
         "start_date": start_date,
+        "button_name": button_name,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
