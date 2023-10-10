@@ -199,8 +199,10 @@ def query_app_updated_timestamps(
                         created_at >= '{start_date}'
                     GROUP BY
                         store,
-                        created_at::date)
+                        created_at::date
+                        )
                     SELECT
+                        my_dates.store AS store,
                         my_dates.date AS date,
                         updated_dates.last_updated_count,
                         {audit_select}

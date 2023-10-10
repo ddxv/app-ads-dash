@@ -67,20 +67,19 @@ def get_cached_dataframe(query_json):
     if query_dict["id"] == "networks-with-app-metrics":
         df = query_networks_with_app_metrics()
     elif query_dict["id"] == STORE_APPS_HISTORY:
-        button_name = query_dict["button_name"]
-        if button_name in ["developers", "store_apps"]:
-            df = query_app_updated_timestamps(
-                table_name=button_name, start_date=query_dict["start_date"]
-            )
-        else:
-            df = query_store_apps_overview(start_date=query_dict["start_date"])
+        df = query_store_apps_overview(start_date=query_dict["start_date"])
     elif query_dict["id"] == PUB_URLS_HISTORY:
         df = query_pub_domains_overview(start_date=query_dict["start_date"])
     elif query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
-        df = query_updated_timestamps(
-            table_name=table_name, start_date=query_dict["start_date"]
-        )
+        if table_name in ["developers", "store_apps"]:
+            df = query_app_updated_timestamps(
+                table_name=table_name, start_date=query_dict["start_date"]
+            )
+        else:
+            df = query_updated_timestamps(
+                table_name=table_name, start_date=query_dict["start_date"]
+            )
     elif query_dict["id"] == TXT_VIEW:
         df = get_app_txt_view(query_dict["developer_url"])
     elif query_dict["id"] == NETWORK_UNIQUES:
