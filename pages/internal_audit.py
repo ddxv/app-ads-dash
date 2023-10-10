@@ -3,11 +3,14 @@ import json
 import dash
 import pandas as pd
 from dash import Input, Output, callback
+from dash.exceptions import PreventUpdate
 
 from config import get_logger
+from dbcon.queries import TABLES_WITH_TIMES
 from ids import (
     AFFIX_DATE_PICKER,
     AFFIX_GROUPBY_TIME,
+    AFFIX_LEFT_MENU,
     AFFIX_PLOT,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
@@ -62,7 +65,7 @@ def render_content(tab):
     Output(INTERNAL_LOGS + AFFIX_TABLE, "columnDefs"),
     Output(INTERNAL_LOGS + "-buttongroup", "children"),
     Output(INTERNAL_LOGS + "-memory-output", "data"),
-    Input({"type": "left-menu", "index": dash.ALL}, "n_clicks"),
+    Input({"type": INTERNAL_LOGS + AFFIX_LEFT_MENU, "index": dash.ALL}, "n_clicks"),
     Input(INTERNAL_LOGS + AFFIX_DATE_PICKER, "start_date"),
 )
 def internal_logs(n_clicks, start_date):
@@ -70,6 +73,8 @@ def internal_logs(n_clicks, start_date):
     table_name = "store_apps"
     if dash.ctx.triggered_id and not isinstance(dash.ctx.triggered_id, str):
         table_name = dash.ctx.triggered_id["index"]
+        if table_name is None:
+            table_name = "store_apps"
     metrics = ["updated_count", "created_count", "last_updated_count"]
     date_col = "date"
     query_dict = {
@@ -81,7 +86,9 @@ def internal_logs(n_clicks, start_date):
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)
-    buttons = get_left_buttons_layout(INTERNAL_LOGS, active_x=table_name)
+    buttons = get_left_buttons_layout(
+        INTERNAL_LOGS, active_x=table_name, tables=TABLES_WITH_TIMES
+    )
     logger.info(f"Internal Logs: {table_name=} {df.shape=}")
     table_obj = df.to_dict("records")
     return table_obj, column_dicts, buttons, table_name
@@ -98,6 +105,8 @@ def internal_logs_plot(
     table_name: str,
     virtual_row_ids: list[str],
 ):
+    if table_name is None:
+        raise PreventUpdate
     logger.info(f"Internal logs plot {table_name=}")
     metrics = ["updated_count", "created_count", "last_updated_count"]
     date_col = "date"
