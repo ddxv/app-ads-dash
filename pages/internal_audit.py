@@ -40,8 +40,8 @@ dash.register_page(__name__, name="Internal Audits", path="/internal")
 PAGE_ID = "internal-audit"
 
 TAB_OPTIONS = [
-    {"label": "Store Apps Historical", "tab_id": STORE_APPS_HISTORY},
     {"label": "Crawler: Updated Counts", "tab_id": INTERNAL_LOGS},
+    {"label": "Store Apps Historical", "tab_id": STORE_APPS_HISTORY},
     {"label": "Pub URLs Historical", "tab_id": PUB_URLS_HISTORY},
 ]
 
@@ -83,7 +83,6 @@ def internal_logs(n_clicks, start_date):
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
-    print(f"XXXXXXXXXXXXX{df.columns}")
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     column_dicts = make_columns(dimensions, metrics)

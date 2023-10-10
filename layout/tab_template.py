@@ -18,7 +18,6 @@ from ids import (
     AFFIX_RADIOS,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
-    APP_HISTORY_BUTTONS,
     DEVELOPERS_SEARCH,
     HOME_TAB,
     INTERNAL_LOGS,
@@ -281,8 +280,6 @@ def create_tab_layout(tab_id: str) -> html.Div:
     plot_div = make_plot_div(tab_id)
     if tab_id == INTERNAL_LOGS:
         tables = TABLES_WITH_TIMES
-    elif tab_id == STORE_APPS_HISTORY:
-        tables = APP_HISTORY_BUTTONS
     else:
         tables = None
     buttons_div = get_left_buttons_layout(tab_id, tables=tables)
