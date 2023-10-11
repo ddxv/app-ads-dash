@@ -100,7 +100,7 @@ def overview_plot(
     xaxis_col: str | None = None,
     title: str | None = None,
 ):
-    # logger.info(f"Start Plot: {df.shape}, {y_vals=}")
+    logger.info(f"Start Plot: {df.shape}, {y_vals=} {bar_column=}")
     fig = go.Figure()
     try:
         assert xaxis_col in df.columns, f"Plotter: xaxis column not in df: {xaxis_col=}"
@@ -121,6 +121,7 @@ def overview_plot(
     else:
         ordered_ids = df.groupby("id")[y_vals[0]].size().sort_values(ascending=False)
     df_ids = ordered_ids.index.unique().tolist()
+    logger.info(f"my {df_ids=}")
     color_dims = True if len(df_ids) >= len(y_vals) else False
     plot_title = ""
     if len(df_ids) == 1:
@@ -139,6 +140,7 @@ def overview_plot(
     else:
         show_bar_legend = False
     main_ids_color_cats = ordered_ids.head(20).index.tolist()
+    df["color"] = "#AA0DFE"
     for y_val in y_vals:
         # symbol_int expected order: 0, 101, 302, 3, 104
         if y_val != bar_column:
