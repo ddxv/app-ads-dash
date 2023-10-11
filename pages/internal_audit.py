@@ -117,6 +117,7 @@ def internal_logs_plot(
         "start_date": start_date,
     }
     df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    df[date_col] = pd.to_datetime(df[date_col], format="%Y-%m-%d")
     dimensions = [x for x in df.columns if x not in metrics and x != date_col]
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Internal logs plot_df: {df.shape=} {dimensions=}")
