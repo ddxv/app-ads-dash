@@ -222,7 +222,7 @@ def query_app_updated_timestamps(
                 """
     df = pd.read_sql(sel_query, con=DBCON.engine)
     df = df.fillna(0)
-    df["store"] = df["store"].replace({1: "Apple App Store", 2: "Google Play"})
+    df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
     return df
 
 
