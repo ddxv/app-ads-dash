@@ -196,10 +196,7 @@ def overview_plot(
                 )
             # SCATTER / Y-AXIS 2
             else:
-                if stack_bars:
-                    name_id = my_id.split(" ")[-1:][0]
-                else:
-                    name_id = my_id
+                name_id = my_id
                 if color_dims:
                     if len([x for x in y_vals if x != bar_column]) > 1:
                         name = name_id + " " + y_val
@@ -213,7 +210,7 @@ def overview_plot(
                     if len(df_ids) == 1:
                         name = y_val
                     else:
-                        name = y_val + " " + name_id
+                        name = f"{name_id} {y_val}"
                     marker_dict = dict(color=COLORS[y_color_int], symbol=symbol_int)
                 # name = name.replace(dims_common_str, "")
                 if is_percent(y_val):
