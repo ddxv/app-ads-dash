@@ -250,9 +250,7 @@ def overview_plot(
         "height": 600,
         "font": {"size": 24},
         "title": {"text": plot_title},
-        "xaxis": {
-            "title": xaxis_title,
-        },
+        "xaxis": {"title": xaxis_title, "automargin": True},
         "yaxis": {
             "title": yaxis1_title,
             "type": "linear",
@@ -270,7 +268,13 @@ def overview_plot(
         "barmode": bar_type,
         "hoverlabel": {"namelength": -1},
         "hovermode": "x unified",
-        "legend": {"orientation": "h"},
+        "legend": {
+            "y": 0,
+            "orientation": "h",
+            "yanchor": "bottom",
+            "yref": "container",
+        },
+        # "legend": {"orientation": "h"},
     }
     fig.layout = layout
     return fig
