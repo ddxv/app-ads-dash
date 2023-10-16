@@ -75,7 +75,12 @@ def internal_logs(n_clicks, start_date):
         table_name = dash.ctx.triggered_id["index"]
         if table_name is None:
             table_name = "store_apps"
-    metrics = ["updated_count", "created_count", "last_updated_count"]
+    metrics = [
+        "updated_count",
+        "created_count",
+        "last_updated_count",
+        "devs_crawled_count",
+    ]
     date_col = "date"
     query_dict = {
         "id": INTERNAL_LOGS,
@@ -108,7 +113,12 @@ def internal_logs_plot(
     if table_name is None:
         raise PreventUpdate
     logger.info(f"Internal logs plot {table_name=}")
-    metrics = ["updated_count", "created_count", "last_updated_count"]
+    metrics = [
+        "updated_count",
+        "created_count",
+        "last_updated_count",
+        "devs_crawled_count",
+    ]
     date_col = "date"
     bar_column = "created_count"
     query_dict = {

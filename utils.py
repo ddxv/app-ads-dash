@@ -9,6 +9,7 @@ from config import DATE_FORMAT, get_logger
 from dbcon.queries import (
     get_app_txt_view,
     query_app_updated_timestamps,
+    query_developer_updated_timestamps,
     query_network_uniqueness,
     query_networks_count,
     query_networks_with_app_metrics,
@@ -72,10 +73,12 @@ def get_cached_dataframe(query_json):
         df = query_pub_domains_overview(start_date=query_dict["start_date"])
     elif query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
-        if table_name in ["developers", "store_apps"]:
+        if table_name in ["store_apps"]:
             df = query_app_updated_timestamps(
                 table_name=table_name, start_date=query_dict["start_date"]
             )
+        elif table_name in ["developers"]:
+            df = query_developer_updated_timestamps(start_date=query_dict["start_date"])
         else:
             df = query_updated_timestamps(
                 table_name=table_name, start_date=query_dict["start_date"]

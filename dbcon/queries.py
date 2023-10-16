@@ -158,17 +158,76 @@ def query_pub_domains_overview(start_date: str):
     return df
 
 
+def query_developer_updated_timestamps(start_date: str = "2021-01-01") -> pd.DataFrame:
+    logger.info(f"Query updated times: table_name=developers {start_date=}")
+    sel_query = f"""WITH my_dates AS (
+                    SELECT
+                        store,
+                        generate_series('{start_date}', 
+                            CURRENT_DATE, '1 day'::INTERVAL)::date AS date
+                    FROM generate_series(1, 2, 1) AS num_series(store)
+                    ),
+                    updated_dates AS (
+                    SELECT
+                        store,
+                        dca.apps_crawled_at::date AS crawled_date,
+                        count(1) AS devs_crawled_count
+                    FROM
+                        developers d
+                    LEFT JOIN logging.developers_crawled_at dca
+                        ON dca.developer = d.id
+                    WHERE
+                        dca.apps_crawled_at >= '{start_date}'
+                    GROUP BY
+                        store,
+                        dca.apps_crawled_at::date
+                    ),
+                    created_dates AS (
+                    SELECT
+                        store,
+                        created_at::date AS created_date,
+                        count(1) AS created_count
+                    FROM
+                        developers
+                    WHERE
+                        created_at >= '{start_date}'
+                    GROUP BY
+                        store,
+                        created_at::date
+                        )
+                    SELECT
+                        my_dates.store AS store,
+                        my_dates.date AS date,
+                        updated_dates.devs_crawled_count,
+                        created_dates.created_count
+                    FROM
+                        my_dates
+                    LEFT JOIN updated_dates ON
+                        my_dates.date = updated_dates.crawled_date 
+                            AND my_dates.store = updated_dates.store
+                    LEFT JOIN created_dates ON
+                        my_dates.date = created_dates.created_date
+                            AND my_dates.store = created_dates.store
+                    ORDER BY
+                        my_dates.date DESC
+                    ;
+                """
+    df = pd.read_sql(sel_query, con=DBCON.engine)
+    df = df.fillna(0)
+    df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
+    return df
+
+
 def query_app_updated_timestamps(
     table_name: str, start_date: str = "2021-01-01"
 ) -> pd.DataFrame:
     logger.info(f"Query updated times: {table_name=} {start_date=}")
+    audit_join, audit_select = "", ""
     if table_name == "store_apps":
         audit_select = " audit_dates.updated_count, "
         audit_join = """LEFT JOIN audit_dates ON
                         my_dates.date = audit_dates.updated_date
                         """
-    else:
-        audit_join, audit_select = "", ""
     sel_query = f"""WITH my_dates AS (
                     SELECT
                         store,
@@ -187,7 +246,8 @@ def query_app_updated_timestamps(
                         updated_at >= '{start_date}'
                     GROUP BY
                         store,
-                        updated_at::date),
+                        updated_at::date
+                    ),
                     created_dates AS (
                     SELECT
                         store,
@@ -230,13 +290,6 @@ def query_updated_timestamps(
     table_name: str, start_date: str = "2021-01-01"
 ) -> pd.DataFrame:
     logger.info(f"Query updated times: {table_name=}")
-    if table_name == "store_apps":
-        audit_select = " audit_dates.updated_count, "
-        audit_join = """LEFT JOIN audit_dates ON
-                        my_dates.date = audit_dates.updated_date
-                        """
-    else:
-        audit_join, audit_select = "", ""
     sel_query = f"""WITH my_dates AS (
                     SELECT
                         generate_series('{start_date}', 
@@ -264,13 +317,11 @@ def query_updated_timestamps(
                     SELECT
                         my_dates.date AS date,
                         updated_dates.last_updated_count,
-                        {audit_select}
                         created_dates.created_count
                     FROM
                         my_dates
                     LEFT JOIN updated_dates ON
                         my_dates.date = updated_dates.last_updated_date
-                    {audit_join}
                     LEFT JOIN created_dates ON
                         my_dates.date = created_dates.created_date
                     ORDER BY
