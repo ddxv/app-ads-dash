@@ -574,7 +574,12 @@ def make_columns(dimensions: list[str], metrics: list[str]) -> list[dict]:
         for i in percent_metrics
     ]
     numeric_metrics_new = [
-        {"name": i, "id": i, "selectable": True, "type": "numeric"}
+        {
+            "headerName": i.replace("_", " ").title(),
+            "field": i,
+            "id": i,
+            "type": "numeric",
+        }
         for i in numeric_metrics
     ]
     metric_columns = numeric_metrics_new + money_metrics_new + percent_metrics_new
