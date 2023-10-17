@@ -31,6 +31,32 @@
             flex-direction: column;
             align-items: flex-end;
         }
+
+        .app-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            /* Spacing between items */
+            justify-content: space-between;
+            /* Evenly space items */
+            margin-bottom: 20px;
+            /* Spacing before the table */
+        }
+
+        .app-item {
+            flex: 1;
+            max-width: calc(10% - 20px);
+            /* 10 apps per row with gap adjustment */
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .app-icon {
+            width: 100%;
+            aspect-ratio: 1/1;
+            /* To make it square */
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 
@@ -44,6 +70,17 @@
         </form>
     </div>
     <br>
+    <h2>New Popular Apps</h2>
+    <div class="app-grid">
+        {% for app in recent_apps %}
+        <div class="app-item">
+            <img src="{{ app.icon_url_512 }}" alt="{{ app.name }}" class="app-icon">
+            <div>{{ app.name }}</div>
+            <div>{{ app.rating }} <i class="fas fa-star"></i></div>
+        </div>
+        {% endfor %}
+    </div>
+
     <table>
         <thead>
             <tr>

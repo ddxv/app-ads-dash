@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 import pandas as pd
 from sqlalchemy import text
@@ -155,6 +157,27 @@ def query_pub_domains_overview(start_date: str):
                 """
     df = pd.read_sql(sel_query, con=DBCON.engine)
     df = df.drop(["crawl_result"], axis=1)
+    return df
+
+
+def query_recent_apps():
+    logger.info("Query app_store for recent apps")
+    early_date = (
+        datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
+    ).strftime("%Y-%m-%d")
+    sel_query = f"""SELECT 
+                        *
+                    FROM
+                        store_apps
+                    WHERE
+                        release_date >= '{early_date}'
+                    ORDER BY
+                        installs DESC NULLS LAST,
+                        review_count DESC NULLS LAST
+                    LIMIT 10
+                    ;
+                    """
+    df = pd.read_sql(sel_query, con=DBCON.engine)
     return df
 
 

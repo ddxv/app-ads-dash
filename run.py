@@ -14,6 +14,7 @@ from dbcon.queries import (
     get_dash_users,
     get_single_app,
     get_top_apps_by_installs,
+    query_recent_apps,
 )
 from server import server
 
@@ -89,6 +90,7 @@ def requires_auth(f):
 @server.route("/apps/")
 def apps_home():
     logger.info("Loading apps home")
+    recent_apps = query_recent_apps()
     cats = get_appstore_categories()
     fig_html = make_category_plot(cats)
     # Make app count strings
@@ -97,7 +99,13 @@ def apps_home():
     )
     cats["ios"] = cats["ios"].apply(lambda x: "{:,.0f}".format(x) if x else "N/A")
     category_dicts = cats.to_dict(orient="records")
-    return render_template("apps_home.html", cats=category_dicts, fig_html=fig_html)
+    recent_dicts = recent_apps.to_dict(orient="records")
+    return render_template(
+        "apps_home.html",
+        cats=category_dicts,
+        fig_html=fig_html,
+        recent_apps=recent_dicts,
+    )
 
 
 @server.route("/")
