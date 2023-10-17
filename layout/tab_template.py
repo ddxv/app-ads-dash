@@ -18,6 +18,7 @@ from ids import (
     AFFIX_RADIOS,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
+    APP_SOURCES,
     DEVELOPERS_SEARCH,
     HOME_TAB,
     INTERNAL_LOGS,
@@ -113,7 +114,30 @@ def make_tab_options(tab_id: str) -> html.Div:
             switch_title="Columns",
             groupby_time=True,
         )
-
+    if APP_SOURCES == tab_id:
+        switch_options = [
+            {
+                "label": "Crawl Source",
+                "value": "crawl_source",
+            },
+            {
+                "label": "Store",
+                "value": "store",
+            },
+            # Metrics
+            {
+                "label": "App Count",
+                "value": "app_count",
+            },
+        ]
+        options_div = make_options_div(
+            tab_id,
+            date_picker=True,
+            switch_options=switch_options,
+            switch_defaults=["crawl_source", "store", "app_count"],
+            switch_title="Columns",
+            groupby_time=True,
+        )
     if STORE_APPS_HISTORY == tab_id:
         switch_options = [
             {

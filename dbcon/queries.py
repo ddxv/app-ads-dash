@@ -158,6 +158,29 @@ def query_pub_domains_overview(start_date: str):
     return df
 
 
+def query_app_store_sources(start_date: str = "2021-01-01") -> pd.DataFrame:
+    logger.info(f"Query app_store sources: table_name=app_store_sources {start_date=}")
+    sel_query = f"""SELECT 
+                        created_at::date AS date,
+                        sa.store,
+                        COALESCE(crawl_source, 'unknown') AS crawl_source,
+                        count(*) as app_count
+                    FROM store_apps sa
+                        LEFT JOIN logging.store_app_sources sas
+                        ON sas.store_app = sa.id
+                    WHERE sa.created_at >= '{start_date}'
+                    GROUP BY 
+                        created_at::date, 
+                        sa.store,
+                        COALESCE(crawl_source, 'unknown')
+                    ;
+                    """
+    df = pd.read_sql(sel_query, con=DBCON.engine)
+    df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d")
+    df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
+    return df
+
+
 def query_developer_updated_timestamps(start_date: str = "2021-01-01") -> pd.DataFrame:
     logger.info(f"Query updated times: table_name=developers {start_date=}")
     sel_query = f"""WITH my_dates AS (
@@ -355,8 +378,6 @@ def query_search_developers(search_input: str, limit: int = 1000):
                     LIMIT {limit}
                     ;
                     """
-    import pandas as pd
-
     df = pd.read_sql(sel_query, DBCON.engine)
     return df
 

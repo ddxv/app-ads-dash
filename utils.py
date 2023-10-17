@@ -8,6 +8,7 @@ from flask_caching import Cache
 from config import DATE_FORMAT, get_logger
 from dbcon.queries import (
     get_app_txt_view,
+    query_app_store_sources,
     query_app_updated_timestamps,
     query_developer_updated_timestamps,
     query_network_uniqueness,
@@ -19,6 +20,7 @@ from dbcon.queries import (
     query_updated_timestamps,
 )
 from ids import (
+    APP_SOURCES,
     DEVELOPERS_SEARCH,
     INTERNAL_LOGS,
     NETWORK_UNIQUES,
@@ -71,6 +73,8 @@ def get_cached_dataframe(query_json):
         df = query_store_apps_overview(start_date=query_dict["start_date"])
     elif query_dict["id"] == PUB_URLS_HISTORY:
         df = query_pub_domains_overview(start_date=query_dict["start_date"])
+    elif query_dict["id"] == APP_SOURCES:
+        df = query_app_store_sources(start_date=query_dict["start_date"])
     elif query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
         if table_name in ["store_apps"]:

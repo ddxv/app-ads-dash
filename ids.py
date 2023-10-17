@@ -16,6 +16,7 @@ TXT_VIEW = "txt-view"
 INTERNAL_LOGS = "internal-logs"
 STORE_APPS_HISTORY = "internal-overview"
 PUB_URLS_HISTORY = "pub-urls"
+APP_SOURCES = "dev-sources"
 
 # Tab Options
 AFFIX_DATE_PICKER = "-date-picker"

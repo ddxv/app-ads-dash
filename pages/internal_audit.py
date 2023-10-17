@@ -14,6 +14,7 @@ from ids import (
     AFFIX_PLOT,
     AFFIX_SWITCHES,
     AFFIX_TABLE,
+    APP_SOURCES,
     INTERNAL_LOGS,
     PUB_URLS_HISTORY,
     STORE_APPS_HISTORY,
@@ -43,6 +44,7 @@ TAB_OPTIONS = [
     {"label": "Crawler: Updated Counts", "tab_id": INTERNAL_LOGS},
     {"label": "Store Apps Historical", "tab_id": STORE_APPS_HISTORY},
     {"label": "Pub URLs Historical", "tab_id": PUB_URLS_HISTORY},
+    {"label": "Developers Sources", "tab_id": APP_SOURCES},
 ]
 
 TABS_DICT = get_tab_layout_dict(page_id=PAGE_ID, tab_options=TAB_OPTIONS)
@@ -331,6 +333,97 @@ def pub_domains_history_plot(
         xaxis_col=date_col,
         y_vals=metrics,
         title="Updated Counts by Date",
+        stack_bars=True,
+        bar_column=bar_column,
+    )
+    return fig
+
+
+@callback(
+    Output(APP_SOURCES + AFFIX_TABLE, "rowData"),
+    Output(APP_SOURCES + AFFIX_TABLE, "columnDefs"),
+    Input(APP_SOURCES + AFFIX_DATE_PICKER, "start_date"),
+    Input(APP_SOURCES + AFFIX_SWITCHES, "value"),
+)
+def app_sources(start_date: str, switches):
+    logger.info("Store developer sources data")
+    metrics = ["app_count"]
+    date_col = "date"
+    query_dict = {
+        "id": APP_SOURCES,
+        "start_date": start_date,
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
+    if switches and len(switches) > 0:
+        dimensions = [x for x in dimensions if x in switches]
+        metrics = [x for x in metrics if x in switches]
+        agg_default = {
+            "app_count": "sum",
+        }
+        metric_aggs = {k: v for k, v in agg_default.items() if k in metrics}
+    # First agg across dimensions
+    df = df.groupby(dimensions)[metrics].agg(metric_aggs).reset_index()
+    # Take last time for overview
+    # df = df.set_index(date_col).groupby.last().reset_index()
+    df = add_id_column(df, dimensions=dimensions)
+    column_dicts = make_columns(dimensions, metrics)
+    logger.info(f"Store app sources: {dimensions=} {df.shape=}")
+    table_obj = df.to_dict("records")
+    return table_obj, column_dicts
+
+
+@callback(
+    Output(APP_SOURCES + AFFIX_PLOT, "figure"),
+    Input(APP_SOURCES + AFFIX_DATE_PICKER, "start_date"),
+    Input(APP_SOURCES + AFFIX_TABLE, "virtualRowData"),
+    Input(APP_SOURCES + AFFIX_SWITCHES, "value"),
+    Input(APP_SOURCES + AFFIX_GROUPBY_TIME, "value"),
+)
+def app_sources_plot(
+    start_date: str,
+    virtual_row_ids: list[str],
+    switches: list[str],
+    groupby_time,
+):
+    logger.info(f"Developer sources plot, {groupby_time=}")
+    if "start_date" not in locals() or not start_date:
+        start_date = get_earlier_date(days=30)
+    metrics = ["app_count"]
+    date_col = "date"
+    bar_column = "app_count"
+    query_dict = {
+        "id": APP_SOURCES,
+        "start_date": start_date,
+    }
+    df = get_cached_dataframe(query_json=json.dumps(query_dict))
+    dimensions = [x for x in df.columns if x not in metrics and x != date_col]
+    if switches and len(switches) > 0:
+        dimensions = [x for x in dimensions if x in switches]
+        metrics = [x for x in metrics if x in switches]
+        agg_default = {
+            "app_count": "sum",
+        }
+        metric_aggs = {k: v for k, v in agg_default.items() if k in metrics}
+    # First agg across dimensions
+    df = df.groupby([date_col] + dimensions)[metrics].agg(metric_aggs).reset_index()
+    # Limit Frequency for plotting to control number of points/columns
+    df = (
+        df.groupby(
+            [pd.Grouper(key=date_col, freq=groupby_time)] + dimensions, dropna=False
+        )
+        .last()
+        .reset_index()
+    )
+    df = add_id_column(df, dimensions=dimensions)
+    logger.info(f"Store app sources plot: {dimensions=} {df.shape=}")
+    df = limit_rows_for_plotting(df, virtual_row_ids, sort_by_columns=metrics)
+
+    fig = overview_plot(
+        df=df,
+        xaxis_col=date_col,
+        y_vals=metrics,
+        title="Sources by Date",
         stack_bars=True,
         bar_column=bar_column,
     )
