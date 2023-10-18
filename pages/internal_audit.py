@@ -44,7 +44,7 @@ TAB_OPTIONS = [
     {"label": "Crawler: Updated Counts", "tab_id": INTERNAL_LOGS},
     {"label": "Store Apps Historical", "tab_id": STORE_APPS_HISTORY},
     {"label": "Pub URLs Historical", "tab_id": PUB_URLS_HISTORY},
-    {"label": "Developers Sources", "tab_id": APP_SOURCES},
+    {"label": "App Sources", "tab_id": APP_SOURCES},
 ]
 
 TABS_DICT = get_tab_layout_dict(page_id=PAGE_ID, tab_options=TAB_OPTIONS)
