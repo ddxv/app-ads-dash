@@ -122,7 +122,6 @@
             </tr>
         </thead>
         <tbody>
-            {{fig_html|safe}}
             {% for cat in cats %}
             <tr>
                 <td><a href="{{ url_for('category', category=cat['category']) }}">{{ cat['category'] }}</a></td>

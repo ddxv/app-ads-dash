@@ -1,9 +1,6 @@
 from functools import wraps
 
-import pandas as pd
-import plotly.graph_objects as go
 from flask import Response, redirect, render_template, request, url_for
-from plotly.subplots import make_subplots
 
 from config import get_logger
 from dashapp import app as dashapp
@@ -24,34 +21,6 @@ logger = get_logger(__name__)
 logger.info(f"start, {dashapp=}")
 
 DASH_USERS_DICT = get_dash_users()
-
-
-def make_category_plot(cats: pd.DataFrame) -> str:
-    fig = make_subplots(
-        rows=1,
-        cols=2,
-        specs=[[{"type": "domain"}, {"type": "domain"}]],
-        subplot_titles=["Android", "iOS"],
-    )
-    fig.add_trace(
-        go.Pie(
-            labels=cats.sort_values("android", ascending=False).head(15)["category"],
-            values=cats.sort_values("android", ascending=False).head(15)["android"],
-        ),
-        1,
-        1,
-    )
-
-    fig.add_trace(
-        go.Pie(
-            labels=cats.sort_values("ios", ascending=False).head(20)["category"],
-            values=cats.sort_values("ios", ascending=False).head(20)["ios"],
-        ),
-        1,
-        2,
-    )
-    fig.update_layout(template="plotly_white")
-    return fig.to_html()
 
 
 def check_auth(username, password):
@@ -97,7 +66,6 @@ def apps_home():
     recent_google_apps = recent_apps[recent_apps["store"].str.contains("oogl")]
     recent_ios_apps = recent_apps[~recent_apps["store"].str.contains("oogl")]
     cats = get_appstore_categories()
-    fig_html = make_category_plot(cats)
     # Make app count strings
     cats["android"] = cats["android"].apply(
         lambda x: "{:,.0f}".format(x) if x else "N/A"
@@ -120,7 +88,6 @@ def apps_home():
     return render_template(
         "apps_home.html",
         cats=category_dicts,
-        fig_html=fig_html,
         trending_apps=trending_dicts,
     )
 
