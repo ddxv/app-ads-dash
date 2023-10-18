@@ -108,11 +108,15 @@ def apps_home():
     recent_google_dicts = recent_google_apps.to_dict(orient="records")
     trending_google_dicts = trending_google_apps.to_dict(orient="records")
     trending_ios_dicts = trending_ios_apps.to_dict(orient="records")
+    trending_title = "Trending Apps this Month"
+    recent_title = "New Apps this Month"
     trending_dicts = {}
-    trending_dicts["Trending Apps this Month: Google Play"] = trending_google_dicts
-    trending_dicts["Trending Apps this Month: iOS"] = trending_ios_dicts
-    trending_dicts["New Apps this Month: Google Play"] = recent_google_dicts
-    trending_dicts["New Apps this Month: iOS"] = recent_ios_dicts
+    trending_dicts[trending_title] = {}
+    trending_dicts[recent_title] = {}
+    trending_dicts[trending_title]["Google Play"] = trending_google_dicts
+    trending_dicts[trending_title]["iOS"] = trending_ios_dicts
+    trending_dicts[recent_title]["Google Play"] = recent_google_dicts
+    trending_dicts[recent_title]["iOS"] = recent_ios_dicts
     return render_template(
         "apps_home.html",
         cats=category_dicts,

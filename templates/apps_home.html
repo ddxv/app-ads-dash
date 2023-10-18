@@ -71,12 +71,20 @@
             /* To make it square */
             margin-bottom: 10px;
         }
+
+        .section-divider {
+            border-top: 1px solid #ddd;
+            /* Adjust the color and style as needed */
+            margin-top: 20px;
+            /* Adjust the margin to control the space between sections */
+            margin-bottom: 20px;
+            /* Add margin at the bottom if needed */
+        }
     </style>
     {% include 'navbar.html' %}
 </head>
 
 <body>
-    <h1>App & Game Categories</h1>
     <div class="right-aligned-container">
         <form action="{{ url_for('search') }}" method="get">
             <input type="text" name="query" placeholder="Search for an app...">
@@ -85,8 +93,9 @@
     </div>
     <br>
 
-    <h2>Trending Apps</h2>
-    {% for appstore, apps in trending_apps.items() %}
+    {% for title, collection in trending_apps.items() %}
+    <h2>{{title}}</h2>
+    {% for appstore, apps in collection.items() %}
     <h3>{{ appstore }}</h3>
     <div class="app-grid">
         {% for app in apps %}
@@ -96,11 +105,14 @@
                 <div>{{ app.name }}</div>
                 {% include 'app_rating.html' %}
             </a>
-        </div>
+        </div>::
         {% endfor %}
     </div>
+    <hr class="section-divider">
+    {% endfor %}
     {% endfor %}
 
+    <h1>App & Game Categories</h1>
     <table>
         <thead>
             <tr>
