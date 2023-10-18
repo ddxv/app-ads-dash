@@ -541,9 +541,7 @@ def clean_app_df(df: pd.DataFrame) -> pd.DataFrame:
         np.where(df["store"].str.contains("Google"), play_link, ios_link)
         + df["store_id"]
     )
-    df["rating_floor"] = np.floor(df["rating"]).astype(int)
-    df["rating_part"] = df["rating"] - df["rating_floor"]
-    df["rating_emptys"] = 5 - (df["rating_floor"] + round(df["rating_part"]))
+    df["rating_percent"] = (1 - (df["rating"] / 5)) * 100
     return df
 
 

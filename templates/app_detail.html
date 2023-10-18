@@ -49,6 +49,7 @@
 
         <h1>{{ app.name }}</h1>
     </div>
+    {% include 'app_rating.html' %}
     <div class="important-info">
         <p>Store: {{ app.store }}</p>
         <p>Store Link: <a href="{{ app.store_link }}" target="_blank" rel="noopener noreferrer">{{ app.store_link }}</a>
