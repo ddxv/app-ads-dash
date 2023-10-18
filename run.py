@@ -90,7 +90,12 @@ def requires_auth(f):
 @server.route("/apps/")
 def apps_home():
     logger.info("Loading apps home")
-    recent_apps = query_recent_apps()
+    recent_apps = query_recent_apps(days=7)
+    trending_apps = query_recent_apps(days=30)
+    trending_ios_apps = trending_apps[~trending_apps["store"].str.contains("oogl")]
+    trending_google_apps = trending_apps[trending_apps["store"].str.contains("oogl")]
+    recent_google_apps = recent_apps[recent_apps["store"].str.contains("oogl")]
+    recent_ios_apps = recent_apps[~recent_apps["store"].str.contains("oogl")]
     cats = get_appstore_categories()
     fig_html = make_category_plot(cats)
     # Make app count strings
@@ -99,12 +104,20 @@ def apps_home():
     )
     cats["ios"] = cats["ios"].apply(lambda x: "{:,.0f}".format(x) if x else "N/A")
     category_dicts = cats.to_dict(orient="records")
-    recent_dicts = recent_apps.to_dict(orient="records")
+    recent_ios_dicts = recent_ios_apps.to_dict(orient="records")
+    recent_google_dicts = recent_google_apps.to_dict(orient="records")
+    trending_google_dicts = trending_google_apps.to_dict(orient="records")
+    trending_ios_dicts = trending_ios_apps.to_dict(orient="records")
+    trending_dicts = {}
+    trending_dicts["Trending Apps this Month: Google Play"] = trending_google_dicts
+    trending_dicts["Trending Apps this Month: iOS"] = trending_ios_dicts
+    trending_dicts["New Apps this Month: Google Play"] = recent_google_dicts
+    trending_dicts["New Apps this Month: iOS"] = recent_ios_dicts
     return render_template(
         "apps_home.html",
         cats=category_dicts,
         fig_html=fig_html,
-        recent_apps=recent_dicts,
+        trending_apps=trending_dicts,
     )
 
 

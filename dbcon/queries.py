@@ -160,24 +160,32 @@ def query_pub_domains_overview(start_date: str):
     return df
 
 
-def query_recent_apps():
+def query_recent_apps(days: int = 7):
     logger.info("Query app_store for recent apps")
-    early_date = (
-        datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=7)
+    limit = 10
+    my_date = (
+        datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)
     ).strftime("%Y-%m-%d")
-    sel_query = f"""SELECT 
-                        *
-                    FROM
-                        store_apps
+    sel_query = f"""WITH RankedApps AS (
+                    SELECT
+                        *,
+                        ROW_NUMBER() OVER(PARTITION BY store 
+                        ORDER BY 
+                            installs DESC NULLS LAST, 
+                            review_count DESC NULLS LAST
+                    ) AS rn
+                    FROM store_apps sa
                     WHERE
-                        release_date >= '{early_date}'
-                    ORDER BY
-                        installs DESC NULLS LAST,
-                        review_count DESC NULLS LAST
-                    LIMIT 10
-                    ;
-                    """
+                        sa.release_date >= '{my_date}'
+                        AND crawl_result = 1
+                )
+                SELECT *
+                FROM RankedApps
+                WHERE rn <= {limit}
+                ;
+                """
     df = pd.read_sql(sel_query, con=DBCON.engine)
+    df = clean_app_df(df)
     return df
 
 
@@ -501,33 +509,41 @@ def get_single_app(app_id: str) -> pd.DataFrame:
     where_str = f"WHERE store_id = '{app_id}'"
     where_str = text(where_str)
     sel_query = f"""SELECT
-                    sa.*,
-                    d.developer_id,
-                    d.name as developer_name,
-                    pd.url as developer_url
+                        sa.*,
+                        d.developer_id,
+                        d.name as developer_name,
+                        pd.url as developer_url
                     FROM store_apps sa
                     LEFT JOIN developers d
-                    ON d.id = sa.developer
+                        ON d.id = sa.developer
                     LEFT JOIN app_urls_map aum
-                    ON aum.store_app = sa.id
+                        ON aum.store_app = sa.id
                     LEFT JOIN pub_domains pd
-                    ON pd.id = aum.pub_domain
+                        ON pd.id = aum.pub_domain
                     {where_str}
                     ;
                     """
     df = pd.read_sql(sel_query, DBCON.engine)
+    df = clean_app_df(df)
+    return df
+
+
+def clean_app_df(df: pd.DataFrame) -> pd.DataFrame:
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
     df["installs"] = df["installs"].apply(lambda x: "{:,.0f}".format(x) if x else "N/A")
     df["review_count"] = df["review_count"].apply(
         lambda x: "{:,.0f}".format(x) if x else "N/A"
     )
-    df["rating"] = df["rating"].apply(lambda x: "{:.2f}".format(x) if x else "N/A")
+    df["rating"] = df["rating"].apply(lambda x: round(x, 2) if x else 0)
     ios_link = "https://apps.apple.com/us/app/-/id"
     play_link = "https://play.google.com/store/apps/details?id="
     df["store_link"] = (
         np.where(df["store"].str.contains("Google"), play_link, ios_link)
         + df["store_id"]
     )
+    df["rating_floor"] = np.floor(df["rating"]).astype(int)
+    df["rating_part"] = df["rating"] - df["rating_floor"]
+    df["rating_emptys"] = 5 - (df["rating_floor"] + round(df["rating_part"]))
     return df
 
 
