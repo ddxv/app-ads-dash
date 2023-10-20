@@ -78,9 +78,7 @@ def get_cached_dataframe(query_json):
     elif query_dict["id"] == INTERNAL_LOGS:
         table_name = query_dict["table_name"]
         if table_name in ["store_apps"]:
-            df = query_app_updated_timestamps(
-                table_name=table_name, start_date=query_dict["start_date"]
-            )
+            df = query_app_updated_timestamps(start_date=query_dict["start_date"])
         elif table_name in ["developers"]:
             df = query_developer_updated_timestamps(start_date=query_dict["start_date"])
         else:
