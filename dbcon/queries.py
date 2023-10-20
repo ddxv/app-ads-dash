@@ -192,18 +192,14 @@ def query_recent_apps(days: int = 7):
 def query_app_store_sources(start_date: str = "2021-01-01") -> pd.DataFrame:
     logger.info(f"Query app_store sources: table_name=app_store_sources {start_date=}")
     sel_query = f"""SELECT 
-                        created_at::date AS date,
+                        date,
                         sa.store,
                         COALESCE(crawl_source, 'unknown') AS crawl_source,
-                        count(*) as app_count
-                    FROM store_apps sa
-                        LEFT JOIN logging.store_app_sources sas
-                        ON sas.store_app = sa.id
-                    WHERE sa.created_at >= '{start_date}'
-                    GROUP BY 
-                        created_at::date, 
-                        sa.store,
-                        COALESCE(crawl_source, 'unknown')
+                        created_count as app_count
+                    FROM 
+                        store_apps_created_at
+                    WHERE
+                        date >= '{start_date}'
                     ;
                     """
     df = pd.read_sql(sel_query, con=DBCON.engine)
