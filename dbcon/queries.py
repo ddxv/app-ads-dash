@@ -193,7 +193,7 @@ def query_app_store_sources(start_date: str = "2021-01-01") -> pd.DataFrame:
     logger.info(f"Query app_store sources: table_name=app_store_sources {start_date=}")
     sel_query = f"""SELECT 
                         date,
-                        sa.store,
+                        store,
                         COALESCE(crawl_source, 'unknown') AS crawl_source,
                         created_count as app_count
                     FROM 
@@ -271,12 +271,19 @@ def query_developer_updated_timestamps(start_date: str = "2021-01-01") -> pd.Dat
 def query_app_updated_timestamps(start_date) -> pd.DataFrame:
     logger.info(f"Query store app updated ats: {start_date=}")
     sel_query = f"""SELECT
-            *
-        FROM 
-            store_apps_updated_at
-        WHERE
-            date >= '{start_date}'
-        ;
+                        ua.store,
+                        ua.date,
+                        ua.last_updated_count,
+                        ua.updated_count,
+                        cr.created_count
+                    FROM
+                        store_apps_updated_at ua
+                    LEFT JOIN store_apps_created_at cr ON
+                        cr.date = ua.date
+                        AND ua.store = cr.store
+                    WHERE
+                        ua.date >= '{start_date}'
+                    ;
     """
     df = pd.read_sql(sel_query, con=DBCON.engine)
     df = df.fillna(0)
