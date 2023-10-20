@@ -272,68 +272,16 @@ def query_developer_updated_timestamps(start_date: str = "2021-01-01") -> pd.Dat
     return df
 
 
-def query_app_updated_timestamps(
-    table_name: str, start_date: str = "2021-01-01"
-) -> pd.DataFrame:
-    logger.info(f"Query updated times: {table_name=} {start_date=}")
-    audit_join, audit_select = "", ""
-    if table_name == "store_apps":
-        audit_select = " audit_dates.updated_count, "
-        audit_join = """LEFT JOIN audit_dates ON
-                        my_dates.date = audit_dates.updated_date
-                        """
-    sel_query = f"""WITH my_dates AS (
-                    SELECT
-                        store,
-                        generate_series('{start_date}', 
-                            CURRENT_DATE, '1 day'::INTERVAL)::date AS date
-                    FROM generate_series(1, 2, 1) AS num_series(store)
-                    ),
-                    updated_dates AS (
-                    SELECT
-                        store,
-                        updated_at::date AS last_updated_date,
-                        count(1) AS last_updated_count
-                    FROM
-                        {table_name}
-                    WHERE
-                        updated_at >= '{start_date}'
-                    GROUP BY
-                        store,
-                        updated_at::date
-                    ),
-                    created_dates AS (
-                    SELECT
-                        store,
-                        created_at::date AS created_date,
-                        count(1) AS created_count
-                    FROM
-                        {table_name}
-                    WHERE
-                        created_at >= '{start_date}'
-                    GROUP BY
-                        store,
-                        created_at::date
-                        )
-                    SELECT
-                        my_dates.store AS store,
-                        my_dates.date AS date,
-                        updated_dates.last_updated_count,
-                        {audit_select}
-                        created_dates.created_count
-                    FROM
-                        my_dates
-                    LEFT JOIN updated_dates ON
-                        my_dates.date = updated_dates.last_updated_date 
-                            AND my_dates.store = updated_dates.store
-                    {audit_join}
-                    LEFT JOIN created_dates ON
-                        my_dates.date = created_dates.created_date
-                            AND my_dates.store = created_dates.store
-                    ORDER BY
-                        my_dates.date DESC
-                    ;
-                """
+def query_app_updated_timestamps(start_date) -> pd.DataFrame:
+    logger.info(f"Query store app updated ats: {start_date=}")
+    sel_query = f"""SELECT
+            *
+        FROM 
+            store_apps_updated_at
+        WHERE
+            date >= '{start_date}'
+        ;
+    """
     df = pd.read_sql(sel_query, con=DBCON.engine)
     df = df.fillna(0)
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
