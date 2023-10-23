@@ -270,21 +270,35 @@ def query_developer_updated_timestamps(start_date: str = "2021-01-01") -> pd.Dat
 
 def query_app_updated_timestamps(start_date) -> pd.DataFrame:
     logger.info(f"Query store app updated ats: {start_date=}")
-    sel_query = f"""SELECT
-                        ua.store,
-                        ua.date,
-                        ua.last_updated_count,
-                        ua.updated_count,
-                        cr.created_count
+    sel_query = f"""WITH created_counts AS (
+                    SELECT
+                        cr.store,
+                        cr.date,
+                        sum(created_count) AS created_count
                     FROM
-                        store_apps_updated_at ua
-                    LEFT JOIN store_apps_created_at cr ON
-                        cr.date = ua.date
-                        AND ua.store = cr.store
+                        store_apps_created_at cr
                     WHERE
-                        ua.date >= '{start_date}'
-                    ;
+                        date >= '{start_date}'
+                    GROUP BY
+                        cr.store,
+                        cr.date
+                )
+                SELECT
+                    ua.store,
+                    ua.date,
+                    ua.last_updated_count,
+                    ua.updated_count,
+                        cr.created_count
+                FROM
+                    store_apps_updated_at ua
+                LEFT JOIN created_counts cr ON
+                    cr.date = ua.date
+                    AND ua.store = cr.store
+                WHERE
+                    ua.date >= '{start_date}'
+                ;
     """
+    print(sel_query)
     df = pd.read_sql(sel_query, con=DBCON.engine)
     df = df.fillna(0)
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
