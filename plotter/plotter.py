@@ -99,6 +99,8 @@ def overview_plot(
     stack_bars: bool = False,
     xaxis_col: str | None = None,
     title: str | None = None,
+    force_color_dimensions: bool = False,
+    y_val_unique_color_column: str | None = None,
 ):
     logger.info(f"Start Plot: {df.shape}, {y_vals=} {bar_column=}")
     fig = go.Figure()
@@ -122,7 +124,7 @@ def overview_plot(
         ordered_ids = df.groupby("id")[y_vals[0]].size().sort_values(ascending=False)
     df_ids = ordered_ids.index.unique().tolist()
     logger.info(f"my {df_ids=}")
-    color_dims = True if len(df_ids) >= len(y_vals) else False
+    color_dims = force_color_dimensions or (len(df_ids) >= len(y_vals))
     plot_title = ""
     if len(df_ids) == 1:
         plot_title = df_ids[0]
@@ -153,15 +155,23 @@ def overview_plot(
                 symbol_int -= 500
             # logger.info(f":{symbol_int=}")
             # symbol_int +=1
-        for i in range(len(main_ids_color_cats)):
-            if df[xaxis_col].dtype == "O":
-                color = "#AA0DFE"
-            else:
-                color = COLORS[i]
-            cat = main_ids_color_cats[i]
-            df.loc[df.id == cat, "color"] = color
+        # If the dtype of xaxis_col is 'O' (object), we keep the default color.
+        # Otherwise, we map each category in main_ids_color_cats to its corresponding color.
+        if df[xaxis_col].dtype != "O":
+            color_map = dict(
+                zip(
+                    main_ids_color_cats,
+                    COLORS[: len(main_ids_color_cats)],
+                    strict=False,
+                )
+            )
+            df["color"] = df["id"].map(color_map).fillna(df["color"])
+
+        # Set any remaining null colors to the last color in COLORS list
         df.loc[df.color.isnull(), "color"] = COLORS[len(main_ids_color_cats)]
+
         cdf = df[["id", "color"]].drop_duplicates()
+
         pdf = pd.pivot_table(
             df, index=[xaxis_col], columns="id", values=y_val
         ).reset_index()
@@ -198,14 +208,23 @@ def overview_plot(
             else:
                 name_id = my_id
                 if color_dims:
-                    if len([x for x in y_vals if x != bar_column]) > 1:
-                        name = name_id + " " + y_val
+                    y_vals_filtered = [x for x in y_vals if x != bar_column]
+                    if len(y_vals_filtered) > 1 and y_val != y_val_unique_color_column:
+                        name = f"{name_id} {y_val}"
+                    elif y_val == y_val_unique_color_column:
+                        name = y_val
                     else:
                         name = name_id
-                    marker_dict = dict(
-                        color=cdf[cdf.id == my_id].color.values[0],
-                        symbol=symbol_int,
-                    )
+                    # Fetch the color for the given ID
+                    y_val_color = cdf[cdf.id == my_id].color.values[0]
+                    # Check if y_val matches y_val_unique_color_column and adjust color if needed
+                    if y_val_unique_color_column == y_val:
+                        y_val_color = COLORS[len(main_ids_color_cats) + 1]
+                    # Construct the marker dictionary
+                    marker_dict = {
+                        "color": y_val_color,
+                        "symbol": symbol_int,
+                    }
                 else:
                     if len(df_ids) == 1:
                         name = y_val

@@ -134,6 +134,7 @@ def internal_logs_plot(
     df = add_id_column(df, dimensions=dimensions)
     logger.info(f"Internal logs plot_df: {df.shape=} {dimensions=}")
     df = limit_rows_for_plotting(df, virtual_row_ids, sort_by_columns=metrics)
+
     fig = overview_plot(
         df=df,
         xaxis_col=date_col,
@@ -141,6 +142,8 @@ def internal_logs_plot(
         title="Updated Counts by Date",
         stack_bars=True,
         bar_column=bar_column,
+        force_color_dimensions=True,
+        y_val_unique_color_column="updated_count",
     )
     return fig
 
