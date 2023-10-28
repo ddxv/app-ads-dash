@@ -51,6 +51,7 @@ def requires_auth(f):
 @server.route("/")
 def home():
     logger.info("Loading home page")
+    return "Welcome", 200
 
 
 if __name__ == "__main__":
