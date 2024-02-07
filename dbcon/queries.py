@@ -373,7 +373,7 @@ def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:
     return df
 
 
-def get_manifest_names():
+def get_manifest_names() -> pd.DataFrame:
     sel_query = """WITH latest_version_codes AS (
                     SELECT
                         vc.store_app,
