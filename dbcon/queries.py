@@ -373,6 +373,43 @@ def get_schema_overview(schema_name: str = "public") -> pd.DataFrame:
     return df
 
 
+def get_manifest_names():
+    sel_query = """WITH latest_version_codes AS (
+                    SELECT
+                        vc.store_app,
+                        MAX(vc.version_code) AS max_version_code
+                    FROM
+                        version_codes AS vc
+                    GROUP BY
+                        vc.store_app
+                )
+                SELECT
+                    vc.store_app,
+                    sa.store_id,
+                    vd.*
+                FROM
+                    version_details AS vd
+                LEFT JOIN
+                    version_codes AS vc ON
+                    vd.version_code = vc.id
+                INNER JOIN
+                    latest_version_codes AS lvc ON
+                        vc.store_app = lvc.store_app
+                    AND vc.version_code = lvc.max_version_code
+                LEFT JOIN store_apps sa ON
+                    sa.id = vc.store_app
+                WHERE
+                    vd.android_name != ''
+                ORDER BY
+                    store_app,
+                    xml_path,
+                    android_name
+                ;
+    """
+    df = pd.read_sql(sel_query, DBCON.engine)
+    return df
+
+
 def get_appstore_categories() -> pd.DataFrame:
     sel_query = """SELECT *
                     FROM mv_app_categories

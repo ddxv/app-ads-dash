@@ -14,13 +14,15 @@ The past decades have seen greater restrictions on freely accessing data and the
 
 A hosted version of the dash is publicly available at [ads.jamesoclaire.com](https://ads.jamesoclaire.com/dash/ads). Some blog articles about the data can also be [found on my blog](https://jamesoclaire.com).
 
-## Self hosting:
+## Self hosting
+
 ### Setup
 
 - If you want to run yourself, you will need the underlying data and database setup. To get that data you will need to run [AdsCrawler](https://github.com/ddxv/adscrawler).
 - Pip install the requirements: `pip install -r requirements.txt`
 - put config file in `~/.config/app-ads/config.yml` with server info like
-```
+
+```yml
   madrone: (any name, your server name)
     host: 12.34.56.78 (your ip)
     os_user: ubuntu (ssh login user)
@@ -30,7 +32,5 @@ A hosted version of the dash is publicly available at [ads.jamesoclaire.com](htt
 ```
   
 ### Run
- - `python dashapp.py` to run locally
-  
 
-
+`python dashapp.py` to run locally
