@@ -129,10 +129,10 @@ def split_filter_part(filter_part):
     return [None] * 3
 
 
-def filter_table(dff, page_current, page_size, sort_by, filter):
+def filter_table(dff, page_current, page_size, sort_by, myfilter):
     original_shape = dff.shape
-    if filter:
-        filtering_expressions = filter.split(" && ")
+    if myfilter:
+        filtering_expressions = myfilter.split(" && ")
         for filter_part in filtering_expressions:
             col_name, operator, filter_value = split_filter_part(filter_part)
 
@@ -177,7 +177,7 @@ def txt_view_table(
     page_current,
     page_size,
     sort_by,
-    filter,
+    myfilter,
     button,
     developer_url,
     groupby,
@@ -197,7 +197,7 @@ def txt_view_table(
         .reset_index()
         .rename(columns={0: "size"})
     )
-    df = filter_table(df, page_current, page_size, sort_by, filter)
+    df = filter_table(df, page_current, page_size, sort_by, myfilter)
     # df[df["publisher_id"] == "1137"]
     dimensions = [x for x in df.columns if x not in metrics and x != "id"]
     column_dicts = make_columns(dimensions, metrics)

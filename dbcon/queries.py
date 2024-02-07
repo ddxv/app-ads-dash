@@ -351,7 +351,7 @@ def get_all_tables_in_schema(schema_name: str):
     WHERE table_schema = '{schema_name}'
     ;"""
     tables = pd.read_sql(sel_schema, DBCON.engine)
-    tables = tables["table_name"].values.tolist()
+    tables = tables["table_name"].to_numpy().tolist()
     return tables
 
 
