@@ -1,18 +1,7 @@
 repos:
-  # Black
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black
-  # iSort
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
   # Ruff
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.1.11
+    rev: v0.2.1
     hooks:
       - id: ruff
   # Mypy

@@ -131,7 +131,7 @@ def limit_rows_for_plotting(
 
 def add_id_column(df: pd.DataFrame, dimensions: list[str]) -> pd.DataFrame:
     df["id"] = df[dimensions].apply(
-        lambda row: " ".join(row.values.astype(str)), axis=1
+        lambda row: " ".join(row.to_numpy().astype(str)), axis=1
     )
     return df
 

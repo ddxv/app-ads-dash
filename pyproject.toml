@@ -20,15 +20,37 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pre-commit"]
 
-[tool.isort]
-profile = 'black'
-
 [tool.ruff]
-select = ["E", "F", "B", "I", "N"]
+lint.select = [
+    "A",   # flake8 builtins 
+    "E",   # errors 
+    "W",   # pycodestyle Warnings 
+    "F",   # PyFlake 
+    "B",   # flake8-bugbear rules 
+    "I",   # import sort 
+    "N",   # PEP8 naming rules 
+    "M",
+    "UP",  # pyupgrade, warnings for common mistakes for new versions
+    "PLW", # pyflake
+    "PLC", # pyflake
+    "PLE", # pyflake
+    "PD",  # pandas-vet
+    #"D", # pydocstyle, all funcs have docstring 
+]
+
 target-version = 'py312'
 
-# Never enforce `E501` (line length violations).
-ignore = ["E501"]
+lint.ignore = [
+    "E501",  #line-length violations
+    "PD901", # avoid df: I prefer df for variable name
+    "W291",  # Trailing whitespaces, triggered by raw SQL queries
+]
 
 # Avoid trying to fix flake8-bugbear (`B`) violations.
-unfixable = ["B"]
+lint.unfixable = ["B"]
+
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

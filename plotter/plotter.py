@@ -38,12 +38,12 @@ def horizontal_barchart(
                 y=temp[yaxis],
                 orientation="h",
                 marker={"color": my_color},
-                text=f"{temp[xaxis].values[0]:.0%}",
+                text=f"{temp[xaxis].to_numpy()[0]:.0%}",
                 textposition="outside",
                 textfont={"size": default_font_size, "color": "white"},
             )
         )
-        domain = temp[yaxis].values[0]
+        domain = temp[yaxis].to_numpy()[0]
         domain = domain.replace(".com", "")
         domain = domain.title()
         if i > 5:
@@ -168,7 +168,7 @@ def overview_plot(
             df["color"] = df["id"].map(color_map).fillna(df["color"])
 
         # Set any remaining null colors to the last color in COLORS list
-        df.loc[df.color.isnull(), "color"] = COLORS[len(main_ids_color_cats)]
+        df.loc[df.color.isna(), "color"] = COLORS[len(main_ids_color_cats)]
 
         cdf = df[["id", "color"]].drop_duplicates()
 
@@ -216,7 +216,7 @@ def overview_plot(
                     else:
                         name = name_id
                     # Fetch the color for the given ID
-                    y_val_color = cdf[cdf.id == my_id].color.values[0]
+                    y_val_color = cdf[cdf.id == my_id].color.to_numpy()[0]
                     # Check if y_val matches y_val_unique_color_column and adjust color if needed
                     if y_val_unique_color_column == y_val:
                         y_val_color = COLORS[len(main_ids_color_cats) + 1]
