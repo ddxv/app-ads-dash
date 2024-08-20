@@ -403,7 +403,7 @@ try:
         .unique()
         .tolist()
     )
-except Exception as e:
-    logger.exception(f"Database Connection failed!")
+except Exception:
+    logger.exception("Database Connection failed!")
     APP_CATEGORIES = ["cat1", "cat2"]
-    TABLES_WITH_TIMES = ["overview", "store_apps"]
+    TABLES_WITH_TIMES = ["overview", "store_apps", "version_codes"]

@@ -6,7 +6,7 @@ from config import CONFIG, get_logger
 logger = get_logger(__name__)
 
 
-def open_ssh_tunnel(server_name: str):  # noqa: ANN201
+def open_ssh_tunnel(server_name: str):
     """Create SSH tunnel when working remotely."""
     from sshtunnel import SSHTunnelForwarder
 
