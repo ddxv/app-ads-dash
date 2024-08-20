@@ -1,5 +1,4 @@
 from sqlalchemy import create_engine
-from sshtunnel import SSHTunnelForwarder
 from typing import Self
 
 from config import CONFIG, get_logger
@@ -11,17 +10,21 @@ def open_ssh_tunnel(server_name: str):  # noqa: ANN201
     """Create SSH tunnel when working remotely."""
     from sshtunnel import SSHTunnelForwarder
 
+    ssh_port = CONFIG[server_name].get("ssh_port", 22)
+    ssh_host = CONFIG[server_name]["host"]
+    ssh_username = CONFIG[server_name]["os_user"]
+    ssh_pkey = CONFIG[server_name].get("ssh_pkey", None)
+    ssh_private_key_password = CONFIG[server_name].get("ssh_pkey_password", None)
     with SSHTunnelForwarder(
-        (CONFIG[server_name]["host"], 22),  # Remote server IP and SSH port
-        ssh_username=CONFIG[server_name]["os_user"],
-        ssh_pkey=CONFIG[server_name].get("ssh_pkey", None),
-        ssh_private_key_password=CONFIG[server_name].get("ssh_pkey_password", None),
+        (ssh_host, ssh_port),  # Remote server IP and SSH port
+        ssh_username=ssh_username,
+        ssh_pkey=ssh_pkey,
+        ssh_private_key_password=ssh_private_key_password,
         remote_bind_address=("127.0.0.1", 5432),
     ) as server:  # PostgreSQL server IP and sever port on remote machine
         logger.info(f"Start SSH tunnel to {server_name=}")
         logger.info(f"Opened SSH Tunnel {server_name=}")
     return server
-
 
 
 def get_db_connection(server_name: str):
@@ -52,7 +55,6 @@ def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
 
 
 class PostgresCon:
-
     """Class for managing the connection to postgres.
 
     Parameters
@@ -105,5 +107,3 @@ class PostgresCon:
             )
             logger.exception(msg)
             self.db_name = None
-
-
