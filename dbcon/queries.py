@@ -274,6 +274,9 @@ def query_app_updated_timestamps(start_date) -> pd.DataFrame:
 def query_updated_timestamps(
     table_name: str, start_date: str = "2021-01-01"
 ) -> pd.DataFrame:
+    created_column = "created_at"
+    if table_name == "version_codes":
+        created_column = "updated_at"  # no created_at column
     logger.info(f"Query updated times: {table_name=}")
     sel_query = f"""WITH my_dates AS (
                     SELECT
@@ -291,14 +294,14 @@ def query_updated_timestamps(
                         updated_at::date),
                     created_dates AS (
                     SELECT
-                        created_at::date AS created_date,
+                        {created_column}::date AS created_date,
                         count(1) AS created_count
                     FROM
                         {table_name}
                     WHERE
-                        created_at >= '{start_date}'
+                        {created_column} >= '{start_date}'
                     GROUP BY
-                        created_at::date)
+                        {created_column}::date)
                     SELECT
                         my_dates.date AS date,
                         updated_dates.last_updated_count,
