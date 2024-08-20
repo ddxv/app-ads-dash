@@ -29,7 +29,6 @@ lint.select = [
     "B",   # flake8-bugbear rules 
     "I",   # import sort 
     "N",   # PEP8 naming rules 
-    "M",
     "UP",  # pyupgrade, warnings for common mistakes for new versions
     "PLW", # pyflake
     "PLC", # pyflake
