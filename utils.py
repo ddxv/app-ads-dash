@@ -18,6 +18,7 @@ from dbcon.queries import (
     query_search_developers,
     query_store_apps_overview,
     query_updated_timestamps,
+    query_updated_version_code_timestamps,
 )
 from ids import (
     APP_SOURCES,
@@ -81,6 +82,10 @@ def get_cached_dataframe(query_json):
             df = query_app_updated_timestamps(start_date=query_dict["start_date"])
         elif table_name in ["developers"]:
             df = query_developer_updated_timestamps(start_date=query_dict["start_date"])
+        elif table_name in ["version_codes"]:
+            df = query_updated_version_code_timestamps(
+                start_date=query_dict["start_date"]
+            )
         else:
             df = query_updated_timestamps(
                 table_name=table_name, start_date=query_dict["start_date"]
