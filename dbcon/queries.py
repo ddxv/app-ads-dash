@@ -316,6 +316,7 @@ def query_updated_timestamps(
                         my_dates.date DESC
                     ;
                 """
+    print(sel_query)
     df = pd.read_sql(sel_query, con=DBCON.engine)
     df = df.fillna(0)
     return df
