@@ -11,7 +11,7 @@ def get_dash_users() -> dict:
                     FROM dash.users
                     ;"""
     df = pd.read_sql(sel_query, DBCON.engine)
-    users_dict = df.set_index("username").to_dict(orient="index")
+    users_dict: dict = df.set_index("username").to_dict(orient="index")
     return users_dict
 
 
@@ -21,7 +21,7 @@ def get_app_categories() -> list[str]:
                     ;
                     """
     df = pd.read_sql(sel_query, DBCON.engine)
-    category_list = df["category"].tolist()
+    category_list: list[str] = df["category"].tolist()
     category_list.sort()
     return category_list
 
@@ -59,7 +59,7 @@ def query_networks_count(top_only: bool = False) -> pd.DataFrame:
     return df
 
 
-def query_network_uniqueness(limit=100):
+def query_network_uniqueness(limit: int = 100) -> pd.DataFrame:
     sel_query = f"""
         SELECT
         ad_domain_url,
@@ -78,7 +78,7 @@ def query_network_uniqueness(limit=100):
     return df
 
 
-def get_app_txt_view(developer_url: str, direct_only=True) -> pd.DataFrame:
+def get_app_txt_view(developer_url: str, direct_only: bool = True) -> pd.DataFrame:
     if direct_only:
         direct_only_str = "AND av.relationship = 'DIRECT'"
     else:
@@ -119,7 +119,7 @@ def get_app_txt_view(developer_url: str, direct_only=True) -> pd.DataFrame:
     return df
 
 
-def query_store_apps_overview(start_date: str):
+def query_store_apps_overview(start_date: str) -> pd.DataFrame:
     logger.info("Query logging.store_apps_snapshot")
     sel_query = f"""SELECT
                         sas.*,
@@ -139,7 +139,7 @@ def query_store_apps_overview(start_date: str):
     return df
 
 
-def query_pub_domains_overview(start_date: str):
+def query_pub_domains_overview(start_date: str) -> pd.DataFrame:
     logger.info("Query logging.pub_domains_snapshot")
     sel_query = f"""SELECT
                         ss.*,
@@ -235,7 +235,7 @@ def query_developer_updated_timestamps(start_date: str = "2021-01-01") -> pd.Dat
     return df
 
 
-def query_app_updated_timestamps(start_date) -> pd.DataFrame:
+def query_app_updated_timestamps(start_date: str) -> pd.DataFrame:
     logger.info(f"Query store app updated ats: {start_date=}")
     sel_query = f"""WITH created_counts AS (
                     SELECT
@@ -273,80 +273,101 @@ def query_app_updated_timestamps(start_date) -> pd.DataFrame:
 
 def query_updated_version_code_timestamps(start_date: str) -> pd.DataFrame:
     sel_query = f"""WITH my_dates AS
-                      (
+                        (
+                            SELECT
+                                store,
+                                crawl_result,
+                                generate_series(
+                                    '{start_date}',
+                                    CURRENT_DATE,
+                                    '1 day'::INTERVAL
+                                )::date AS date
+                            FROM
+                                generate_series(
+                                    1,
+                                    2,
+                                    1
+                                ) AS num_series(store),
+                                generate_series(
+                                    1,
+                                    4,
+                                    1
+                                ) AS num_seriess(crawl_result)
+                        ),
+                        updated_dates AS (
+                            SELECT
+                                vc.updated_at::date AS last_updated_date,
+                                sa.store,
+                                vc.crawl_result,
+                                count(1) AS last_updated_count
+                            FROM
+                                version_codes vc
+                            LEFT JOIN store_apps sa ON
+                                vc.store_app = sa.id
+                            WHERE
+                                vc.updated_at >= '{start_date}'
+                            GROUP BY
+                                vc.updated_at::date,
+                                sa.store,
+                                vc.crawl_result
+                        ),
+                        min_version_per_app AS (
+                            SELECT
+                                sa.store,
+                                store_app,
+                                MIN(vc.version_code) AS min_version_code,
+                                DATE(vc.updated_at) AS updated_date
+                            FROM
+                                version_codes vc
+                            LEFT JOIN store_apps sa ON
+                                vc.store_app = sa.id
+                            WHERE
+                                vc.crawl_result = 1
+                            GROUP BY
+                                store,
+                                store_app,
+                                DATE(vc.updated_at)
+                        ),
+                        created_dates AS (
+                            SELECT
+                                updated_date AS created_date,
+                                store,
+                                1 AS crawl_result,
+                                COUNT(*) AS created_count
+                            FROM
+                                min_version_per_app
+                            GROUP BY
+                                updated_date,
+                                store
+                            ORDER BY
+                                updated_date
+                        )
                         SELECT
-                            store,
-                            generate_series(
-                                '{start_date}',
-                                CURRENT_DATE,
-                                '1 day'::INTERVAL
-                            )::date AS date
+                            my_dates.date AS date,
+                            my_dates.store,
+                            my_dates.crawl_result,
+                            updated_dates.last_updated_count,
+                            created_dates.created_count
                         FROM
-                            generate_series(
-                                1,
-                                2,
-                                1
-                            ) AS num_series(store)
-                    ),
-                    updated_dates AS (
-                        SELECT
-                            vc.updated_at::date AS last_updated_date,
-                            sa.store,
-                            count(1) AS last_updated_count
-                        FROM
-                            version_codes vc
-                        LEFT JOIN store_apps sa ON vc.store_app = sa.id
-                        WHERE
-                            vc.updated_at >= '{start_date}'
-                        GROUP BY
-                            vc.updated_at::date, sa.store
-                    ),
-                    min_version_per_app AS (
-                        SELECT
-                            store_app,
-                            sa.store,
-                            MIN(version_code) AS min_version_code,
-                            DATE(vc.updated_at) AS updated_date
-                        FROM
-                            version_codes vc
-                        LEFT JOIN store_apps sa ON vc.store_app = sa.id
-                        WHERE
-                            vc.crawl_result = 1
-                        GROUP BY
-                            store,
-                            store_app,
-                            DATE(vc.updated_at)
-                    ),
-                    created_dates AS (
-                        SELECT
-                            updated_date AS created_date,
-                            store,
-                            COUNT(*) AS created_count
-                        FROM
-                            min_version_per_app
-                        GROUP BY
-                            updated_date, store
+                            my_dates
+                        LEFT JOIN updated_dates ON
+                            my_dates.date = updated_dates.last_updated_date
+                            AND my_dates.store = updated_dates.store
+                            AND my_dates.crawl_result = updated_dates.crawl_result
+                        LEFT JOIN created_dates ON
+                            my_dates.date = created_dates.created_date
+                            AND my_dates.store = created_dates.store
+                            AND my_dates.crawl_result = created_dates.crawl_result
                         ORDER BY
-                            updated_date
-                    )
-                    SELECT
-                        my_dates.date AS date,
-                        my_dates.store,
-                        updated_dates.last_updated_count,
-                        created_dates.created_count
-                    FROM
-                        my_dates
-                    LEFT JOIN updated_dates ON
-                        my_dates.date = updated_dates.last_updated_date AND my_dates.store = updated_dates.store
-                    LEFT JOIN created_dates ON
-                        my_dates.date = created_dates.created_date AND my_dates.store = created_dates.store
-                    ORDER BY
-                        my_dates.date DESC
-                    ;
+                            my_dates.date DESC
+                        ;
                 """
     df = pd.read_sql(sel_query, con=DBCON.engine)
     df = df.fillna(0)
     df["store"] = df["store"].replace({1: "Google Play", 2: "Apple App Store"})
+    df["crawl_result"] = df["crawl_result"].replace(
+        {1: "Success (1)", 2: "Fail (2)", 3: "Fail (3)", 4: "Fail (4)"}
+    )
     return df
 
 
@@ -401,7 +422,7 @@ def query_updated_timestamps(
     return df
 
 
-def query_search_developers(search_input: str, limit: int = 1000):
+def query_search_developers(search_input: str, limit: int = 1000) -> pd.DataFrame:
     logger.info(f"Developer search: {search_input=}")
     search_input = f"%%{search_input}%%"
     sel_query = f"""SELECT
@@ -427,14 +448,14 @@ def query_search_developers(search_input: str, limit: int = 1000):
     return df
 
 
-def get_all_tables_in_schema(schema_name: str):
+def get_all_tables_in_schema(schema_name: str) -> list[str]:
     logger.info("Get checks tables")
     sel_schema = f"""SELECT table_name
     FROM information_schema.tables
     WHERE table_schema = '{schema_name}'
     ;"""
-    tables = pd.read_sql(sel_schema, DBCON.engine)
-    tables = tables["table_name"].to_numpy().tolist()
+    tables_df = pd.read_sql(sel_schema, DBCON.engine)
+    tables: list[str] = tables_df["table_name"].to_numpy().tolist()
     return tables
 
 

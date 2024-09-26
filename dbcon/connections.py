@@ -1,57 +1,11 @@
-from sqlalchemy import create_engine
 from typing import Self
+
+from sqlalchemy import create_engine
+from sshtunnel import SSHTunnelForwarder
 
 from config import CONFIG, get_logger
 
 logger = get_logger(__name__)
-
-
-def open_ssh_tunnel(server_name: str):
-    """Create SSH tunnel when working remotely."""
-    from sshtunnel import SSHTunnelForwarder
-
-    ssh_port = CONFIG[server_name].get("ssh_port", 22)
-    ssh_host = CONFIG[server_name]["host"]
-    ssh_username = CONFIG[server_name]["os_user"]
-    ssh_pkey = CONFIG[server_name].get("ssh_pkey", None)
-    ssh_private_key_password = CONFIG[server_name].get("ssh_pkey_password", None)
-    with SSHTunnelForwarder(
-        (ssh_host, ssh_port),  # Remote server IP and SSH port
-        ssh_username=ssh_username,
-        ssh_pkey=ssh_pkey,
-        ssh_private_key_password=ssh_private_key_password,
-        remote_bind_address=("127.0.0.1", 5432),
-    ) as server:  # PostgreSQL server IP and sever port on remote machine
-        logger.info(f"Start SSH tunnel to {server_name=}")
-        logger.info(f"Opened SSH Tunnel {server_name=}")
-    return server
-
-
-def get_db_connection(server_name: str):
-    """Returns a PostgresCon class
-    to use class run server.set_engine()
-    ====
-    Parameters
-       server_name: str String of server name for parsing config file
-    """
-    server_ip, server_local_port = get_postgres_server_ips(server_name)
-    postgres_con = PostgresCon(server_name, server_ip, server_local_port)
-    return postgres_con
-
-
-def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
-    db_ip = CONFIG[server_name]["host"]
-    if db_ip == "localhost" or db_ip.startswith("192"):
-        db_ip = CONFIG[server_name]["host"]
-        db_port = str(5432)
-    else:
-        logger.info(f"Opening SSH tunnel to {server_name=}")
-        ssh_server = open_ssh_tunnel(server_name)
-        ssh_server.start()
-        db_port = str(ssh_server.local_bind_port)
-        db_ip = "127.0.0.1"
-    logger.info(f"Connecting {db_ip=} {db_port=}")
-    return db_ip, db_port
 
 
 class PostgresCon:
@@ -107,3 +61,50 @@ class PostgresCon:
             )
             logger.exception(msg)
             self.db_name = None
+
+
+def open_ssh_tunnel(server_name: str) -> SSHTunnelForwarder:
+    """Create SSH tunnel when working remotely."""
+
+    ssh_port = CONFIG[server_name].get("ssh_port", 22)
+    ssh_host = CONFIG[server_name]["host"]
+    ssh_username = CONFIG[server_name]["os_user"]
+    ssh_pkey = CONFIG[server_name].get("ssh_pkey", None)
+    ssh_private_key_password = CONFIG[server_name].get("ssh_pkey_password", None)
+    with SSHTunnelForwarder(
+        (ssh_host, ssh_port),  # Remote server IP and SSH port
+        ssh_username=ssh_username,
+        ssh_pkey=ssh_pkey,
+        ssh_private_key_password=ssh_private_key_password,
+        remote_bind_address=("127.0.0.1", 5432),
+    ) as server:  # PostgreSQL server IP and sever port on remote machine
+        logger.info(f"Start SSH tunnel to {server_name=}")
+        logger.info(f"Opened SSH Tunnel {server_name=}")
+    return server
+
+
+def get_db_connection(server_name: str) -> PostgresCon:
+    """Returns a PostgresCon class
+    to use class run server.set_engine()
+    ====
+    Parameters
+       server_name: str String of server name for parsing config file
+    """
+    server_ip, server_local_port = get_postgres_server_ips(server_name)
+    postgres_con = PostgresCon(server_name, server_ip, server_local_port)
+    return postgres_con
+
+
+def get_postgres_server_ips(server_name: str) -> tuple[str, str]:
+    db_ip = CONFIG[server_name]["host"]
+    if db_ip == "localhost" or db_ip.startswith("192"):
+        db_ip = CONFIG[server_name]["host"]
+        db_port = str(5432)
+    else:
+        logger.info(f"Opening SSH tunnel to {server_name=}")
+        ssh_server = open_ssh_tunnel(server_name)
+        ssh_server.start()
+        db_port = str(ssh_server.local_bind_port)
+        db_ip = "127.0.0.1"
+    logger.info(f"Connecting {db_ip=} {db_port=}")
+    return db_ip, db_port

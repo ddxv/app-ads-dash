@@ -45,6 +45,9 @@ lint.ignore = [
     "W291",  # Trailing whitespaces, triggered by raw SQL queries
 ]
 
+lint.fixable = ["ALL"]
+
+
 # Avoid trying to fix flake8-bugbear (`B`) violations.
 lint.unfixable = ["B"]
 
